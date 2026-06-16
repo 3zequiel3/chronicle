@@ -61,7 +61,7 @@ It is **opt-in and budget-bounded** (token economy): reserved for high risk, not
 
 ### Post-generation audit (adversarial sample, fresh-context)
 
-This is the cheap **semantic complement** to the close-gate mechanical check (`edge-cases.md` §Auto-check). The mechanical gate checks whether the citation **exists and resolves** (form); this audit checks whether the **content** of the claim matches the source — the failure grep cannot see.
+This is the cheap **semantic complement** to the close-gate mechanical check (`edge-cases.md` §Final self-check). The mechanical gate checks whether the citation **exists and resolves** (form); this audit checks whether the **content** of the claim matches the source — the failure grep cannot see.
 
 - **Trigger**: when closing a generator mode (optional), or when the user asks "audit what you generated".
 - **Fresh-context**: run by a sub-agent **with no memory of having generated**. Fresh eyes catch the drift that the author cannot see in their own output (this is `requesting-code-review` applied to one's own output).

@@ -1,12 +1,12 @@
 ---
 name: chronicle
 description: >
-  Builds and maintains a structured project knowledge base at knowledge-base/ (project root), organized in canonical nodes — a core set plus variable nodes selected by a per-system-type profile (web, api, cli, mobile, saas, library/SDK, data pipeline). Five modes: generate from source docs (silent), build from scratch (interactive), reverse-document existing code by functionality (read-only), update/improve an existing KB (non-destructive merge), and audit an existing KB (consistency, completeness, optional source-correctness verification). Every factual claim carries a provenance citation. Reads code but NEVER modifies it.
-  Trigger: When user asks to create, build, generate, update, improve, or audit a knowledge base; document a project from source documents (.txt, .docx, .pdf) or from existing code; or asks to "armar base de conocimiento" / "crear KB" / "documentar proyecto" / "documentar funcionalidad" / "actualizar la KB".
+  Builds and maintains a structured project knowledge base at knowledge-base/ (10 canonical slots, core + profile-selected by system type) in five modes: generate from source docs, build from scratch, reverse-document existing code (read-only), update an existing KB (non-destructive merge), and audit it. Every factual claim carries a provenance citation; reads code but NEVER modifies it.
+  Trigger: when the user asks to create, build, generate, update, improve, or audit a knowledge base; document a project from source documents (.txt, .docx, .pdf) or from existing code; or "armar base de conocimiento" / "crear KB" / "documentar proyecto" / "documentar funcionalidad" / "actualizar la KB".
 license: Apache-2.0
 metadata:
   author: Ezequiel González
-  version: "2.8"
+  version: "2.9"
 ---
 
 ## Master rule (governs every mode)
@@ -36,7 +36,7 @@ Documentation must not exhaust the session. Every costly operation (reading code
 2. **Isolated sub-agent** — heavy work runs in a sub-agent with its own context that returns only the compact result; the main session does not inflate.
 3. **Budget-bounded and risk-prioritized** — most important first, stop when the limit is reached.
 4. **Report coverage** — always state what was done and what was skipped; never cut off silently.
-5. **Bounded unit, verified before continuing** — generative work advances in small units (one feature at a time in Mode C); each unit passes the **mechanical close gate** before the next one starts (`assets/edge-cases.md` §Auto-check). **Stop before degrading**: discipline does not scale with context, so context is kept small.
+5. **Bounded unit, verified before continuing** — generative work advances in small units (one feature at a time in Mode C); each unit passes the **mechanical close gate** before the next one starts (`assets/edge-cases.md` §Final self-check). **Stop before degrading**: discipline does not scale with context, so context is kept small.
 
 This is complemented by the **asset loading map** (below): each mode reads only what it needs.
 
@@ -131,24 +131,24 @@ The KB has **10 canonical slots** with stable numbering. **Not all slots exist i
 - **Core (always present)**: **01, 02, 09, 10** — apply to any system.
 - **Variable (03-08)**: presence and framing by profile. A CLI does not carry RBAC (03); a library does not carry UI flows (07); a pipeline does not carry user stories (06). A slot that the profile deactivates is **not generated empty** — it is omitted and noted in the `README` index.
 
-The table below is the complete set (profile `web_app`, the broadest). Each active node is a **`.md` file** or, if it is a growing collection, a **folder** with the same numeric prefix (conditional decision by size — see `assets/node-templates.md` §Axis 2).
+The slot map below is the complete set (profile `web_app`, the broadest). Each active node is a **`.md` file** or, if it is a growing collection, a **folder** with the same numeric prefix.
 
-| # | Node | Type | Content |
-|---|------|------|---------|
-| 01 | `01_vision_y_objetivos.md` | map (file) | Purpose, objectives by actor, scope, out-of-scope |
-| 02 | `02_descripcion_general.md` | map (file) | Stack (structured by layer/service), architecture, integrations |
-| 03 | `03_actores_y_roles.md` | map (file) | Actors, RBAC matrix, permissions, public routes |
-| 04 | `04_modelo_de_datos.md` *or* `04_modelos-apis/` | **collection** | Entities, ERD, relationships + API contracts |
-| 05 | `05_reglas_de_negocio.md` *or* `05_reglas-de-negocio/` | **collection** | Rules by domain (codes `RN-XX`) |
-| 06 | `06_funcionalidades.md` *or* `06_funcionalidades/` | **collection** | User stories by epic |
-| 07 | `07_flujos_principales.md` *or* `07_flujos-principales/` | **collection** | End-to-end flows |
-| 08 | `08_arquitectura_propuesta.md` | map (file) | Patterns, structure, security, env vars |
-| 09 | `09_decisiones_y_supuestos.md` *or* `09_decisiones/` | **collection (ADR)** | Decisions (one file per decision) + assumptions |
-| 10 | `10_preguntas_abiertas.md` | backlog (file) | Inconsistencies + prioritized open questions |
+| # | Node | Kind |
+|---|------|------|
+| 01 | `01_vision_y_objetivos.md` | map |
+| 02 | `02_descripcion_general.md` | map |
+| 03 | `03_actores_y_roles.md` | map |
+| 04 | `04_modelo_de_datos.md` *or* `04_modelos-apis/` | collection |
+| 05 | `05_reglas_de_negocio.md` *or* `05_reglas-de-negocio/` | collection |
+| 06 | `06_funcionalidades.md` *or* `06_funcionalidades/` | collection |
+| 07 | `07_flujos_principales.md` *or* `07_flujos-principales/` | collection |
+| 08 | `08_arquitectura_propuesta.md` | map |
+| 09 | `09_decisiones_y_supuestos.md` *or* `09_decisiones/` | collection (ADR) |
+| 10 | `10_preguntas_abiertas.md` | backlog |
 
 Plus a `README.md` index at `knowledge-base/README.md`.
 
-**Maps vs collections**: **maps** (01, 02, 03, 08, 10) are read whole to get the full picture → single file. **Collections** (04, 05, 06, 07, 09) are lists of discrete units that grow and are navigated per unit → explode into a folder when they cross the threshold. See `assets/node-templates.md`.
+**Maps vs collections**: **maps** (01, 02, 03, 08, 10) are read whole → single file. **Collections** (04, 05, 06, 07, 09) are lists of discrete units → explode into a folder when they cross the size threshold. **Per-slot content, templates, the file↔folder threshold, and the dynamic promotion rule live in `assets/node-templates.md`** — not duplicated here.
 
 ### Optional extras (allowed)
 Extra files with prefix `1X_`/`2X_` and kebab-case names complement the canonical slots, never replace them. Examples: `11_pagos_mercadopago.md`, `12_seguridad_compliance.md`, `13_glosario.md`.

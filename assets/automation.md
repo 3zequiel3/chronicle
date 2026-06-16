@@ -60,7 +60,7 @@ Without config, sensible defaults (coverage 0.80, staleness and broken refs bloc
 
 | Your workflow | Artifact |
 |---|---|
-| **Generation close** | the **same checker** runs at the end of any generator mode, **fail-closed** (early catch — see `edge-cases.md` §Auto-check and `checker-spec.md` §8) |
+| **Generation close** | the **same checker** runs at the end of any generator mode, **fail-closed** (early catch — see `edge-cases.md` §Final self-check and `checker-spec.md` §8) |
 | Team with PRs | GitHub Action / GitLab CI on the PR or push |
 | **Solo / no PRs** | **pre-commit** or **pre-push** hook (local, stops the bad commit) |
 | No hooks | **manual command** whenever you want |

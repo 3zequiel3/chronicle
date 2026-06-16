@@ -22,7 +22,7 @@ A functionality is a **vertical slice**: checkout doesn't live in `pagos/`, it l
 
 Citation discipline degrades in long sessions and giant contexts. The defense is **keeping the unit small**: **one functionality = one closed work unit**.
 
-- **One feature at a time.** Don't chain five features in a single run. Document one, **verify it** (the mechanical gate at close — `edge-cases.md` §Auto-check), then move to the next. Small context = less drift.
+- **One feature at a time.** Don't chain five features in a single run. Document one, **verify it** (the mechanical gate at close — `edge-cases.md` §Final self-check), then move to the next. Small context = less drift.
 - **Stop before degrading.** If the tracing frontier exhausts the budget before drying up, **STOP and report partial** (what was left unexplored). Never push through a degraded trace to "finish": an incomplete map declared complete is worse than a partial one declared partial.
 - **Verify before continuing.** A slice merge is not "done" until it passes the mechanical gate for that slice. A feature with broken citations is not closed or accumulated into the next one.
 
@@ -94,7 +94,7 @@ This avoids documenting the wrong thing — a real risk when the target is given
 ```json
 { "version": 1, "rows": [
   { "id": "t1", "symbol": "validateCoupon", "role": "rule",
-    "file": "src/payments/rules.ts", "line": 42, "hash": "<normalized fingerprint>" }
+    "file": "src/payments/rules.ts", "line": 42, "fingerprint": "<normalized fingerprint>" }
 ]}
 ```
 
@@ -102,7 +102,7 @@ Plus the trace status (`complete` | `partial`, with what was left unexplored). T
 
 > **The trace map is the citable allowlist, and now MECHANICAL (foreign key).** A citation `[code · path#symbol]` is valid **only if it resolves to a map row** with that same `file#symbol`. This is no longer discipline: the checker (`checker-spec.md` §2.5) counts as **orphan** any citation that doesn't resolve to a row → **mechanical defect**, not "the model should". Citing outside the map was the worst defect (fabricated authority); now it's **catchable without an LLM**. What can't be traced is written as `[inferred · → 10]`.
 >
-> The citation **renders human-readable** (`[code · src/payments/rules.ts#validateCoupon]`) — the format doesn't change — but is **backed** by its map row. The `~Lnn` is provided by the search, **never typed by the model** (guessed line number = fabrication signal). The row's `hash` is what staleness (`staleness.md`) uses to detect whether the source changed.
+> The citation **renders human-readable** (`[code · src/payments/rules.ts#validateCoupon]`) — the format doesn't change — but is **backed** by its map row. The `~Lnn` is provided by the search, **never typed by the model** (guessed line number = fabrication signal). The row's `fingerprint` is what staleness (`staleness.md`) uses to detect whether the source changed.
 
 ### 4. Merge (vertical slice, non-destructive)
 

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rows": [
-    { "id": "t1", "symbol": "validateCoupon", "role": "regla", "file": "src/payments/rules.ts", "line": 42, "hash": "112007c1a9e8addff1c755a366c46830dce11d1cfa3482074ec5a47c0ae79b83" },
-    { "id": "t2", "symbol": "confirm", "role": "regla", "file": "src/payments/confirm.ts", "line": 10, "hash": "0000000000000000000000000000000000000000000000000000000000000000" }
+    { "id": "t1", "symbol": "validateCoupon", "role": "regla", "file": "src/payments/rules.ts", "line": 42, "fingerprint": "112007c1a9e8addff1c755a366c46830dce11d1cfa3482074ec5a47c0ae79b83" },
+    { "id": "t2", "symbol": "confirm", "role": "regla", "file": "src/payments/confirm.ts", "line": 10, "fingerprint": "0000000000000000000000000000000000000000000000000000000000000000" }
   ]
 }
