@@ -64,3 +64,5 @@ Estos chequeos son deterministas, así que **no los "verifica" el modelo sobre s
 7. **Idioma** — un solo idioma en toda la KB.
 
 La honestidad del estado es parte del contrato: reportá cobertura real, nunca "completo" sobre una muestra parcial.
+
+> **Complemento semántico (opcional, no bloquea).** El gate mecánico ve forma (existe/resuelve), no contenido. Si querés cazar la afirmación que existe pero está **mal**, corré la **auditoría post-generación** (`verification.md` §Auditoría post-generación): un subagente fresco audita una muestra de alto riesgo, adversarial. Cuesta tokens → reporta al `10`, no bloquea. El gate que bloquea sigue siendo el mecánico.

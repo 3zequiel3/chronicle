@@ -144,6 +144,21 @@ El marcador **`⚠ sin test`** vive pegado a la regla y **se auto-limpia**: cuan
 
 ---
 
+## Extraer, no narrar (donde hay fuente estructurada)
+
+Donde existe una fuente **estructurada y determinista**, no la narres de memoria: **extraela**. El LLM narrando entidades de cabeza puede driftear; una extracción mecánica de la fuente no. Esto achica la superficie de fabricación (es el flanco "achicar la superficie" del gap #5) y de paso ahorra tokens. La narración del LLM se reserva para el **PORQUÉ**, que la fuente estructurada no tiene.
+
+| Fuente estructurada | Extraé (mecánico) → nodo | El LLM agrega (el PORQUÉ) |
+|---|---|---|
+| `prisma/schema.prisma`, migraciones, `*.sql` | entidades, campos, relaciones → **04** | el porqué del modelado, invariantes no obvias |
+| `openapi.*` / `swagger.*` | endpoints, request/response → **04** contratos | reglas de negocio detrás del contrato |
+| router / archivo de rutas | paths + handlers → **04/07** | el flujo y su intención |
+| `.env.example` / config | env vars, flags → **08** | qué es sensible y por qué existe |
+
+Lo extraído **igual lleva cita** (`[code · prisma/schema.prisma#Model]`) — es procedencia **más fuerte**, porque salió de leer la fuente, no de la memoria — y entra al **mapa de traza** como cualquier símbolo (es citable, §3). El PORQUÉ que no esté en la fuente va a `09`/`10`, **nunca inventado**.
+
+---
+
 ## El QUÉ vs el PORQUÉ (no-invención)
 
 El código te da el **QUÉ**: qué entidades hay, qué rutas existen, qué validaciones corren. No te da el **PORQUÉ**: por qué ese `if` valida dos veces el cupón, por qué esa decisión de diseño.

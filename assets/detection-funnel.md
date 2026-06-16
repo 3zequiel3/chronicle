@@ -27,8 +27,8 @@ Un solo read de un archivo chico y denso resuelve el stack completo. Leer archiv
 | `*.csproj` / `*.sln` | .NET / C# |
 | `pubspec.yaml` | Dart / Flutter |
 | `docker-compose.yml` / `Dockerfile` | infra, servicios, `needs_infra = true` |
-| `prisma/schema.prisma` / `*.sql` / migraciones | DB + modelo de datos (insumo para nodo 04) |
-| `openapi.*` / `swagger.*` | contratos de API (insumo para nodo 04) |
+| `prisma/schema.prisma` / `*.sql` / migraciones | DB + modelo de datos (insumo para nodo 04 — **extraer, no narrar**: ver `reverse-documentation.md`) |
+| `openapi.*` / `swagger.*` | contratos de API (insumo para nodo 04 — **extraer, no narrar**) |
 
 > Leé **solo la sección de dependencias** del manifest cuando alcance. No hace falta el archivo entero.
 

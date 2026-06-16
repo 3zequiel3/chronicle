@@ -6,7 +6,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Ezequiel González
-  version: "2.6"
+  version: "2.7"
 ---
 
 ## Master rule (governs every mode)

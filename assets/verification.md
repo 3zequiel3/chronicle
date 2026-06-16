@@ -59,6 +59,16 @@ Un solo subagente juzgando "¿coincide?" es la misma familia de modelo con los m
 
 Es **opt-in y acotado por presupuesto** (token economy): se reserva para el alto riesgo, no para toda la KB. El default es juez único; el multi-juez se pide ("verificá reforzado") o se dispara solo sobre las `RN` cuando hay budget. Reportá cuántos jueces votaron por afirmación.
 
+### Auditoría post-generación (muestra adversarial, fresh-context)
+
+Es el complemento **semántico barato** del gate mecánico del cierre (`edge-cases.md` §Auto-chequeo). El gate mecánico ve si la cita **existe y resuelve** (forma); esta auditoría ve si el **contenido** de la afirmación coincide con la fuente — la falla que el grep no puede ver.
+
+- **Disparo**: al cerrar un modo generador (opcional), o cuando el usuario pide "auditá lo que generaste".
+- **Fresh-context**: la corre un subagente **sin memoria de haber generado**. Ojos frescos atrapan el drift que el autor no ve en sí mismo (es `requesting-code-review` aplicado al propio output).
+- **Muestra, no todo**: N afirmaciones de alto riesgo (`RN` primero), acotada por presupuesto. No es el pase exhaustivo — es un **spot-audit** barato y temprano.
+- **Adversarial**: mismo framing de refutación ("buscá evidencia de que está MAL").
+- **Reporta, NO bloquea**: es nivel LLM (cuesta tokens, no determinista) → **nunca** es gate bloqueante (regla de `automation.md`). El que bloquea es el gate mecánico; esto registra hallazgos en el `10`. Si encuentra contradicciones, el usuario decide correr el pase completo o pasar a Mode Update.
+
 ---
 
 ## El ledger (mecanismo compartido con #5)

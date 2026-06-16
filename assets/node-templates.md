@@ -177,6 +177,8 @@ erDiagram
 ```
 **Checklist**: ERD presente · cada entidad con atributos+relaciones · contratos con request/response · **cita de origen por ítem**.
 
+> **Extraer, no narrar**: si hay `schema.prisma`/`*.sql`/migraciones o `openapi.*`, **extraé** las entidades y contratos de ahí en vez de narrarlos de memoria (ver `reverse-documentation.md` §Extraer, no narrar). El LLM agrega solo el PORQUÉ.
+
 ---
 
 ## 05 · Reglas de Negocio *(colección)*
