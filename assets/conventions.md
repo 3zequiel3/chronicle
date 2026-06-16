@@ -1,14 +1,14 @@
 # Conventions & Adaptive Rules
 
-Convenciones transversales que aplican a todos los modos y nodos.
+Cross-cutting conventions that apply to all modes and nodes.
 
 ---
 
-## 1. Diagramas en Mermaid (no ASCII)
+## 1. Diagrams in Mermaid (not ASCII)
 
-Donde un template pida un diagrama (ERD, secuencia, arquitectura), usá **Mermaid** — se renderiza nativo en GitHub/GitLab y se mantiene mejor que el ASCII.
+Where a template calls for a diagram (ERD, sequence, architecture), use **Mermaid** — it renders natively in GitHub/GitLab and is easier to maintain than ASCII.
 
-**ERD (nodo 04):**
+**ERD (node 04):**
 ````markdown
 ```mermaid
 erDiagram
@@ -18,7 +18,7 @@ erDiagram
 ```
 ````
 
-**Secuencia (nodo 07):**
+**Sequence (node 07):**
 ````markdown
 ```mermaid
 sequenceDiagram
@@ -29,7 +29,7 @@ sequenceDiagram
 ```
 ````
 
-**Arquitectura (nodo 08):**
+**Architecture (node 08):**
 ````markdown
 ```mermaid
 flowchart LR
@@ -39,46 +39,46 @@ flowchart LR
 ```
 ````
 
-ASCII solo como fallback si el destino no renderiza Mermaid.
+ASCII only as a fallback if the target does not render Mermaid.
 
 ---
 
-## 2. Tagging MVP / Post-MVP (por ítem, no por archivo)
+## 2. MVP / Post-MVP tagging (per item, not per file)
 
-Cada ítem de las colecciones 05 (reglas), 06 (historias) y 07 (flujos) lleva un tag de alcance:
+Each item in collections 05 (rules), 06 (stories), and 07 (flows) carries a scope tag:
 
 ```markdown
 ### US-007 — Checkout con pago real  `[Post-MVP]`
 ### US-003 — Carrito  `[MVP]`
 ```
 
-Tags válidos: `[MVP]`, `[Post-MVP]`, `[v2]` (o versión concreta). Por qué tagging y no archivos separados: la KB documenta UN sistema; la versión MVP de una feature y su extensión post-MVP pertenecen al **mismo nodo de dominio**. Los tags lo mantienen filtrable y permiten derivar un índice de roadmap (ej. un `CHANGES.md`). El `01` fija la frontera a nivel visión (`Alcance v{X.Y}` / `Fuera de alcance`); los tags la propagan ítem por ítem.
+Valid tags: `[MVP]`, `[Post-MVP]`, `[v2]` (or a concrete version). Why tagging instead of separate files: the KB documents ONE system; the MVP version of a feature and its post-MVP extension belong to the **same domain node**. Tags keep it filterable and allow deriving a roadmap index (e.g. a `CHANGES.md`). `01` sets the boundary at vision level (`Scope v{X.Y}` / `Out of scope`); tags propagate it item by item.
 
-> **En Mode A/C**: el código no carga intención de roadmap → el tag MVP/Post-MVP lo pone el **usuario**, o el ítem queda sin tag y la duda va al `10`. Lo post-MVP que aún no existe en código **nunca se documenta como implementado**.
+> **In Mode A/C**: the code does not carry roadmap intent → the MVP/Post-MVP tag is set by the **user**, or the item is left untagged and the doubt goes to `10`. Post-MVP items that do not yet exist in code are **never documented as implemented**.
 
 ---
 
-## 3. Set canónico adaptativo (gate: `system_type` → profile)
+## 3. Adaptive canonical set (gate: `system_type` → profile)
 
-`system_type` selecciona un **profile** que agrega y quita nodos. No fuerces los 10 idénticos en todo sistema. **La tabla de profiles que decide qué slot vive y cómo se encuadra es la autoridad y vive en `node-templates.md` §Eje 1.** Acá solo el resumen de intención por tipo:
+`system_type` selects a **profile** that adds and removes nodes. Do not force all 10 identically onto every system. **The profile table that decides which slot lives and how it is framed is the authority and lives in `node-templates.md` §Axis 1.** Here only a summary of intent by type:
 
-| system_type | Intención del profile |
+| system_type | Profile intent |
 |---|---|
-| `web_app` | Set completo (RBAC, flujos UI, contratos front-back) |
-| `api` | Quita pantallas; enfatiza contratos de API en el 04 |
-| `cli` | **Quita** RBAC del 03 y flujos web del 07; agrega "comandos y argumentos" |
-| `mobile` | Flujos de navegación + estado offline |
-| `saas_multi_tenant` | **Agrega** aislamiento de datos + modelo de tenancy (extra `1X_tenancy.md`) |
-| `library_sdk` | **Quita** actores/flujos-UI; el 04 es la **superficie de API pública**, el 08 suma versionado/compat |
-| `data_pipeline` | **Quita** actores/historias-UI; el 04 son **data contracts**, el 06 son stages/jobs, el 07 es el **DAG**, el 08 suma orquestación |
+| `web_app` | Full set (RBAC, UI flows, front-back contracts) |
+| `api` | Removes screens; emphasizes API contracts in `04` |
+| `cli` | **Removes** RBAC from `03` and web flows from `07`; adds "commands and arguments" |
+| `mobile` | Navigation flows + offline state |
+| `saas_multi_tenant` | **Adds** data isolation + tenancy model (extra `1X_tenancy.md`) |
+| `library_sdk` | **Removes** actors/UI-flows; `04` is the **public API surface**, `08` adds versioning/compat |
+| `data_pipeline` | **Removes** actors/UI-stories; `04` is **data contracts**, `06` is stages/jobs, `07` is the **DAG**, `08` adds orchestration |
 
-Los nodos quitados no se generan vacíos: se omiten y se nota la omisión en el `README` index.
+Removed nodes are not generated as empty files: they are omitted and the omission is noted in the `README` index.
 
 ---
 
-## 4. Compliance condicional (gate: tipo de dato, NO governance)
+## 4. Conditional compliance (gate: data type, NOT governance)
 
-Si el discovery detecta **datos sensibles** (PII, pagos, salud), generá el extra `12_seguridad_compliance.md`. Este gate es **independiente** de `maintenance_context` — lo decide el tipo de dato, no el tamaño del equipo.
+If discovery detects **sensitive data** (PII, payments, health), generate the extra `12_seguridad_compliance.md`. This gate is **independent** of `maintenance_context` — it is decided by the data type, not team size.
 
 ```markdown
 # Seguridad y Compliance
@@ -95,13 +95,13 @@ Si el discovery detecta **datos sensibles** (PII, pagos, salud), generá el extr
 - Gestión de secretos
 ```
 
-> En Mode A/C: lo que el código revela (ej. campos de tarjeta, datos personales) se documenta como hecho; lo que no revela (¿hay obligación GDPR?) va al `10` como pregunta.
+> In Mode A/C: what the code reveals (e.g. card fields, personal data) is documented as fact; what it does not reveal (is there a GDPR obligation?) goes to `10` as a question.
 
 ---
 
-## 5. Glosario / lenguaje ubicuo
+## 5. Glossary / ubiquitous language
 
-Extra recomendado `13_glosario.md` — un solo lugar donde cada término del dominio significa una cosa. Clave para onboarding y DDD.
+Recommended extra `13_glosario.md` — a single place where each domain term means one thing. Key for onboarding and DDD.
 
 ```markdown
 # Glosario — Lenguaje Ubicuo
@@ -114,18 +114,18 @@ Extra recomendado `13_glosario.md` — un solo lugar donde cada término del dom
 
 ---
 
-## 6. Idioma de la KB — se PREGUNTA, no se detecta
+## 6. KB language — ASKED, not detected
 
-El idioma de la KB (nombres de archivo **y** contenido) es una decisión de alto impacto y costo de pregunta nulo: errar significa regenerar toda la KB. Por eso **no se infiere del repo** — un proyecto en *espanglish* (código en inglés, comentarios y README en español) da una señal ambigua, y adivinar mal sale carísimo.
+The KB language (file names **and** content) is a high-impact, zero-cost-to-ask decision: getting it wrong means regenerating the entire KB. For this reason it is **not inferred from the repo** — a *Spanglish* project (code in English, comments and README in Spanish) gives an ambiguous signal, and guessing wrong is expensive.
 
-**Preguntá explícitamente, una sola vez, antes de escribir el primer nombre de archivo:**
+**Ask explicitly, exactly once, before writing the first file name:**
 
 ```
-¿En qué idioma querés la documentación?
-(a) Español   (b) English
+Which language do you want the documentation in?
+(a) Spanish   (b) English
 ```
 
-La respuesta se **cachea para toda la KB**. Esta es la única pregunta que se hace **incluso en Mode A** (silencioso): es una decisión estructural —como `system_type`— donde una pregunta barata previene el error más caro. Una vez fijado el idioma, aplicalo de forma consistente a **nombres de archivo y contenido**:
+The answer is **cached for the entire KB**. This is the only question asked **even in Mode A** (silent): it is a structural decision — like `system_type` — where a cheap question prevents the most expensive mistake. Once the language is set, apply it consistently to **file names and content**:
 
 | es (default) | en |
 |---|---|
@@ -134,4 +134,4 @@ La respuesta se **cachea para toda la KB**. Esta es la única pregunta que se ha
 | `06_funcionalidades/` | `06_features/` |
 | `07_flujos-principales/` | `07_main-flows/` |
 
-El idioma se decide una vez al inicio (por pregunta) y se mantiene en toda la KB. No mezclar idiomas dentro de una misma KB.
+The language is decided once at the start (by question) and maintained throughout the KB. Do not mix languages within the same KB.

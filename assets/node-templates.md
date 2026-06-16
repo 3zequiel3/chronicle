@@ -1,122 +1,122 @@
-# Canonical Templates — estructura de cada nodo
+# Canonical Templates — structure of each node
 
-Estructura **mínima esperada** de cada uno de los 10 slots canónicos (núcleo + variables por profile — ver §Eje 1). Adaptala al dominio, pero respetá las secciones marcadas. Cada nodo incluye un **checklist de validación** que alimenta el completeness score (`quality-rubric.md`). Los templates base de abajo son la forma `web_app`; las **variantes no-web** (librería, CLI, pipeline) están en §Templates por profile.
-
----
-
-## Dos taxonomías ortogonales
-
-Cada nodo se clasifica en dos ejes **independientes**:
-
-1. **Núcleo vs variable** — *qué* nodos existen. Lo decide el `system_type` vía su **profile**.
-2. **Mapa vs colección** — archivo único vs carpeta. Lo decide el **tamaño**.
-
-Los dos ejes se combinan: un nodo puede estar activo (eje 1) y ser archivo o carpeta (eje 2).
+**Minimum expected structure** for each of the 10 canonical slots (core + variables per profile — see §Axis 1). Adapt to the domain, but respect the marked sections. Each node includes a **validation checklist** that feeds the completeness score (`quality-rubric.md`). The base templates below are the `web_app` form; **non-web variants** (library, CLI, pipeline) are in §Templates by profile.
 
 ---
 
-## Eje 1 — Núcleo + profile por `system_type`
+## Two orthogonal taxonomies
 
-No todos los sistemas llevan los mismos nodos. Un CLI no tiene RBAC; una librería no tiene flujos de UI; un pipeline de datos no tiene historias de usuario. Forzar los 10 idénticos genera nodos vacíos o forzados. En cambio:
+Each node is classified on two **independent** axes:
 
-- **Núcleo (4 nodos, SIEMPRE presentes)** — aplican a cualquier sistema: **01** (visión), **02** (descripción/stack), **09** (decisiones), **10** (preguntas abiertas).
-- **Variables (6 nodos, 03-08)** — su **presencia y encuadre** los define el profile del `system_type`. Un nodo que el profile desactiva **no se genera vacío**: se omite y se anota la omisión en el `README` index.
+1. **Core vs variable** — *which* nodes exist. Decided by `system_type` via its **profile**.
+2. **Map vs collection** — single file vs folder. Decided by **size**.
 
-### Tabla de profiles (qué slot vive y cómo se encuadra)
+The two axes combine: a node can be active (axis 1) and be a file or folder (axis 2).
+
+---
+
+## Axis 1 — Core + profile by `system_type`
+
+Not all systems carry the same nodes. A CLI has no RBAC; a library has no UI flows; a data pipeline has no user stories. Forcing all 10 identically generates empty or forced nodes. Instead:
+
+- **Core (4 nodes, ALWAYS present)** — apply to any system: **01** (vision), **02** (description/stack), **09** (decisions), **10** (open questions).
+- **Variables (6 nodes, 03-08)** — their **presence and framing** are defined by the `system_type` profile. A node deactivated by the profile **is not generated empty**: it is omitted and the omission is noted in the `README` index.
+
+### Profile table (which slot lives and how it's framed)
 
 | Slot | `web_app` | `api` | `cli` | `mobile` | `saas_multi_tenant` | `library_sdk` | `data_pipeline` |
 |---|---|---|---|---|---|---|---|
-| **03** actores | RBAC completo | auth de servicio | ✗ (el invocador) | RBAC completo | RBAC + roles de tenant | ✗ (consumidores de la API) | ✗ (operadores / upstreams) |
-| **04** datos | entidades + contratos | énfasis en contratos de API | esquema de config/IO | entidades + sync | + aislamiento por tenant | **superficie de API pública** | **data contracts (in/out) + esquemas** |
-| **05** reglas | reglas de dominio | reglas de dominio | semántica de comandos | reglas de dominio | + límites por plan | invariantes/contratos de comportamiento | reglas de transformación/validación |
-| **06** funcionalidades | historias (US) | endpoints como features | **comandos y flags** | historias (US) | historias (US) | **recetas de uso de la API** | **stages / jobs del pipeline** |
-| **07** flujos | flujos de UI | flujos de request | flujo de ejecución del comando | navegación + offline | flujos de UI | secuencias de llamada típicas | **DAG del pipeline / linaje de datos** |
-| **08** arquitectura | completo | completo | completo | completo | + modelo de tenancy | + **versionado / compatibilidad** | + **orquestación / scheduling** |
+| **03** actors | full RBAC | service auth | ✗ (the caller) | full RBAC | RBAC + tenant roles | ✗ (API consumers) | ✗ (operators / upstreams) |
+| **04** data | entities + contracts | emphasis on API contracts | config/IO schema | entities + sync | + per-tenant isolation | **public API surface** | **data contracts (in/out) + schemas** |
+| **05** rules | domain rules | domain rules | command semantics | domain rules | + per-plan limits | invariants/behavior contracts | transformation/validation rules |
+| **06** features | stories (US) | endpoints as features | **commands and flags** | stories (US) | stories (US) | **API usage recipes** | **pipeline stages / jobs** |
+| **07** flows | UI flows | request flows | command execution flow | navigation + offline | UI flows | typical call sequences | **pipeline DAG / data lineage** |
+| **08** architecture | full | full | full | full | + tenancy model | + **versioning / compatibility** | + **orchestration / scheduling** |
 
-> El profile se resuelve del `system_type` (detectado en Capa 0 / preguntado en P0-sys). La **selección** de profile no agrega tokens: cada run instancia **un solo profile**, y el asset-loading map ya carga solo lo necesario. `conventions.md` §3 encuadra el *tono* del interrogatorio por tipo; esta tabla decide *qué nodos existen*.
+> The profile is resolved from `system_type` (detected in Layer 0 / asked in P0-sys). **Profile selection** adds no tokens: each run instantiates **a single profile**, and the asset-loading map already loads only what's needed. `conventions.md` §3 frames the *tone* of the interview by type; this table decides *which nodes exist*.
 
-> **Extras gateados aparte** (no por profile): `12_seguridad_compliance.md` lo gatea el **tipo de dato** (PII/pagos), `1X_tenancy.md` lo agrega `saas_multi_tenant`. Ver `conventions.md` §3-4.
+> **Separately gated extras** (not by profile): `12_seguridad_compliance.md` is gated by **data type** (PII/payments), `1X_tenancy.md` is added by `saas_multi_tenant`. See `conventions.md` §3-4.
 
 ---
 
-## Eje 2 — Mapas vs colecciones
+## Axis 2 — Maps vs collections
 
-De los nodos **activos**, solo las colecciones se explotan en carpeta.
+Of the **active** nodes, only collections expand into folders.
 
-- **Mapas (archivo único)** — se leen enteros para tener la foto completa; partirlos fragmenta la historia. Son **01, 02, 03, 08, 10**.
-- **Colecciones (archivo o carpeta)** — listas de unidades discretas, organizadas por funcionalidad/dominio, que crecen y se navegan por unidad. Son **04, 05, 06, 07, 09**. Son exactamente los nodos que **Mode C escribe** al documentar una funcionalidad.
+- **Maps (single file)** — read in full to get the complete picture; splitting them fragments the story. These are **01, 02, 03, 08, 10**.
+- **Collections (file or folder)** — lists of discrete units, organized by functionality/domain, that grow and are navigated per unit. These are **04, 05, 06, 07, 09**. These are exactly the nodes that **Mode C writes** when documenting a functionality.
 
-> **Procedencia obligatoria**: cada ítem factual de las colecciones (04-07) y cada decisión (09) lleva su **cita de origen** (`[code · …]` / `[doc · …]` / `[user]`), o se marca `[inferred · inferido → 10]`. Ver `provenance.md`. Los checklists de abajo la exigen.
+> **Mandatory provenance**: every factual item in collections (04-07) and every decision (09) carries its **origin citation** (`[code · …]` / `[doc · …]` / `[user]`), or is marked `[inferred · → 10]`. See `provenance.md`. The checklists below require it.
 
-### Regla archivo ↔ carpeta (condicional por tamaño)
+### File ↔ folder rule (conditional on size)
 
-Una colección **arranca como archivo** y se **promueve a carpeta** al cruzar un umbral. No infles estructura en sistemas chicos.
+A collection **starts as a file** and is **promoted to a folder** when it crosses a threshold. Don't inflate structure for small systems.
 
-| Nodo | Umbral sugerido para explotar a carpeta |
+| Node | Suggested threshold to expand to folder |
 |---|---|
-| 04 modelo de datos | ≥ ~6-8 entidades, o si hay contratos de API |
-| 05 reglas de negocio | ≥ ~20 reglas en ≥ 3 dominios |
-| 06 funcionalidades | ≥ ~3 épicas con varias historias |
-| 07 flujos | ≥ ~5 flujos con diagramas |
-| 09 decisiones | ≥ ~5 decisiones (patrón ADR) |
+| 04 data model | ≥ ~6-8 entities, or if there are API contracts |
+| 05 business rules | ≥ ~20 rules in ≥ 3 domains |
+| 06 features | ≥ ~3 epics with several stories |
+| 07 flows | ≥ ~5 flows with diagrams |
+| 09 decisions | ≥ ~5 decisions (ADR pattern) |
 
-### Estructura de carpeta
+### Folder structure
 
-Mantiene el **prefijo numérico** y lleva un `README.md` con el **mapa/overview** — lo único que sí necesitás ver todo junto.
+Keeps the **numeric prefix** and includes a `README.md` with the **map/overview** — the only thing you actually need to see all together.
 
 ```
 knowledge-base/
 ├── 04_modelos-apis/
-│   ├── README.md            ← índice + ERD GLOBAL
+│   ├── README.md            ← index + GLOBAL ERD
 │   ├── modelos/{entidad}.md
 │   └── contratos-api/{dominio}.md
 ├── 05_reglas-de-negocio/
-│   ├── README.md            ← índice de dominios
+│   ├── README.md            ← domain index
 │   └── {dominio}.md         ← RN-{DOMINIO}-NN
 ├── 06_funcionalidades/{epica}.md (+ README)
 ├── 07_flujos-principales/{flujo}.md (+ README)
 └── 09_decisiones/
-    ├── README.md            ← índice + supuestos SU-NN
-    └── DD-NN-{titulo}.md     ← un archivo por decisión (ADR)
+    ├── README.md            ← index + assumptions SU-NN
+    └── DD-NN-{titulo}.md     ← one file per decision (ADR)
 ```
 
-> **Corte vertical (Mode C)**: documentar "pagos" escribe `pago.md` en 04, `pagos.md` en 05, 06 y 07 — cuatro diffs quirúrgicos en lugar de cuatro monolitos. La carpeta es el reflejo físico del enfoque por funcionalidad.
+> **Vertical slice (Mode C)**: documenting "pagos" writes `pago.md` in 04, `pagos.md` in 05, 06 and 07 — four surgical diffs instead of four monoliths. The folder is the physical reflection of the functionality-first approach.
 
-### Promoción dinámica (Mode Update)
+### Dynamic promotion (Mode Update)
 
-Cuando un update hace que una colección-archivo cruce el umbral, la skill la **refactoriza a carpeta**: crea `0X_<nombre>/`, reparte por unidad, escribe el `README` con el mapa y **actualiza todas las referencias cruzadas**. Refactor de documentación, nunca de código.
+When an update causes a collection-file to cross the threshold, the skill **refactors it to a folder**: creates `0X_<name>/`, distributes by unit, writes the `README` with the map and **updates all cross-references**. Documentation refactor, never code refactor.
 
-### Nodo 09 — variante ADR
+### Node 09 — ADR variant
 
-Se explota por **longevidad**, no por funcionalidad: un archivo por decisión (`DD-01-elegir-postgres.md`). Los supuestos (`SU-NN`), más livianos, viven en el `README` de la carpeta.
+Expanded by **longevity**, not by functionality: one file per decision (`DD-01-elegir-postgres.md`). Assumptions (`SU-NN`), being lighter, live in the folder's `README`.
 
 ---
 
-## 01 · Visión y Objetivos *(mapa)*
+## 01 · Visión y Objetivos *(map)*
 
 ```markdown
 # Visión y Objetivos
 
 ## Propósito
-[Una frase + un párrafo de contexto: qué problema resuelve y para quién.]
+[One sentence + one context paragraph: what problem it solves and for whom.]
 
 ## Objetivos por actor
 | Actor | Objetivo principal | Objetivos secundarios |
 
 ## Alcance v{X.Y}
-- [Qué SÍ hace el sistema en esta versión.]
+- [What the system DOES in this version.]
 
 ## Fuera de alcance
-- [Qué NO hace, explícito.]
+- [What it does NOT do, explicit.]
 
 ## Métricas de éxito
-[Cómo se mide que cumple su propósito. Recomendado.]
+[How you measure that it meets its purpose. Recommended.]
 ```
-**Checklist**: propósito en 1 frase · rango explícito de alcance · fuera-de-alcance presente.
+**Checklist**: purpose in 1 sentence · explicit scope range · out-of-scope present.
 
 ---
 
-## 02 · Descripción General *(mapa)*
+## 02 · Descripción General *(map)*
 
 ```markdown
 # Descripción General
@@ -128,16 +128,16 @@ Se explota por **longevidad**, no por funcionalidad: un archivo por decisión (`
 | Datos | Postgres + Redis | 16 / 7 |
 
 ## Arquitectura general
-[Diagrama Mermaid (ver conventions.md) + justificación de alto nivel.]
+[Mermaid diagram (see conventions.md) + high-level justification.]
 
 ## Integraciones externas
 | Servicio | Propósito | Tipo (REST/webhook/SDK) |
 ```
-**Checklist**: stack por capa · diagrama presente · integraciones listadas.
+**Checklist**: stack per layer · diagram present · integrations listed.
 
 ---
 
-## 03 · Actores y Roles *(mapa)*
+## 03 · Actores y Roles *(map)*
 
 ```markdown
 # Actores y Roles
@@ -149,13 +149,13 @@ Se explota por **longevidad**, no por funcionalidad: un archivo por decisión (`
 | Rol | Recurso | C | R | U | D |
 
 ## Rutas públicas
-- [Accesibles sin autenticación.]
+- [Accessible without authentication.]
 ```
-**Checklist**: matriz RBAC completa · rutas públicas explícitas. *(Omitir en `system_type = cli`.)*
+**Checklist**: complete RBAC matrix · public routes explicit. *(Omit in `system_type = cli`.)*
 
 ---
 
-## 04 · Modelo de Datos + Contratos *(colección)*
+## 04 · Modelo de Datos + Contratos *(collection)*
 
 ```markdown
 # Modelo de Datos
@@ -168,57 +168,57 @@ erDiagram
 ```
 
 ## Entidad: {Nombre}   `[code · prisma/schema.prisma#{Nombre}]`
-- Atributos (con tipo)
-- Relaciones (con cardinalidad)
-- Constraints / índices
+- Attributes (with type)
+- Relations (with cardinality)
+- Constraints / indexes
 
 ## Contrato de API: {dominio}
-[Por endpoint: método, path, request, response, errores.] `[code · src/api/{dominio}.route.ts#handler]`
+[Per endpoint: method, path, request, response, errors.] `[code · src/api/{dominio}.route.ts#handler]`
 ```
-**Checklist**: ERD presente · cada entidad con atributos+relaciones · contratos con request/response · **cita de origen por ítem**.
+**Checklist**: ERD present · each entity with attributes+relations · contracts with request/response · **origin citation per item**.
 
-> **Extraer, no narrar**: si hay `schema.prisma`/`*.sql`/migraciones o `openapi.*`, **extraé** las entidades y contratos de ahí en vez de narrarlos de memoria (ver `reverse-documentation.md` §Extraer, no narrar). El LLM agrega solo el PORQUÉ.
+> **Extract, don't narrate**: if `schema.prisma`/`*.sql`/migrations or `openapi.*` exist, **extract** entities and contracts from there instead of narrating from memory (see `reverse-documentation.md` §Extract, don't narrate). The LLM adds only the WHY.
 
 ---
 
-## 05 · Reglas de Negocio *(colección)*
+## 05 · Reglas de Negocio *(collection)*
 
 ```markdown
 # Reglas de Negocio — {dominio}
 
-Código único `RN-{DOMINIO}-NN` para trazabilidad.
+Unique code `RN-{DOMINIO}-NN` for traceability.
 
-- **RN-PAGOS-01** `[MVP]`: [regla] — [justificación] `[code · tests/payments.test.ts#"no aplica cupón dos veces"]`
-- **RN-PAGOS-02** `[Post-MVP]`: ... `[code · src/payments/rules.ts#applyDiscount]` ⚠ sin test
+- **RN-PAGOS-01** `[MVP]`: [rule] — [justification] `[code · tests/payments.test.ts#"no aplica cupón dos veces"]`
+- **RN-PAGOS-02** `[Post-MVP]`: ... `[code · src/payments/rules.ts#applyDiscount]` ⚠ no test
 ```
-Preferí citar el **test** cuando existe (evidencia más fuerte). Si la regla sale solo de la implementación, marcala `⚠ sin test` — el marcador se auto-limpia cuando se agrega el test.
+Prefer citing the **test** when it exists (stronger evidence). If the rule comes only from the implementation, mark it `⚠ no test` — the marker self-clears when the test is added.
 
-**Checklist**: toda regla con código · tag MVP/Post-MVP · justificación donde no sea obvia · **cita de origen por regla** · marcador `⚠ sin test` donde aplique.
+**Checklist**: every rule with a code · MVP/Post-MVP tag · justification where not obvious · **origin citation per rule** · `⚠ no test` marker where applicable.
 
 ---
 
-## 06 · Funcionalidades *(colección)*
+## 06 · Funcionalidades *(collection)*
 
 ```markdown
 # Funcionalidades — Épica {N}: {nombre}
 
 ### US-001 — {título}  `[MVP]`
-**Como** [actor] **quiero** [acción] **para** [beneficio].
+**As** [actor] **I want** [action] **so that** [benefit].
 
-**Criterios de aceptación**:
-- [ ] CA-1  `[code · src/checkout/handler.ts#submit]`
-**Reglas relacionadas**: RN-PAGOS-01
+**Acceptance criteria**:
+- [ ] AC-1  `[code · src/checkout/handler.ts#submit]`
+**Related rules**: RN-PAGOS-01
 ```
-**Checklist**: historias en formato US-NNN · criterios de aceptación · enlace a reglas existentes · **cita de origen en criterios derivados**.
+**Checklist**: stories in US-NNN format · acceptance criteria · link to existing rules · **origin citation in derived criteria**.
 
 ---
 
-## 07 · Flujos Principales *(colección)*
+## 07 · Flujos Principales *(collection)*
 
 ```markdown
 # Flujo: {nombre}
 
-**Disparador**: [evento] · **Actor**: [quién inicia]
+**Trigger**: [event] · **Actor**: [who initiates]
 
 ## Secuencia
 ```mermaid
@@ -228,53 +228,53 @@ sequenceDiagram
     API-->>Actor: confirmación
 ```
 
-## Pasos (cita por salto)
-1. [Componente] hace X `[code · src/checkout/handler.ts#submit]`
-2. [Componente] hace Y `[code · src/stock/reserve.ts#reserve]`
+## Steps (citation per hop)
+1. [Component] does X `[code · src/checkout/handler.ts#submit]`
+2. [Component] does Y `[code · src/stock/reserve.ts#reserve]`
 
-## Casos de error
-- [caso] → [manejo]
+## Error cases
+- [case] → [handling]
 ```
-**Checklist**: disparador+actor · diagrama de secuencia · casos de error · **cita de origen por paso**.
+**Checklist**: trigger+actor · sequence diagram · error cases · **origin citation per step**.
 
 ---
 
-## 08 · Arquitectura Propuesta *(mapa)*
+## 08 · Arquitectura Propuesta *(map)*
 
 ```markdown
 # Arquitectura Propuesta
 
 ## Patrones aplicados
-| Patrón | Dónde | Por qué |
+| Pattern | Where | Why |
 
 ## Estructura de directorios
-[árbol]
+[tree]
 
 ## Seguridad
-- Autenticación / Autorización / Validación de input / Secrets
+- Authentication / Authorization / Input validation / Secrets
 
 ## Variables de entorno
-| Variable | Descripción | Ejemplo | Sensible (Y/N) |
+| Variable | Description | Example | Sensitive (Y/N) |
 ```
-**Checklist**: patrones justificados · sección de seguridad · env vars con marca de sensibilidad.
+**Checklist**: justified patterns · security section · env vars with sensitivity flag.
 
 ---
 
-## 09 · Decisiones y Supuestos *(colección ADR)*
+## 09 · Decisiones y Supuestos *(ADR collection)*
 
 ```markdown
 # DD-01 — {título}   `[user]`
-**Decisión**: [qué se decidió]
-**Contexto**: [por qué hubo que decidir]
-**Alternativas**: [opciones evaluadas]
-**Justificación**: [por qué esta]
-**Trade-offs**: [qué se resigna]
+**Decision**: [what was decided]
+**Context**: [why a decision was needed]
+**Alternatives**: [options evaluated]
+**Rationale**: [why this one]
+**Trade-offs**: [what is given up]
 
 ---
-# SU-01 — {título}   (en el README de la carpeta)
-**Supuesto**: [...] · **Origen**: [...] · **Riesgo si es falso**: [...] · **Cómo validar**: [...]
+# SU-01 — {título}   (in the folder README)
+**Assumption**: [...] · **Origin**: [...] · **Risk if false**: [...] · **How to validate**: [...]
 ```
-**Checklist**: cada decisión con alternativas+trade-offs · supuestos con origen y forma de validar.
+**Checklist**: every decision with alternatives+trade-offs · assumptions with origin and validation method.
 
 ---
 
@@ -285,83 +285,83 @@ sequenceDiagram
 
 ## Inconsistencias detectadas
 ### IN-01 — {título}
-**A dice**: [...] · **B dice**: [...] · **Impacto**: [...] · **Resolución propuesta**: [...]
+**A says**: [...] · **B says**: [...] · **Impact**: [...] · **Proposed resolution**: [...]
 
 ## Preguntas priorizadas
-| Prioridad | Pregunta | Bloquea | Decisor |
+| Priority | Question | Blocks | Decision-maker |
 ```
-**Checklist**: inconsistencias con impacto · preguntas con prioridad y decisor.
+**Checklist**: inconsistencies with impact · questions with priority and decision-maker.
 
-> **Backlog VIVO, no log.** Cuando una pregunta se resuelve, su respuesta **migra** a su nodo propio (decisión → `09`, regla → `05`, etc.) y la pregunta **se borra del `10`**. El historial de la resolución va al `CHANGELOG.md`, no acá. Así el `10` se achica al resolver y nunca se convierte en un cementerio de miles de líneas. Misma regla para los supuestos `SU-NN` del `09`.
+> **LIVE backlog, not a log.** When a question is resolved, its answer **migrates** to its own node (decision → `09`, rule → `05`, etc.) and the question **is deleted from `10`**. The resolution history goes to `CHANGELOG.md`, not here. This way `10` shrinks as things are resolved and never becomes a graveyard of thousands of lines. Same rule for `SU-NN` assumptions in `09`.
 
 ---
 
-## README de la KB *(índice)*
+## KB README *(index)*
 
 ```markdown
-# {Proyecto} — Base de Conocimiento
+# {Project} — Knowledge Base
 
-## Índice de nodos
-| Nodo | Tipo | Contenido |
-| [01_vision_y_objetivos.md](01_vision_y_objetivos.md) | archivo | ... |
-| [04_modelos-apis/](04_modelos-apis/README.md) | carpeta | ... |
+## Node index
+| Node | Type | Content |
+| [01_vision_y_objetivos.md](01_vision_y_objetivos.md) | file | ... |
+| [04_modelos-apis/](04_modelos-apis/README.md) | folder | ... |
 
-## Quick start para devs
-1. Dominio → 01, 03 · 2. Datos → 04 · 3. Reglas → 05 · 4. Arquitectura → 02, 08 · 5. Implementar → 06, 07 · 6. Antes de codear → 10
+## Quick start for devs
+1. Domain → 01, 03 · 2. Data → 04 · 3. Rules → 05 · 4. Architecture → 02, 08 · 5. Implement → 06, 07 · 6. Before coding → 10
 
-## Resumen ejecutivo
-[2-3 frases con lo más importante.]
+## Executive summary
+[2-3 sentences with the most important points.]
 ```
-> Si el `system_type` omitió un nodo (ej. RBAC en un CLI), anotá la omisión en el índice en vez de dejar un archivo vacío.
+> If `system_type` omitted a node (e.g. RBAC in a CLI), note the omission in the index instead of leaving an empty file.
 
 ---
 
-## Templates por profile (variantes no-web)
+## Templates by profile (non-web variants)
 
-Los templates de arriba son la forma `web_app`. Cuando el profile (§Eje 1) reencuadra un slot, **usá la variante de abajo en vez del template base** — mismo número de slot, otra forma. Los slots no listados para un profile usan el template base; los marcados ✗ en la tabla de profiles se omiten. La **procedencia es obligatoria igual** (cita por ítem).
+The templates above are the `web_app` form. When the profile (§Axis 1) reframes a slot, **use the variant below instead of the base template** — same slot number, different form. Slots not listed for a profile use the base template; slots marked ✗ in the profile table are omitted. **Provenance is equally mandatory** (citation per item).
 
 ### `library_sdk`
 
-- **04 · Superficie de API pública** *(colección)* — reemplaza "modelo de datos". Por símbolo exportado:
+- **04 · Public API surface** *(collection)* — replaces "data model". Per exported symbol:
   ```markdown
-  ## `funcionExportada(args)` → ReturnType   `[code · src/index.ts#funcionExportada]`
-  - **Firma**: parámetros (tipo, opcional/requerido), retorno, throws.
-  - **Estabilidad**: `stable` | `beta` | `deprecated` (+ desde qué versión).
-  - **Ejemplo mínimo**: snippet de uso.
+  ## `exportedFunction(args)` → ReturnType   `[code · src/index.ts#exportedFunction]`
+  - **Signature**: parameters (type, optional/required), return, throws.
+  - **Stability**: `stable` | `beta` | `deprecated` (+ since which version).
+  - **Minimal example**: usage snippet.
   ```
-  **Checklist**: cada símbolo público con firma · estabilidad/semver · ejemplo · cita.
-- **06 · Recetas de uso** *(colección)* — reemplaza historias de usuario. Por caso de uso: objetivo, snippet end-to-end, notas/gotchas. `[code · …]`
-- **07 · Secuencias de llamada** — el orden esperado de llamadas para un caso típico (init → configurar → usar → liberar), con diagrama de secuencia si aplica.
-- **03 actores** y **07 flujos de UI**: ✗ (omitir; los consumidores no son actores RBAC).
+  **Checklist**: every public symbol with signature · stability/semver · example · citation.
+- **06 · Usage recipes** *(collection)* — replaces user stories. Per use case: goal, end-to-end snippet, notes/gotchas. `[code · …]`
+- **07 · Call sequences** — the expected order of calls for a typical case (init → configure → use → release), with sequence diagram if applicable.
+- **03 actors** and **07 UI flows**: ✗ (omit; consumers are not RBAC actors).
 
 ### `cli`
 
-- **04 · Esquema de config/IO** — reemplaza entidades: archivos de config, env vars, formato de entrada y salida (stdin/stdout/archivos), exit codes. `[code · …]`
-- **06 · Comandos** *(colección)* — reemplaza historias. Por comando:
+- **04 · Config/IO schema** — replaces entities: config files, env vars, input and output format (stdin/stdout/files), exit codes. `[code · …]`
+- **06 · Commands** *(collection)* — replaces stories. Per command:
   ```markdown
-  ## `mi-cli <comando> [flags]`   `[code · src/commands/cmd.ts#run]`
-  - **Sinopsis**: qué hace en una frase.
-  - **Flags**: `--flag` (tipo, default, efecto).
-  - **Ejemplos**: invocación → salida esperada.
+  ## `my-cli <command> [flags]`   `[code · src/commands/cmd.ts#run]`
+  - **Synopsis**: what it does in one sentence.
+  - **Flags**: `--flag` (type, default, effect).
+  - **Examples**: invocation → expected output.
   - **Exit codes**: 0 ok · N error.
   ```
-- **07 · Flujo de ejecución** — del parseo de args a la salida/exit code.
-- **03 RBAC**: ✗ (el invocador es el usuario; no hay roles).
+- **07 · Execution flow** — from arg parsing to output/exit code.
+- **03 RBAC**: ✗ (the caller is the user; there are no roles).
 
 ### `data_pipeline`
 
-- **04 · Data contracts** *(colección)* — reemplaza entidades. Por dataset/stream: esquema (campos + tipos), formato, fuente/sink, particionado, SLA/frescura. `[code · …]`
-- **06 · Stages / Jobs** *(colección)* — reemplaza historias. Por stage: input, transformación, output, idempotencia/reproceso. `[code · …]`
-- **07 · DAG / linaje** — el grafo de dependencias entre stages + linaje de datos:
+- **04 · Data contracts** *(collection)* — replaces entities. Per dataset/stream: schema (fields + types), format, source/sink, partitioning, SLA/freshness. `[code · …]`
+- **06 · Stages / Jobs** *(collection)* — replaces stories. Per stage: input, transformation, output, idempotency/reprocessing. `[code · …]`
+- **07 · DAG / lineage** — the dependency graph between stages + data lineage:
   ```markdown
-  ## DAG del pipeline
+  ## Pipeline DAG
   ```mermaid
   flowchart LR
       Ingesta --> Limpieza --> Enriquecido --> Carga
   ```
-  - **Dependencias**: qué stage espera a cuál.
-  - **Linaje**: de qué fuente sale cada campo del output. `[code · …]`
+  - **Dependencies**: which stage waits for which.
+  - **Lineage**: which source each output field comes from. `[code · …]`
   ```
-- **03 actores** y **06 historias de UI**: ✗ (operadores/upstreams, no actores RBAC).
+- **03 actors** and **06 UI stories**: ✗ (operators/upstreams, not RBAC actors).
 
-> `api`, `mobile` y `saas_multi_tenant` usan los templates base con los ajustes de la tabla de profiles (énfasis en contratos, offline/sync, tenancy) — no necesitan variante de forma completa.
+> `api`, `mobile` and `saas_multi_tenant` use the base templates with the profile table adjustments (emphasis on contracts, offline/sync, tenancy) — they don't need a full form variant.

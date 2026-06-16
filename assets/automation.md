@@ -1,38 +1,38 @@
-# Automation — chequeo de frescura, donde quieras (sin LLM)
+# Automation — freshness checks, wherever you want (no LLM)
 
-Expone los chequeos baratos como un **comando mecánico y determinista** que corre en cualquier superficie (CI, hooks, manual, o preguntándole al agente). **Cero tokens**: es git + regex + hash, no LLM.
+Exposes cheap checks as a **mechanical, deterministic command** that runs on any surface (CI, hooks, manual, or by asking the agent). **Zero tokens**: it is git + regex + hash, not LLM.
 
-> chronicle es una skill (instrucciones para un agente), no un binario. Por eso lo **caro** (generar, verificar correctitud) necesita el agente y va on-demand/async; lo **barato** (frescura, cobertura, consistencia) es mecánico y **sí** puede ser un gate de CI real con exit code.
+> chronicle is a skill (instructions for an agent), not a binary. That is why the **expensive** parts (generating, verifying correctness) require the agent and run on-demand/async; the **cheap** parts (freshness, coverage, cross-reference consistency) are mechanical and **can** be a real CI gate with an exit code.
 
 ---
 
-## Dos niveles
+## Two levels
 
-| Nivel | Qué incluye | Costo | Uso |
+| Level | What it includes | Cost | Use |
 |---|---|---|---|
-| **Mecánico** | cobertura de citas · consistencia cruzada · staleness (`git diff`) | gratis, determinista | **gate** bloqueante (PR/commit/manual) |
-| **LLM** | verificación de correctitud · generar/actualizar doc | tokens, lento | on-demand / agendado, **nunca** gate bloqueante |
+| **Mechanical** | citation coverage · cross-reference consistency · staleness (`git diff`) | free, deterministic | **blocking gate** (PR/commit/manual) |
+| **LLM** | correctness verification · generate/update doc | tokens, slow | on-demand / scheduled, **never** a blocking gate |
 
-El gate de cada commit/PR quema **cero tokens** porque solo corre el nivel mecánico.
+The gate on each commit/PR burns **zero tokens** because only the mechanical level runs.
 
 ---
 
-## El chequeo mecánico (sin LLM)
+## The mechanical check (no LLM)
 
-| Chequeo | Cómo (mecánico) | Falla si… |
+| Check | How (mechanical) | Fails if… |
 |---|---|---|
-| **Cobertura de citas** | extrae citas con `\[(code\|doc\|user\|inferred) · [^]]+\]`; cuenta afirmaciones factuales sin cita | cobertura < threshold |
-| **Consistencia cruzada** | resuelve cada `RN`/`US`/`DD` referenciada | hay una referencia rota |
-| **Staleness** | `git diff <ref> --name-only` → archivos cambiados → citas afectadas → fingerprint normalizado vs ledger | hay afirmaciones `stale`/`huérfanas` sobre código tocado |
-| **Cobertura por test** | cuenta reglas con cita a un test vs reglas con `⚠ sin test` | (métrica de riesgo; bloquea solo si se configura un mínimo) |
+| **Citation coverage** | extracts citations with `\[(code\|doc\|user\|inferred) · [^]]+\]`; counts factual claims without a citation | coverage < threshold |
+| **Cross-reference consistency** | resolves each referenced `RN`/`US`/`DD` | there is a broken reference |
+| **Staleness** | `git diff <ref> --name-only` → changed files → affected citations → normalized fingerprint vs ledger | there are `stale`/orphaned claims on touched code |
+| **Test coverage** | counts rules with a test citation vs rules with `⚠ no test` | (risk metric; blocks only if a minimum is configured) |
 
-El **staleness** es el chequeo estrella: implementa *"tocaste código documentado y no actualizaste la doc"* — ver `staleness.md`. Funciona igual en un PR que en un pre-commit de un solo dev.
+**Staleness** is the star check: it implements *"you touched documented code and did not update the doc"* — see `staleness.md`. Works the same in a PR as in a pre-commit for a solo developer.
 
 ---
 
-## Contrato machine-readable
+## Machine-readable contract
 
-Reporte (lo consume cualquier superficie):
+Report (consumable by any surface):
 
 ```json
 {
@@ -45,48 +45,48 @@ Reporte (lo consume cualquier superficie):
 }
 ```
 
-**Exit codes**: `0` = todo pasa · `1` = staleness · `2` = cobertura · `3` = consistencia · (combinables por bitmask si hace falta). El detalle siempre va en el reporte.
+**Exit codes**: `0` = all pass · `1` = staleness · `2` = coverage · `3` = consistency · (combinable by bitmask if needed). Detail always goes in the report.
 
-**Config opcional** (`knowledge-base/.chronicle/checks.json`) — thresholds y qué bloquea:
+**Optional config** (`knowledge-base/.chronicle/checks.json`) — thresholds and what blocks:
 
 ```json
 { "coverage_threshold": 0.80, "block_on_stale": true, "block_on_broken_ref": true }
 ```
-Sin config, defaults razonables (cobertura 0.80, staleness y refs rotas bloquean).
+Without config, sensible defaults (coverage 0.80, staleness and broken refs block).
 
 ---
 
-## Superficies (PRs son opcionales)
+## Surfaces (PRs are optional)
 
-| Tu workflow | Artefacto |
+| Your workflow | Artifact |
 |---|---|
-| **Cierre de generación** | el **mismo checker** corre al terminar cualquier modo generador, **fail-closed** (atrapada temprana — ver `edge-cases.md` §Auto-chequeo y `checker-spec.md` §8) |
-| Equipo con PRs | GitHub Action / GitLab CI en el PR o push |
-| **Solo / sin PRs** | hook **pre-commit** o **pre-push** (local, frena el commit malo) |
-| Sin hooks | **comando manual** cuando quieras |
-| Cero automatización | **preguntale al agente**: "¿la doc quedó vieja?" → Mode Audit interactivo |
-| Agendado | cron / agente programado (para el nivel LLM profundo) |
+| **Generation close** | the **same checker** runs at the end of any generator mode, **fail-closed** (early catch — see `edge-cases.md` §Auto-check and `checker-spec.md` §8) |
+| Team with PRs | GitHub Action / GitLab CI on the PR or push |
+| **Solo / no PRs** | **pre-commit** or **pre-push** hook (local, stops the bad commit) |
+| No hooks | **manual command** whenever you want |
+| Zero automation | **ask the agent**: "is the doc stale?" → interactive Mode Audit |
+| Scheduled | cron / scheduled agent (for the deep LLM level) |
 
-Nadie está obligado a usar PRs: la capacidad es el chequeo; la superficie la elegís vos, o ninguna. El cierre de generación es el adelanto; CI/pre-commit es el enforcement reproducible (mismo binario en ambos).
-
----
-
-## Generado a medida
-
-chronicle **no incluye un script fijo** (te ataría a un runtime y traería los líos de cross-platform de vuelta). En cambio, **emite el artefacto a tu medida** cuando se lo pedís ("armá el chequeo de CI"), implementando el contrato runtime-agnóstico de `checker-spec.md`:
-
-- detecta tu CI y stack (de la Capa 0),
-- genera el checker en el **runtime que tu proyecto ya usa** (Node → node, Python → python, Go → go) + la GitHub Action / el hook que lo invoca,
-- cross-platform por construcción (Windows/Linux/macOS según el target),
-- aplicando las **reglas de seguridad** del checker (`checker-spec.md` §5: argv-arrays, parse-no-exec, confinamiento a la raíz),
-- usando el preflight de búsqueda de `reverse-documentation.md` §0 cuando el chequeo necesita buscar.
-
-> **Auto-verificación antes de confiar (no opcional).** Apenas generás el checker, corrélo contra el golden fixture (`assets/conformance/sample-kb/`) y compará con `assets/conformance/expected.json`. Si no coincide exacto, el checker está mal generado → **regeneralo**. Ver `checker-spec.md` §7. Así la correctitud queda **verificada por generación**, no asumida.
-
-Así el chequeo es turnkey **sin** un script que chronicle tenga que mantener, y sin imponerte Python ni ningún runtime ajeno al proyecto.
+Nobody is required to use PRs: the capability is the check; the surface is your choice, or none. The generation close is the early catch; CI/pre-commit is the reproducible enforcement (same binary in both).
 
 ---
 
-## El nivel LLM (aparte, nunca gate)
+## Generated to spec
 
-La verificación de correctitud (`verification.md`) y el auto-update corren **on-demand o agendados** — por ejemplo, un agente headless nocturno que audita en profundidad y abre un issue/PR con los hallazgos. Nunca como chequeo síncrono y bloqueante, porque cuesta tokens y no es determinista.
+chronicle **does not ship a fixed script** (that would lock you to a runtime and bring cross-platform headaches back). Instead, it **emits an artifact tailored to your project** when asked ("set up the CI check"), implementing the runtime-agnostic contract from `checker-spec.md`:
+
+- detects your CI and stack (from Layer 0),
+- generates the checker in the **runtime your project already uses** (Node → node, Python → python, Go → go) + the GitHub Action / hook that invokes it,
+- cross-platform by construction (Windows/Linux/macOS per target),
+- applying the **security rules** from the checker (`checker-spec.md` §5: argv-arrays, parse-no-exec, confinement to the root),
+- using the search preflight from `reverse-documentation.md` §0 when the check needs to search.
+
+> **Self-verification before trusting (not optional).** As soon as you generate the checker, run it against the golden fixture (`assets/conformance/sample-kb/`) and compare with `assets/conformance/expected.json`. If it does not match exactly, the checker was generated incorrectly → **regenerate it**. See `checker-spec.md` §7. This way correctness is **verified by generation**, not assumed.
+
+The check is thus turnkey **without** a script that chronicle has to maintain, and without imposing Python or any runtime foreign to the project.
+
+---
+
+## The LLM level (separate, never a gate)
+
+Correctness verification (`verification.md`) and auto-update run **on-demand or on a schedule** — for example, a nightly headless agent that audits in depth and opens an issue/PR with findings. Never as a synchronous blocking check, because it costs tokens and is non-deterministic.

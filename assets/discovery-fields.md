@@ -1,59 +1,59 @@
-# Discovery Fields — el modelo que guía cada run
+# Discovery Fields — the model that guides each run
 
-chronicle establece un puñado de **hechos del proyecto** al arrancar (el discovery) y los usa durante todo el run para decidir cómo se comporta: qué nodos genera, si enciende governance, si activa el checklist de escalado, etc.
+chronicle establishes a handful of **project facts** at startup (the discovery) and uses them throughout the run to decide how it behaves: which nodes to generate, whether to enable governance, whether to activate the scaling checklist, etc.
 
-> Esto es **estado interno del run**, no se escribe a ningún archivo externo. chronicle es standalone: razona con estos campos en memoria y los refleja en la KB que produce.
+> This is **internal run state**, not written to any external file. chronicle is standalone: it reasons with these fields in memory and reflects them in the KB it produces.
 
 ---
 
-## El set de campos
+## The field set
 
-| Campo | Qué representa | Cómo se obtiene | Qué dispara |
+| Field | What it represents | How it is obtained | What it triggers |
 |---|---|---|---|
-| `intent` | La operación pedida | preguntado (Q-INTENT) | Elige el modo (create/ingest/reverse/update/audit) |
-| `system_type` | Tipo de sistema | detectado (Capa 0) / preguntado (P0-sys) | Selecciona el **profile** (núcleo de 4 + variables 03-08) — ver `node-templates.md` §Eje 1 |
-| `scale` | Escala actual | detectado / preguntado (P0-scale) | Profundidad de datos/caché/tenancy |
-| `domain` | Dominio de negocio | detectado / inferido | Naming, agrupación de dominios |
-| `trajectory` | Ambición (hoy → futuro) | preguntado (Q-trayectoria) | Checklist de escalado |
-| `maintenance_context` | Quién mantiene la doc | preguntado (Q-maintenance) | Gate de governance |
-| `stack` | Tecnologías por capa | detectado (manifests) | Tabla de stack, trazado cross-language |
-| `needs_infra` | ¿Hay infra no trivial? | detectado / inferido | Extras de infra/despliegue |
-| `language` | Idioma de la KB | **preguntado** (Q-idioma) | Nombres de archivo y contenido de toda la KB |
+| `intent` | The requested operation | asked (Q-INTENT) | Selects the mode (create/ingest/reverse/update/audit) |
+| `system_type` | System type | detected (Layer 0) / asked (P0-sys) | Selects the **profile** (core of 4 + variables 03-08) — see `node-templates.md` §Axis 1 |
+| `scale` | Current scale | detected / asked (P0-scale) | Depth of data/cache/tenancy |
+| `domain` | Business domain | detected / inferred | Naming, domain grouping |
+| `trajectory` | Ambition (today → future) | asked (Q-trayectoria) | Scaling checklist |
+| `maintenance_context` | Who maintains the docs | asked (Q-maintenance) | Governance gate |
+| `stack` | Technologies per layer | detected (manifests) | Stack table, cross-language tracing |
+| `needs_infra` | Non-trivial infra present? | detected / inferred | Infra/deployment extras |
+| `language` | KB language | **asked** (Q-language) | File names and content of the entire KB |
 
-### Dos naturalezas
+### Two natures
 
-- **Detectables / inferibles**: `system_type`, `scale`, `domain`, `stack`, `needs_infra`. Salen de la huella del filesystem (`detection-funnel.md`) o de las fuentes. Se **confirman**, no se preguntan de cero.
-- **Intención humana**: `intent`, `trajectory`, `maintenance_context`, `language`. **No** están en el código ni en los docs — se **preguntan**. Nunca se inventan. (`language` no se infiere del repo por el riesgo de *espanglish*: errar = regenerar toda la KB.)
+- **Detectable / inferable**: `system_type`, `scale`, `domain`, `stack`, `needs_infra`. Come from the filesystem footprint (`detection-funnel.md`) or from the sources. They are **confirmed**, not asked from scratch.
+- **Human intent**: `intent`, `trajectory`, `maintenance_context`, `language`. **Not** in the code or docs — they are **asked**. Never invented. (`language` is not inferred from the repo due to the risk of *Spanglish*: a wrong guess = regenerate the entire KB.)
 
 ---
 
-## Inferencia en Mode A (silent, solo pregunta el idioma)
+## Inference in Mode A (silent, asks only for language)
 
-Mode A es fire-and-forget salvo por Q-idioma (ver más abajo). Los campos detectables/inferibles se sacan de las fuentes:
+Mode A is fire-and-forget except for Q-language (see below). Detectable/inferable fields are drawn from the sources:
 
-| Campo | Inferir de | Señal |
+| Field | Infer from | Signal |
 |---|---|---|
-| `problem` | la visión generada | la primera frase declarativa sobre qué resuelve el sistema |
-| `system_type` | la descripción/arquitectura | "web app", "REST API", "CLI", "mobile", "SaaS", "multi-tenant", "librería/SDK", "pipeline/ETL" |
-| `domain` | actores + funcionalidades | nombres de actores y agrupación de features (ecommerce → productos/carrito; fintech → transacciones) |
-| `scale` | actores + menciones de escala/RBAC | conteo de actores, complejidad de RBAC, keywords de escala |
-| `stack` | la descripción general | frameworks, lenguajes, DB, servicios externos |
-| `needs_infra` | descripción + arquitectura | `true` si hay Docker, DB, Redis, colas, cron o infra de despliegue |
+| `problem` | the generated vision | the first declarative sentence about what the system solves |
+| `system_type` | description/architecture | "web app", "REST API", "CLI", "mobile", "SaaS", "multi-tenant", "library/SDK", "pipeline/ETL" |
+| `domain` | actors + features | actor names and feature grouping (ecommerce → products/cart; fintech → transactions) |
+| `scale` | actors + scale mentions/RBAC | actor count, RBAC complexity, scale keywords |
+| `stack` | general description | frameworks, languages, DB, external services |
+| `needs_infra` | description + architecture | `true` if Docker, DB, Redis, queues, cron, or deployment infra are present |
 
-### Regla de baja confianza
+### Low-confidence rule
 
-**Nunca pongas un valor con cara de certeza si no lo tenés.** Cuando un campo no se puede inferir con confianza razonable:
+**Never assign a value with apparent certainty if you do not have it.** When a field cannot be inferred with reasonable confidence:
 
-1. Poné el mejor esfuerzo marcado como incierto (ej. `"web_app (inferido, baja confianza)"`).
-2. Registralo en `10_preguntas_abiertas.md`:
+1. Set the best-effort value marked as uncertain (e.g. `"web_app (inferred, low confidence)"`).
+2. Record it in `10_preguntas_abiertas.md`:
    ```
-   [DISCOVERY] No se pudo inferir `<campo>` con confianza desde las fuentes.
-   Confirmar: <qué hace falta saber>.
+   [DISCOVERY] Could not infer `<field>` with confidence from the sources.
+   Confirm: <what needs to be known>.
    ```
-3. Seguí — nunca bloquees Mode A por un solo campo incierto.
+3. Continue — never block Mode A over a single uncertain field.
 
-### Campos de intención humana en Mode A
+### Human-intent fields in Mode A
 
-`trajectory` y `maintenance_context` **no** son inferibles de docs (son intención de producto/equipo, no contenido). Mode A los pone en **default conservador** — `trajectory` sin setear (sin checklist de escalado) y `maintenance_context = solo` (governance OFF) — y deja una nota `[DISCOVERY]` en `10_preguntas_abiertas.md` para que el usuario los confirme. Nunca los adivina.
+`trajectory` and `maintenance_context` are **not** inferable from docs (they are product/team intent, not content). Mode A sets them to **conservative defaults** — `trajectory` unset (no scaling checklist) and `maintenance_context = solo` (governance OFF) — and leaves a `[DISCOVERY]` note in `10_preguntas_abiertas.md` for the user to confirm. Never guesses them.
 
-`language` y `system_type` son la **excepción**: aunque Mode A es silencioso, antes de generar se **confirman** ambos en un solo paso. El idioma se pregunta (Q-idioma); el `system_type` se **infiere de las fuentes pero se confirma** porque ahora **selecciona el profile** (qué nodos existen) — inferirlo mal genera el set de nodos equivocado en silencio. Los dos son estructurales: errarlos obliga a regenerar toda la KB, y por eso no se dejan en default ni se asumen. Ver `interview-guide.md` §Mode A y `conventions.md` §6.
+`language` and `system_type` are the **exception**: even though Mode A is silent, both are **confirmed** in a single step before generating. Language is asked (Q-language); `system_type` is **inferred from sources but confirmed** because it now **selects the profile** (which nodes exist) — inferring it wrong generates the wrong node set silently. Both are structural: getting them wrong forces a full KB regeneration, which is why they are never left as defaults or assumed. See `interview-guide.md` §Mode A and `conventions.md` §6.

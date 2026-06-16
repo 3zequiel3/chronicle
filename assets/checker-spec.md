@@ -1,69 +1,69 @@
-# Checker Spec — el contrato del chequeo mecánico (runtime-agnóstico)
+# Checker Spec — the mechanical check contract (runtime-agnostic)
 
-Define **qué debe hacer** el chequeo mecánico de `chronicle`, sin atarlo a ningún lenguaje. chronicle **no shippea un ejecutable** — genera el checker a medida en el runtime que el proyecto ya usa (Node, Python, Go…) y lo **auto-verifica contra un golden fixture** antes de confiar en él. Esto da portabilidad (Windows sin imponer Python), seguridad de cadena de contribuciones (la skill es solo-markdown, auditable a ojo) y correctitud verificada por generación.
+Defines **what the mechanical checker for `chronicle` must do**, without tying it to any language. chronicle **does not ship an executable** — it generates the checker tailored to the runtime the project already uses (Node, Python, Go…) and **auto-verifies it against a golden fixture** before trusting it. This gives portability (Windows without imposing Python), supply-chain security (the skill is markdown-only, auditable by eye), and correctness verified by generation.
 
-> El checker es **mecánico y determinista**: git + regex + hash, **cero LLM, cero tokens**. Por eso puede ser un gate de CI real. Lo caro (verificar correctitud, generar doc) es otra cosa y vive en `verification.md` / la generación del agente.
+> The checker is **mechanical and deterministic**: git + regex + hash, **zero LLM, zero tokens**. That is why it can be a real CI gate. Expensive operations (correctness verification, doc generation) are separate and live in `verification.md` / agent generation.
 
 ---
 
-## 1. Entradas
+## 1. Inputs
 
-| Entrada | De dónde | Obligatoria |
+| Input | Source | Required |
 |---|---|---|
-| Directorio de la KB | `knowledge-base/` | sí |
+| KB directory | `knowledge-base/` | yes |
 | Config | `knowledge-base/.chronicle/checks.json` | no (defaults) |
-| Ledger | `knowledge-base/.chronicle/verification.json` | no (staleness lo necesita) |
-| Trace map | `knowledge-base/.chronicle/trace-map.json` | no (resolución de citas `code` lo necesita) |
-| `ref` de git | del ledger o argumento | no (sin git → modo full) |
+| Ledger | `knowledge-base/.chronicle/verification.json` | no (staleness needs it) |
+| Trace map | `knowledge-base/.chronicle/trace-map.json` | no (needed for `code` citation resolution) |
+| git `ref` | from ledger or argument | no (without git → full mode) |
 
 ---
 
-## 2. Chequeos (todos mecánicos)
+## 2. Checks (all mechanical)
 
-### 2.1 Cobertura de citas
-Extrae las citas con la gramática de `provenance.md`:
+### 2.1 Citation coverage
+Extracts citations using the grammar from `provenance.md`:
 
 ```
 \[(code|doc|user|inferred) · ([^\]]+)\]
 ```
 
-**Unidad de afirmación** (definición determinista para contar): en los nodos 04-09, cada **ítem codificado** cuenta como una afirmación factual. Operacionalmente, una línea que empieza con `- **<CÓDIGO>**` (ej. `- **RN-PAGOS-01**`, `- **DD-02**`) o un heading de entidad/endpoint. Cada afirmación **debe** tener una cita en su bloque o estar marcada `[inferred · …]`.
+**Claim unit** (deterministic definition for counting): in nodes 04-09, each **coded item** counts as one factual claim. Operationally, a line starting with `- **<CODE>**` (e.g. `- **RN-PAGOS-01**`, `- **DD-02**`) or an entity/endpoint heading. Each claim **must** have a citation in its block or be marked `[inferred · …]`.
 
-- `claims` = total de unidades de afirmación.
-- `cited` = las que tienen una cita (cualquier tipo) en su bloque.
-- `uncited` = afirmaciones **sin cita ni marca `inferred`** → **defecto**.
+- `claims` = total claim units.
+- `cited` = those with a citation (any type) in their block.
+- `uncited` = claims **with no citation and no `inferred` mark** → **defect**.
 - `value` = `cited / claims`.
 
-### 2.2 Consistencia cruzada
-Resuelve cada referencia a un código:
-- toda `RN-XXX-NN` referenciada en 06/07 existe como definición en 05,
-- toda `US-NNN` enlazada resuelve a una historia en 06,
-- toda `DD-NN` referenciada existe en 09.
+### 2.2 Cross-reference consistency
+Resolves every reference to a code:
+- every `RN-XXX-NN` referenced in 06/07 exists as a definition in 05,
+- every `US-NNN` linked resolves to a story in 06,
+- every `DD-NN` referenced exists in 09.
 
-`broken` = cantidad de referencias que no resuelven; `items` = lista `"origen → destino-roto"`.
+`broken` = number of references that do not resolve; `items` = list of `"source → broken-target"`.
 
 ### 2.3 Staleness
-Requiere ledger. Con git: `git diff <ref> --name-only` (sin `..HEAD`, capta lo no commiteado) → archivos cambiados → citas `code` que apuntan a esos archivos → re-calcular **fingerprint normalizado** (§4) y comparar con el del ledger. Sin git: re-fingerprintear todas las citas `code`, acotado por presupuesto. Ver `staleness.md`.
+Requires the ledger. With git: `git diff <ref> --name-only` (without `..HEAD`, captures uncommitted changes) → changed files → `code` citations pointing to those files → re-calculate **normalized fingerprint** (§4) and compare with the ledger's. Without git: re-fingerprint all `code` citations, budget-bounded. See `staleness.md`.
 
-`stale` = fingerprint distinto; `orphaned` = símbolo desaparecido. La salida es marca, **no reescritura**.
+`stale` = fingerprint differs; `orphaned` = symbol has disappeared. Output is a mark, **not a rewrite**.
 
-### 2.4 Cobertura por test (métrica, no defecto)
-Cuenta reglas (05) con cita a un test vs reglas con `⚠ sin test`. Riesgo visible, no bloqueante salvo que se configure un mínimo.
+### 2.4 Test coverage (metric, not defect)
+Counts rules (05) with a test citation vs. rules with `⚠ no test`. Risk is visible but not blocking unless a minimum is configured.
 
-### 2.5 Resolución citación→mapa (anti-cita-fabricada, mecánica)
-Requiere `trace-map.json`. Por cada cita `code` de la KB, extraé su `file#symbol` y buscá una **fila del mapa** con ese mismo `file` + `symbol`. Convierte el allowlist de disciplina a chequeo mecánico (ver `reverse-documentation.md` §3, `provenance.md`).
+### 2.5 Citation→map resolution (anti-fabrication, mechanical)
+Requires `trace-map.json`. For each `code` citation in the KB, extract its `file#symbol` and look for a **map row** with that same `file` + `symbol`. Converts the discipline allowlist into a mechanical check (see `reverse-documentation.md` §3, `provenance.md`).
 
-- `code_citations` = total de citas `code`.
-- `resolved` = las que matchean una fila del mapa.
-- `orphans` = las que **no** resuelven → **defecto** (cita fabricada o símbolo no trazado). `orphan_items` = lista `file#symbol`.
+- `code_citations` = total `code` citations.
+- `resolved` = those that match a map row.
+- `orphans` = those that **do not resolve** → **defect** (fabricated citation or untraced symbol). `orphan_items` = list of `file#symbol`.
 
-> Las citas `doc`/`user`/`inferred` no aplican (no salen del mapa de traza). Si no hay `trace-map.json` (KB no generada por Mode C), este chequeo se omite y se reporta `n/a`.
+> `doc`/`user`/`inferred` citations do not apply (they do not come from the trace map). If there is no `trace-map.json` (KB not generated by Mode C), this check is skipped and reported as `n/a`.
 
 ---
 
-## 3. Salida y exit codes
+## 3. Output and exit codes
 
-Reporte machine-readable (mismo contrato que `automation.md`):
+Machine-readable report (same contract as `automation.md`):
 
 ```json
 {
@@ -76,74 +76,74 @@ Reporte machine-readable (mismo contrato que `automation.md`):
 }
 ```
 
-**Exit codes** (combinables por bitmask): `0` = todo pasa · `1` = staleness · `2` = cobertura · `3` = consistencia. El detalle siempre va en el reporte JSON.
+**Exit codes** (combinable by bitmask): `0` = all pass · `1` = staleness · `2` = coverage · `3` = consistency. Detail always goes in the JSON report.
 
 ---
 
-## 4. Algoritmo de fingerprint normalizado (estable entre corridas)
+## 4. Normalized fingerprint algorithm (stable across runs)
 
-El fingerprint es lo que comparten verificación (#3) y staleness (#5); tiene que dar **igual** ante un reformateo y **distinto** solo ante un cambio de lógica real.
+The fingerprint is shared by verification (§3) and staleness (§5); it must produce the **same result** after a reformat and a **different result** only on a real logic change.
 
-1. Localizá el cuerpo del símbolo citado (la función/clase/región, no el archivo entero).
-2. Normalizá, en este orden:
-   - quitar comentarios (de línea y de bloque, según el lenguaje),
-   - colapsar todo run de whitespace (espacios, tabs, newlines) a un solo espacio,
-   - trim de bordes.
-3. Hasheá el resultado con una **librería de hashing** del runtime (SHA-256). Sin librería disponible, una firma estructural normalizada como fallback.
+1. Locate the cited symbol's body (the function/class/region, not the whole file).
+2. Normalize, in this order:
+   - strip comments (line and block, per language),
+   - collapse all whitespace runs (spaces, tabs, newlines) to a single space,
+   - trim edges.
+3. Hash the result with a **hashing library** from the runtime (SHA-256). Without an available library, use a normalized structural signature as fallback.
 
-El digest es el `fingerprint`. El `ref` (commit git de la corrida) se guarda junto, como línea base para el git fast-path.
-
----
-
-## 5. Reglas de seguridad (obligatorias en el checker generado)
-
-El checker corre sobre repos no confiables y se genera por código → es superficie de inyección. El checker generado **debe**:
-
-1. **argv-arrays, nunca `sh -c` con interpolación.** Los paths y nombres de símbolo se pasan como argumentos de proceso, jamás concatenados a un string de shell. (Defensa contra command-injection vía path/símbolo crafteado.)
-2. **Parsear las citas, no ejecutarlas.** Una cita es texto a matchear con la regex, nunca algo que se evalúe.
-3. **Confinamiento a la raíz del repo.** Una cita `[code · ../../etc/passwd#x]` se **rechaza**: resolvé y operá solo dentro de la raíz del proyecto. Cualquier path que escape se reporta como cita inválida, no se abre.
-4. **Hashing por librería**, no shelleando `sha256sum`/`shasum` con input interpolado.
-5. **Sin red, sin escritura fuera de `.chronicle/`.** El checker solo lee la KB + el código y escribe el ledger.
+The digest is the `fingerprint`. The `ref` (git commit of the run) is stored alongside it as the baseline for the git fast-path.
 
 ---
 
-## 6. Propiedad del ledger (regla dura)
+## 5. Security rules (mandatory in the generated checker)
 
-`verification.json` lo escribe **únicamente el checker mecánico**. El LLM **nunca lo edita a mano** — solo lo **lee** para decidir qué re-verificar. Esto elimina el drift de "modelo manteniendo JSON de memoria": el estado de tooling es responsabilidad del tooling, no del lenguaje natural.
+The checker runs on untrusted repos and is generated as code → it is an injection surface. The generated checker **must**:
 
----
-
-## 7. Protocolo de conformancia (auto-verificación antes de confiar)
-
-Cuando el agente **genera** el checker para un proyecto, antes de usarlo:
-
-1. Corré el checker generado contra `assets/conformance/sample-kb/` y compará su salida con `assets/conformance/expected.json` (campos `claims`, `cited`, `uncited`, `broken`, `items`).
-2. Corré la normalización + hash sobre `assets/conformance/fingerprint/sample.js` y compará con `assets/conformance/fingerprint/expected.json` (el string `normalized` **y** el `fingerprint` SHA-256).
-3. Corré la resolución citación→mapa sobre `assets/conformance/trace-map/` (usando su `trace-map.json`) y compará con `assets/conformance/trace-map/expected.json` (`code_citations`, `resolved`, `orphans`, `orphan_items`).
-4. **Si todo coincide exacto → conformante**, usalo. **Si no → regenerá** el checker y repetí. No uses un checker que no pasó el fixture.
-
-El fixture es **data, no código** (markdown + JSON + un snippet), runtime-agnóstico. Valida las cuatro piezas deterministas: extracción de citas, consistencia cruzada, normalización del fingerprint **y la resolución citación→mapa** (el foreign key anti-fabricación). Lo único que no se fixtura es el `git diff` del staleness, que necesita un repo git real y se valida en el repo objetivo.
-
-> Así el chequeo es turnkey **sin** que chronicle mantenga un script por plataforma, y su correctitud queda **verificada por generación** en vez de asumida.
+1. **argv-arrays, never `sh -c` with interpolation.** Paths and symbol names are passed as process arguments, never concatenated into a shell string. (Defense against command injection via crafted path/symbol.)
+2. **Parse citations, do not execute them.** A citation is text to match with the regex, never something to evaluate.
+3. **Confinement to the repo root.** A citation like `[code · ../../etc/passwd#x]` is **rejected**: resolve and operate only within the project root. Any path that escapes is reported as an invalid citation, not opened.
+4. **Hash via library**, not by shelling out to `sha256sum`/`shasum` with interpolated input.
+5. **No network, no writes outside `.chronicle/`.** The checker only reads the KB + code and writes the ledger.
 
 ---
 
-## 8. Dos superficies, un solo binario (cierre de run + CI)
+## 6. Ledger ownership (hard rule)
 
-El checker corre en **dos momentos**, y debe ser el **mismo binario** en ambos (si divergen, el cierre miente):
+`verification.json` is written **exclusively by the mechanical checker**. The LLM **never edits it manually** — it only **reads** it to decide what to re-verify. This eliminates drift from "model maintaining JSON from memory": tooling state is the responsibility of tooling, not natural language.
 
-1. **Cierre de run (atrapada temprana)** — al terminar cualquier modo generador, antes de declarar la KB completa. Es el nivel mecánico del auto-chequeo final (`edge-cases.md`). **Fail-closed**: no se declara "completo" con el checker en rojo.
-2. **CI / pre-commit (atrapada real)** — corre sin el modelo, reproducible por el usuario. Es el enforcement de verdad; el cierre de run es solo el adelanto.
+---
 
-> **Por qué las dos.** En una sesión pelada, "correr el checker" sigue siendo una instrucción que el LLM ejecuta — el determinismo solo muerde cuando hay una superficie independiente. Por eso el cierre de run **persiste** su resultado y CI lo **re-corre**: lo que una sesión saltee, lo caza el próximo commit.
+## 7. Conformance protocol (self-verify before trusting)
 
-### Persistencia del resultado
+When the agent **generates** the checker for a project, before using it:
 
-El checker escribe su última corrida en `knowledge-base/.chronicle/last-check.json` (distinto del `verification.json`, que es el ledger de verificación/staleness). Lo escribe **solo el checker**, nunca el LLM (misma regla que §6):
+1. Run the generated checker against `assets/conformance/sample-kb/` and compare its output with `assets/conformance/expected.json` (fields `claims`, `cited`, `uncited`, `broken`, `items`).
+2. Run normalization + hash on `assets/conformance/fingerprint/sample.js` and compare with `assets/conformance/fingerprint/expected.json` (both the `normalized` string **and** the SHA-256 `fingerprint`).
+3. Run citation→map resolution on `assets/conformance/trace-map/` (using its `trace-map.json`) and compare with `assets/conformance/trace-map/expected.json` (`code_citations`, `resolved`, `orphans`, `orphan_items`).
+4. **If everything matches exactly → conformant**, use it. **If not → regenerate** the checker and repeat. Never use a checker that did not pass the fixture.
+
+The fixture is **data, not code** (markdown + JSON + one snippet), runtime-agnostic. It validates all four deterministic pieces: citation extraction, cross-reference consistency, fingerprint normalization **and citation→map resolution** (the anti-fabrication foreign key). The only piece not fixturized is the `git diff` staleness path, which requires a real git repo and is validated in the target repo.
+
+> This makes the check turnkey **without** chronicle maintaining a per-platform script, and its correctness is **verified by generation** rather than assumed.
+
+---
+
+## 8. Two surfaces, one binary (run close + CI)
+
+The checker runs at **two moments**, and must be the **same binary** in both (if they diverge, the run close lies):
+
+1. **Run close (early catch)** — at the end of any generative mode, before declaring the KB complete. This is the mechanical level of the final auto-check (`edge-cases.md`). **Fail-closed**: "complete" is never declared with the checker in red.
+2. **CI / pre-commit (real catch)** — runs without the model, reproducible by the user. This is the true enforcement; the run close is just the preview.
+
+> **Why both.** In a bare session, "run the checker" is still an instruction the LLM executes — determinism only bites when there is an independent surface. That is why the run close **persists** its result and CI **re-runs** it: whatever a session skips, the next commit catches.
+
+### Result persistence
+
+The checker writes its last run to `knowledge-base/.chronicle/last-check.json` (distinct from `verification.json`, which is the verification/staleness ledger). Written **only by the checker**, never by the LLM (same rule as §6):
 
 ```json
 { "ran_at": "<timestamp>", "ref": "<git commit>", "status": "pass|fail",
   "checks": { "citation_coverage": {...}, "cross_ref": {...}, "existence": {...} } }
 ```
 
-El próximo run y CI comparan contra este archivo. Si el proyecto aún no tiene checker generado, el cierre corre los chequeos con tools deterministas (grep/regex) como equivalente y **ofrece generar** el checker persistente para que CI los re-corra.
+The next run and CI compare against this file. If the project does not yet have a generated checker, the close runs the checks with deterministic tools (grep/regex) as an equivalent and **offers to generate** the persistent checker so CI can re-run them.

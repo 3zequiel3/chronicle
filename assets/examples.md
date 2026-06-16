@@ -1,23 +1,23 @@
-# Examples — un recorrido por modo (few-shot)
+# Examples — an end-to-end walkthrough by mode (few-shot)
 
-Ejemplos end-to-end, uno por modo. **Cargá solo la sección del modo activo.** Sirven de referencia de estilo y de flujo esperado.
+End-to-end examples, one per mode. **Load only the section for the active mode.** They serve as style and expected-flow references.
 
-> Los ejemplos usan el profile `web_app` (ecommerce) por concreción. Con otro `system_type` el flujo es el mismo, pero el **profile reencuadra los nodos** (`node-templates.md` §Eje 1): una librería documenta su API pública en el `04` y no genera `03`/`07-UI`; un pipeline arma el DAG en el `07` y stages en el `06`; un CLI documenta comandos en el `06`. La mecánica de cada modo no cambia.
+> The examples use the `web_app` profile (ecommerce) for concreteness. With a different `system_type` the flow is the same, but the **profile reframes the nodes** (`node-templates.md` §Axis 1): a library documents its public API in `04` and does not generate `03`/`07-UI`; a pipeline builds the DAG in `07` and stages in `06`; a CLI documents commands in `06`. The mechanics of each mode do not change.
 
 ---
 
 ## Mode A — silent ingest
 
-**Entrada**: `docs/descripcion.txt`, `docs/historias.docx`. No hay `knowledge-base/`.
+**Input**: `docs/descripcion.txt`, `docs/historias.docx`. No `knowledge-base/` present.
 
-**Flujo**:
-1. Capa 0 detecta `docs/` con fuentes → propone Mode A.
-2. Lee las fuentes, infiere discovery (`discovery-fields.md`): `system_type: web_app`, `domain: ecommerce`, `stack: Django + React`.
-3. `trajectory`/`maintenance_context` no inferibles → default conservador + nota en `10`.
-4. Genera los 10 nodos. El 04 tiene 5 entidades → queda **archivo** (no carpeta).
-5. Auto-chequeo (`quality-rubric.md`); cierra con tabla resumen.
+**Flow**:
+1. Layer 0 detects `docs/` with sources → proposes Mode A.
+2. Reads sources, infers discovery (`discovery-fields.md`): `system_type: web_app`, `domain: ecommerce`, `stack: Django + React`.
+3. `trajectory`/`maintenance_context` not inferable → conservative default + note in `10`.
+4. Generates the 10 nodes. `04` has 5 entities → stays as a **file** (not a folder).
+5. Self-check (`quality-rubric.md`); closes with summary table.
 
-**Cierre**:
+**Close**:
 ```markdown
 ## KB generada en knowledge-base/
 | Nodo | Líneas | Temas |
@@ -28,75 +28,75 @@ Ejemplos end-to-end, uno por modo. **Cargá solo la sección del modo activo.** 
 
 ---
 
-## Mode B — desde cero
+## Mode B — from scratch
 
-**Entrada**: repo vacío. Usuario: "armemos la KB desde cero".
+**Input**: empty repo. User: "let's build the KB from scratch".
 
-**Flujo**:
-1. Q-INTENT → `create`. Capa 0 no detecta stack (no hay código).
-2. Ronda discovery: P0-sys=(a) web_app, P0-scale=(b), Q-trayectoria=(b) semilla → activa checklist de escalado, Q-maintenance=(a) solo → governance OFF.
-3. Ronda 1 (P1-P5). P1 vago ("ayudar a vender") → **rechaza**, repregunta.
-4. Cierre de ronda con supuestos. Itera nodo por nodo con validación.
+**Flow**:
+1. Q-INTENT → `create`. Layer 0 detects no stack (no code).
+2. Discovery round: P0-sys=(a) web_app, P0-scale=(b), Q-trayectoria=(b) seed → activates scaling checklist, Q-maintenance=(a) solo → governance OFF.
+3. Round 1 (P1-P5). P1 is vague ("help sell things") → **rejected**, follow-up asked.
+4. Round close with assumptions. Iterates node by node with validation.
 
-**Ejemplo de pregunta**:
+**Example question**:
 ```markdown
-**P2 — Alcance del MVP**
-¿Qué es lo mínimo "lanzable"?
-(a) catálogo + carrito + checkout simulado
-(b) + pago real
-(c) + panel admin
-Por qué importa: define la v1. Lo que quede afuera se etiqueta [Post-MVP].
+**P2 — MVP scope**
+What is the minimum "launchable" scope?
+(a) catalog + cart + simulated checkout
+(b) + real payment
+(c) + admin panel
+Why it matters: defines v1. Anything left out gets tagged [Post-MVP].
 ```
 
 ---
 
-## Mode C — reverse por funcionalidad
+## Mode C — reverse by feature
 
-**Entrada**: repo con código, sin docs. Usuario: "documentá el checkout".
+**Input**: repo with code, no docs. User: "document the checkout".
 
-**Flujo**:
-1. Capa 0: `package.json` → Next.js + Prisma. Carpetas `pagos/`, `stock/`.
-2. **Anclaje**: busca "checkout" → encuentra `api/checkout.route.ts`.
-3. **Confirmación**:
+**Flow**:
+1. Layer 0: `package.json` → Next.js + Prisma. Folders `pagos/`, `stock/`.
+2. **Anchoring**: searches "checkout" → finds `api/checkout.route.ts`.
+3. **Confirmation**:
    ```
-   Encontré checkout en: checkout.route.ts, payment.service.ts, stock.service.ts.
-   ¿Es esto? (sí / ajustar / no)
+   Found checkout in: checkout.route.ts, payment.service.ts, stock.service.ts.
+   Is this right? (yes / adjust / no)
    ```
-4. **Trazado acotado** (read-only, cross-language si aplica). Al tocar `inventory` → frontera: cross-reference, no lo documenta.
-5. **Merge corte vertical** con **cita por afirmación**: escribe `04/modelos/pago.md`, `05/pagos.md`, `06/pagos.md`, `07/pagos-checkout.md`. Ej:
+4. **Scoped tracing** (read-only, cross-language if applicable). When `inventory` is touched → boundary: cross-reference, do not document it.
+5. **Vertical-slice merge** with **per-claim citation**: writes `04/modelos/pago.md`, `05/pagos.md`, `06/pagos.md`, `07/pagos-checkout.md`. Example:
    ```markdown
-   - **RN-PAGOS-01**: el cupón no se aplica dos veces. `[code · src/payments/rules.ts#validateCoupon ~L42]`
+   - **RN-PAGOS-01**: the coupon cannot be applied twice. `[code · src/payments/rules.ts#validateCoupon ~L42]`
    ```
-6. Un `if` valida el cupón dos veces y no se sabe por qué → Q-WHY; sin respuesta → `[inferred · inferido → 10]`. **No inventa.**
+6. An `if` validates the coupon twice and the reason is unclear → Q-WHY; no answer → `[inferred · → 10]`. **Does not invent.**
 
 ---
 
-## Mode Update — merge no destructivo
+## Mode Update — non-destructive merge
 
-**Entrada**: `knowledge-base/` existe. Usuario: "actualizá con la feature de devoluciones".
+**Input**: `knowledge-base/` exists. User: "update with the returns feature".
 
-**Flujo**:
-1. Q-INTENT → `update`. Lee los nodos afectados.
-2. Documenta "devoluciones" (reusa trazado de Mode C).
-3. Al agregar reglas, `05` cruza el umbral (22 reglas en 4 dominios) → **promoción**: `05_reglas_de_negocio.md` → `05_reglas-de-negocio/` y **actualiza referencias** `RN-*` en 06/07.
-4. Registra el cambio en `CHANGELOG.md`. Respeta lo que ya estaba bien.
+**Flow**:
+1. Q-INTENT → `update`. Reads affected nodes.
+2. Documents "returns" (reuses Mode C tracing).
+3. When adding rules, `05` crosses the threshold (22 rules across 4 domains) → **promotion**: `05_reglas_de_negocio.md` → `05_reglas-de-negocio/` and **updates `RN-*` references** in 06/07.
+4. Records the change in `CHANGELOG.md`. Respects what was already correct.
 
 ---
 
-## Mode Audit — validar sin generar
+## Mode Audit — validate without generating
 
-**Entrada**: `knowledge-base/` existe. Usuario: "auditá la KB".
+**Input**: `knowledge-base/` exists. User: "audit the KB".
 
-**Flujo**:
-1. Q-INTENT → `audit`. No genera contenido.
-2. Corre `quality-rubric.md`: score por nodo + chequeos de integridad.
-3. Reporta priorizado:
+**Flow**:
+1. Q-INTENT → `audit`. Generates no content.
+2. Runs `quality-rubric.md`: score per node + integrity checks.
+3. Reports prioritized:
 ```markdown
 ## Completeness
-| 07 flujos | 40% ❌ | faltan casos de error |
-## Integridad
-- ❌ US-014 → RN-PAGOS-09 inexistente.
-## Prioridad
-1. [Alta] Resolver RN-PAGOS-09.
+| 07 flows | 40% ❌ | missing error cases |
+## Integrity
+- ❌ US-014 → RN-PAGOS-09 does not exist.
+## Priority
+1. [High] Resolve RN-PAGOS-09.
 ```
-4. No toca la KB salvo que el usuario pida pasar a Mode Update con los hallazgos.
+4. Does not touch the KB unless the user asks to switch to Mode Update with the findings.

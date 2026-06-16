@@ -1,81 +1,81 @@
-# Detection Funnel — Arranque barato y preciso (3 capas)
+# Detection Funnel — Cheap and precise startup (3 layers)
 
-El arranque de la skill es lo que decide si es cara o barata. La regla: **el filesystem te dice el QUÉ-existe (se detecta); el usuario te dice el QUÉ-querés (se pregunta).** Nunca intentes inferir la intención leyendo código — no se puede y es carísimo.
+The skill's startup is what determines whether it's expensive or cheap. The rule: **the filesystem tells you WHAT-exists (detected); the user tells you WHAT-you-want (asked).** Never try to infer intent by reading code — it's impossible and prohibitively expensive.
 
-Las tres capas van de lo más barato a lo más caro. No subas de capa hasta agotar la anterior.
+The three layers go from cheapest to most expensive. Don't move up a layer until you've exhausted the previous one.
 
 ---
 
-## Capa 0 — Huella del filesystem (casi 0 tokens, SIN leer código fuente)
+## Layer 0 — Filesystem footprint (near 0 tokens, WITHOUT reading source code)
 
-Antes de preguntar nada y antes de abrir un solo archivo de código fuente, escaneá la estructura.
+Before asking anything and before opening a single source file, scan the structure.
 
-### Stack vía manifests (detección por SEÑAL, no por lectura)
+### Stack via manifests (detection by SIGNAL, not by reading)
 
-Un solo read de un archivo chico y denso resuelve el stack completo. Leer archivos de código fuente para "adivinar" la tecnología es tirar tokens.
+A single read of a small, dense file resolves the full stack. Reading source files to "guess" the technology is wasting tokens.
 
-| Señal (archivo) | Te dice |
+| Signal (file) | Tells you |
 |---|---|
-| `package.json` | Node/TS + framework (react, next, express, nest…) + libs en `dependencies` |
+| `package.json` | Node/TS + framework (react, next, express, nest…) + libs in `dependencies` |
 | `tsconfig.json` | TypeScript |
-| `go.mod` | Go + módulos y versión |
+| `go.mod` | Go + modules and version |
 | `requirements.txt` / `pyproject.toml` / `Pipfile` | Python + deps |
 | `Cargo.toml` | Rust |
 | `pom.xml` / `build.gradle` | Java / Kotlin |
-| `composer.json` | PHP (+ Laravel/Symfony por deps) |
+| `composer.json` | PHP (+ Laravel/Symfony via deps) |
 | `Gemfile` | Ruby (+ Rails) |
 | `*.csproj` / `*.sln` | .NET / C# |
 | `pubspec.yaml` | Dart / Flutter |
-| `docker-compose.yml` / `Dockerfile` | infra, servicios, `needs_infra = true` |
-| `prisma/schema.prisma` / `*.sql` / migraciones | DB + modelo de datos (insumo para nodo 04 — **extraer, no narrar**: ver `reverse-documentation.md`) |
-| `openapi.*` / `swagger.*` | contratos de API (insumo para nodo 04 — **extraer, no narrar**) |
+| `docker-compose.yml` / `Dockerfile` | infra, services, `needs_infra = true` |
+| `prisma/schema.prisma` / `*.sql` / migrations | DB + data model (input for node 04 — **extract, don't narrate**: see `reverse-documentation.md`) |
+| `openapi.*` / `swagger.*` | API contracts (input for node 04 — **extract, don't narrate**) |
 
-> Leé **solo la sección de dependencias** del manifest cuando alcance. No hace falta el archivo entero.
+> Read **only the dependencies section** of the manifest when that suffices. The full file is not needed.
 
-### Otras señales estructurales (gratis)
+### Other structural signals (free)
 
-| Señal | Te dice |
+| Signal | Tells you |
 |---|---|
-| Nombres de carpetas (`pagos/`, `stock/`, `auth/`) | Dominios candidatos del sistema |
-| Existencia de `docs/` con fuentes | Candidato a **Mode A** |
-| Existencia de `knowledge-base/` | Candidato a **Mode Update / Audit** |
-| Ausencia de ambos + presencia de código | Candidato a **Mode C** |
-| Ausencia de todo | Candidato a **Mode B** |
-| Conteo de archivos / LOC aproximado | Señal de **tamaño** → alimenta el umbral archivo↔carpeta y la pregunta demo-vs-grande |
+| Folder names (`pagos/`, `stock/`, `auth/`) | Candidate system domains |
+| Presence of `docs/` with sources | Candidate for **Mode A** |
+| Presence of `knowledge-base/` | Candidate for **Mode Update / Audit** |
+| Absence of both + code present | Candidate for **Mode C** |
+| Absence of everything | Candidate for **Mode B** |
+| File count / approximate LOC | **Size** signal → feeds the file↔folder threshold and the demo-vs-large question |
 
-**Salida de la Capa 0**: stack (estructurado por capa), dominios, modo propuesto, tamaño — todo **sin leer código fuente**.
-
----
-
-## Capa 1 — Confirmar + preguntar SOLO los huecos
-
-Mostrá lo detectado y pedí confirmación. Ejemplo:
-
-```
-Detecté: Next.js + Prisma + Postgres. Monorepo con módulos pagos/ y stock/.
-~18 entidades. No hay docs/ ni knowledge-base/. ¿Es correcto?
-```
-
-Luego hacé **únicamente** las preguntas que ningún archivo puede responder (conocimiento humano puro): **idioma de la KB** (Q-idioma — no se infiere del repo por el *espanglish*), intención, trayectoria, mantenimiento, frontera MVP, y el problema raíz. Todo lo que la Capa 0 ya resolvió (`system_type`, `scale`, `stack`, `domain`) se **confirma**, no se pregunta.
-
-El detalle de cada pregunta y su efecto por modo está en [`interview-guide.md`](interview-guide.md).
-
-> **No-invención**: confirmar una inferencia con el usuario NO es opcional para campos que afectan estructura (`system_type`, `scale`). Una inferencia sin confirmar que cambia la KB se marca como `**Suposición:**` y, si el usuario no está disponible, va a `10_preguntas_abiertas.md`.
+**Layer 0 output**: stack (structured by layer), domains, proposed mode, size — all **without reading source code**.
 
 ---
 
-## Capa 2 — Lectura profunda, acotada
+## Layer 1 — Confirm + ask ONLY the gaps
 
-Leer código fuente de verdad ocurre **únicamente en Mode C**, y solo de la **funcionalidad puntual** que el usuario pidió documentar, siguiendo el trazado acotado de [`reverse-documentation.md`](reverse-documentation.md). **Nunca** "leo todo para entender".
+Show what was detected and ask for confirmation. Example:
 
-Esto es lo que hace que documentar un proyecto gigante cueste casi lo mismo que uno chico: nunca lees el gigante entero, lees su huella barata (Capa 0) y después solo la rebanada que te piden (Capa 2).
+```
+Detected: Next.js + Prisma + Postgres. Monorepo with modules pagos/ and stock/.
+~18 entities. No docs/ or knowledge-base/. Is this correct?
+```
+
+Then ask **only** the questions no file can answer (pure human knowledge): **KB language** (Q-language — not inferred from the repo due to *Spanglish*), intent, trajectory, maintenance, MVP boundary, and the root problem. Everything Layer 0 already resolved (`system_type`, `scale`, `stack`, `domain`) is **confirmed**, not asked.
+
+The detail of each question and its effect per mode is in [`interview-guide.md`](interview-guide.md).
+
+> **Non-invention**: confirming an inference with the user is NOT optional for fields that affect structure (`system_type`, `scale`). An unconfirmed inference that changes the KB is marked as `**Assumption:**` and, if the user is unavailable, goes to `10_preguntas_abiertas.md`.
 
 ---
 
-## Resumen del embudo
+## Layer 2 — Deep, bounded reading
+
+Reading actual source code happens **only in Mode C**, and only for the **specific functionality** the user asked to document, following the bounded tracing from [`reverse-documentation.md`](reverse-documentation.md). **Never** "read everything to understand".
+
+This is what makes documenting a giant project cost nearly the same as a small one: you never read the giant in full, you read its cheap footprint (Layer 0) and then only the slice you're asked for (Layer 2).
+
+---
+
+## Funnel summary
 
 ```
-Capa 0 (manifests + estructura, gratis)
-   → Capa 1 (confirmar lo detectado + preguntar solo huecos humanos)
-      → Capa 2 (lectura profunda SOLO de la feature pedida, solo en Mode C)
+Layer 0 (manifests + structure, free)
+   → Layer 1 (confirm detected + ask only human gaps)
+      → Layer 2 (deep reading ONLY of the requested feature, only in Mode C)
 ```

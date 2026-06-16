@@ -1,178 +1,178 @@
-# Reverse Documentation — Mode C (read-only, por funcionalidad)
+# Reverse Documentation — Mode C (read-only, by functionality)
 
-Mode C documenta un **sistema ya construido que no tiene documentación**, leyendo el código en modo **read-only** y scopeando **por funcionalidad** (un corte vertical que cruza carpetas/lenguajes), no por módulo.
+Mode C documents a **system that already exists but has no documentation**, reading the code in **read-only** mode and scoping **by functionality** (a vertical slice that crosses folders/languages), not by module.
 
-> **Regla madre (no negociable)**: el código se LEE pero NUNCA se modifica. El código dice el **QUÉ**; el usuario dice el **PORQUÉ**; nada se inventa.
-
----
-
-## Por qué por funcionalidad y no por módulo
-
-Una funcionalidad es un **corte vertical**: el checkout no vive en `pagos/`, vive en `pagos/` + `stock/` + `users/` + `notifications/`. Documentar por módulo fragmenta la historia; documentar por funcionalidad sigue el flujo real. Además, mapea exacto a los nodos colección de la KB (04, 05, 06, 07), que ya están organizados por funcionalidad.
-
-> La organización por funcionalidad es un **lente conceptual**, no un espejo de las carpetas del código. Aunque el código sea un monolito desprolijo, la KB le impone el orden que el código todavía no tiene. No necesitás un código bien modularizado para documentarlo bien.
+> **Master rule (non-negotiable)**: the code is READ but NEVER modified. The code says the **WHAT**; the user says the **WHY**; nothing is invented.
 
 ---
 
-## Protocolo: preflight → anclaje → confirmación → trazado → merge
+## Why by functionality and not by module
 
-> Todo el trazado (búsqueda + lectura de rebanadas) corre en un **subagente aislado** (principio de economía de tokens, ver SKILL.md): la exploración cara ocurre afuera y devuelve un **mapa de traza** compacto. La sesión principal no se infla.
+A functionality is a **vertical slice**: checkout doesn't live in `pagos/`, it lives in `pagos/` + `stock/` + `users/` + `notifications/`. Documenting by module fragments the story; documenting by functionality follows the real flow. It also maps exactly to the collection nodes in the KB (04, 05, 06, 07), which are already organized by functionality.
 
-### Unidad de trabajo acotada (la disciplina no escala con el contexto)
+> Organization by functionality is a **conceptual lens**, not a mirror of code folders. Even if the code is a messy monolith, the KB imposes the order the code doesn't yet have. You don't need well-modularized code to document it well.
 
-La disciplina de citas se degrada en sesiones largas y contextos gigantes. La defensa es **mantener la unidad chica**: **una funcionalidad = una unidad de trabajo cerrada**.
+---
 
-- **Una feature por vez.** No encadenes cinco features en un run. Documentá una, **verificala** (el gate mecánico del cierre — `edge-cases.md` §Auto-chequeo), y recién entonces pasá a la siguiente. Contexto chico = menos drift.
-- **Parar antes que degradar.** Si la frontera de trazado agota el presupuesto antes de secarse, **PARÁ y reportá parcial** (qué quedó sin explorar). Nunca empujes a través de un trazado degradado para "terminar": un mapa incompleto declarado completo es peor que uno parcial declarado parcial.
-- **Verificar antes de seguir.** El merge de un slice no está "hecho" hasta que pasó el gate mecánico sobre ese slice. Una feature con citas rotas no se cierra ni se acumula a la siguiente.
+## Protocol: preflight → anchoring → confirmation → tracing → merge
 
-### 0. Preflight — capacidad de búsqueda
+> All tracing (search + reading slices) runs in an **isolated sub-agent** (token economy principle, see SKILL.md): the expensive exploration happens outside and returns a compact **trace map**. The main session stays lean.
 
-El trazado se apoya en **búsqueda rápida sobre el repo** (mapear por nombre sin leer cuerpos). Antes de trazar, asegurá la capacidad de búsqueda en este orden:
+### Bounded work unit (the discipline doesn't scale with context)
 
-1. **Herramienta de búsqueda nativa del agente** (ej. la tool `Grep` del runtime) — portable, sin instalación, agnóstica del SO. Si está, usala. **Es la opción preferida** y resuelve el caso Windows sin depender de nada instalado.
-2. Si hay que ir al shell: probá `rg` (ripgrep) → `git grep` (si es repo git) → `grep` (Unix) / `findstr` (Windows).
-3. **Si no hay NINGUNA**, no traces a ciegas. **Pará** y pedí instalar ripgrep con el comando del SO y el porqué:
+Citation discipline degrades in long sessions and giant contexts. The defense is **keeping the unit small**: **one functionality = one closed work unit**.
 
-| SO | Comando |
+- **One feature at a time.** Don't chain five features in a single run. Document one, **verify it** (the mechanical gate at close — `edge-cases.md` §Auto-check), then move to the next. Small context = less drift.
+- **Stop before degrading.** If the tracing frontier exhausts the budget before drying up, **STOP and report partial** (what was left unexplored). Never push through a degraded trace to "finish": an incomplete map declared complete is worse than a partial one declared partial.
+- **Verify before continuing.** A slice merge is not "done" until it passes the mechanical gate for that slice. A feature with broken citations is not closed or accumulated into the next one.
+
+### 0. Preflight — search capability
+
+Tracing relies on **fast search over the repo** (mapping by name without reading bodies). Before tracing, confirm search capability in this order:
+
+1. **Agent's native search tool** (e.g. the `Grep` tool in the runtime) — portable, no install, OS-agnostic. If available, use it. **This is the preferred option** and covers Windows without depending on anything installed.
+2. If you need the shell: try `rg` (ripgrep) → `git grep` (if it's a git repo) → `grep` (Unix) / `findstr` (Windows).
+3. **If none available**, don't trace blind. **Stop** and ask to install ripgrep with the OS command and the reason:
+
+| OS | Command |
 |---|---|
-| Windows | `winget install BurntSushi.ripgrep.MSVC` (o `scoop install ripgrep` / `choco install ripgrep`) |
+| Windows | `winget install BurntSushi.ripgrep.MSVC` (or `scoop install ripgrep` / `choco install ripgrep`) |
 | macOS | `brew install ripgrep` |
 | Debian/Ubuntu | `sudo apt install ripgrep` |
 | Fedora | `sudo dnf install ripgrep` |
 | Arch | `sudo pacman -S ripgrep` |
 
-> **Para qué se usa** (explicáselo al usuario): chronicle traza una funcionalidad **buscando nombres** (rutas, eventos, símbolos) en el código en vez de leer todo. La búsqueda rápida es lo que hace el trazado **barato y confiable**; sin ella, habría que leer archivos a ciegas — caro e incompleto.
+> **Why it's needed** (explain to the user): chronicle traces a functionality by **searching for names** (paths, events, symbols) in the code instead of reading everything. Fast search is what makes tracing **cheap and reliable**; without it, files would have to be read blindly — expensive and incomplete.
 
-> **Portabilidad Windows**: normalizá las rutas de las citas a `/` (forward slash) sin importar el SO, para que `[code · ruta#símbolo]` sea estable entre Windows y Unix.
+> **Windows portability**: normalize citation paths to `/` (forward slash) regardless of OS, so `[code · path#symbol]` is stable across Windows and Unix.
 
-### 1. Anclaje
-Del nombre de la funcionalidad ("el checkout"), extraé **términos semilla** (entidades, rutas, keywords del dominio) y localizá el **punto de entrada** con búsqueda read-only (un endpoint, una ruta, un controller, un service). No abras todavía medio repo: encontrá el hilo del que tirar.
+### 1. Anchoring
+From the functionality name ("the checkout"), extract **seed terms** (entities, paths, domain keywords) and locate the **entry point** with read-only search (an endpoint, a route, a controller, a service). Don't open half the repo yet: find the thread to pull.
 
-### 2. Confirmación (antes de trazar)
-Mostrá al usuario qué encontraste y confirmá el alcance **antes** de documentar:
+### 2. Confirmation (before tracing)
+Show the user what you found and confirm scope **before** documenting:
 
 ```
-Encontré "checkout" en:
-- src/api/checkout.controller.ts (entrada)
+Found "checkout" in:
+- src/api/checkout.controller.ts (entry point)
 - src/services/payment.service.ts
 - src/services/stock.service.ts
-¿Es esta la funcionalidad que querés documentar? (sí / ajustar / no)
+Is this the functionality you want to document? (yes / adjust / no)
 ```
 
-Esto evita documentar lo equivocado — riesgo real cuando el target viene en lenguaje natural.
+This avoids documenting the wrong thing — a real risk when the target is given in natural language.
 
-### 3. Trazado acotado (híbrido, loop-until-dry)
+### 3. Bounded tracing (hybrid, loop-until-dry)
 
-Estrategia **híbrida**: búsqueda-primero para mapear el territorio + seguir-llamadas dentro de los archivos ya confirmados. Una **frontera** que se expande hasta secarse, con tope de presupuesto.
+**Hybrid** strategy: search-first to map the territory + follow-calls within already-confirmed files. A **frontier** that expands until dry, with a budget cap.
 
-**El loop:**
-1. Frontera inicial = términos semilla + el punto de entrada confirmado.
-2. Por cada término sin explorar: **buscá** (no leas) sus ubicaciones en el repo.
-3. Confirmá relevancia (mismo dominio/feature). Leé **solo la rebanada** del símbolo confirmado y, dentro de ese archivo, seguí las llamadas directas relacionadas.
-4. Extraé términos nuevos del cuerpo: funciones llamadas, **eventos emitidos**, **colas/tópicos**, **claves de config**, interfaces. Agregalos a la frontera.
-5. Repetí hasta que la frontera **se seque** (no aparecen términos nuevos = punto fijo) **o** se agote el presupuesto.
-6. Si el budget cortó antes de secarse → reportá **trazado parcial** (qué quedó sin explorar). Nunca lo declares completo.
+**The loop:**
+1. Initial frontier = seed terms + the confirmed entry point.
+2. For each unexplored term: **search** (don't read) its locations in the repo.
+3. Confirm relevance (same domain/feature). Read **only the slice** of the confirmed symbol and, within that file, follow the directly related calls.
+4. Extract new terms from the body: called functions, **emitted events**, **queues/topics**, **config keys**, interfaces. Add them to the frontier.
+5. Repeat until the frontier **dries up** (no new terms appear = fixed point) **or** the budget is exhausted.
+6. If budget cut before dry → report **partial trace** (what was left unexplored). Never declare it complete.
 
-**Checklist de indirecciones** — lo que el seguimiento de llamadas se pierde; buscalo explícitamente **por nombre**:
+**Indirection checklist** — what call-following misses; search for it explicitly **by name**:
 
-| Indirección | Qué buscar |
+| Indirection | What to search for |
 |---|---|
-| Inyección de dependencias | el nombre de la interfaz **+** sus implementaciones |
-| Eventos / pub-sub | el nombre del evento, en **emisión Y suscripción** |
-| Colas / mensajería | el nombre de la cola/tópico, en **productor Y consumidor** |
-| Routing por config | la ruta/path en archivos de config (yaml/json/env) |
-| Dispatch dinámico / reflexión | el string del método/handler resuelto en runtime |
-| Middleware / decoradores | el decorador/middleware aplicado al handler |
+| Dependency injection | the interface name **+** its implementations |
+| Events / pub-sub | the event name, in **emission AND subscription** |
+| Queues / messaging | the queue/topic name, in **producer AND consumer** |
+| Config-based routing | the route/path in config files (yaml/json/env) |
+| Dynamic dispatch / reflection | the string of the method/handler resolved at runtime |
+| Middleware / decorators | the decorator/middleware applied to the handler |
 
-**Cross-language**: los enlaces entre servicios (REST, gRPC, cola) se cruzan buscando el **contrato compartido** — el path del endpoint o el nombre del mensaje — en ambos lados del límite.
+**Cross-language**: links between services (REST, gRPC, queue) are crossed by searching for the **shared contract** — the endpoint path or message name — on both sides of the boundary.
 
-**Regla de frontera**: cuando un símbolo encontrado pertenece claramente a **otra funcionalidad**, no lo expandas — cross-reference y seguí. La frontera se decide por **dominio**, no por distancia de llamada.
+**Frontier rule**: when a found symbol clearly belongs to **another functionality**, don't expand it — cross-reference and continue. The frontier is decided by **domain**, not call distance.
 
-**Salida — el mapa de traza (persistido)**: el subagente devuelve y **persiste** el mapa en `knowledge-base/.chronicle/trace-map.json`. Cada fila es una unidad citable:
+**Output — the trace map (persisted)**: the sub-agent returns and **persists** the map in `knowledge-base/.chronicle/trace-map.json`. Each row is a citable unit:
 
 ```json
 { "version": 1, "rows": [
-  { "id": "t1", "symbol": "validateCoupon", "role": "regla",
-    "file": "src/payments/rules.ts", "line": 42, "hash": "<fingerprint normalizado>" }
+  { "id": "t1", "symbol": "validateCoupon", "role": "rule",
+    "file": "src/payments/rules.ts", "line": 42, "hash": "<normalized fingerprint>" }
 ]}
 ```
 
-Más el estado del trazado (`completo` | `parcial`, con lo no explorado). El mapa es **tooling-owned**: lo escribe el subagente de trazado / el checker, **nunca el LLM a mano** (misma regla que el ledger, `checker-spec.md` §6).
+Plus the trace status (`complete` | `partial`, with what was left unexplored). The map is **tooling-owned**: written by the tracing sub-agent / the checker, **never by the LLM manually** (same rule as the ledger, `checker-spec.md` §6).
 
-> **El mapa de traza es la allowlist citable, y ahora MECÁNICA (foreign key).** Una cita `[code · ruta#símbolo]` es válida **solo si resuelve a una fila del mapa** con ese mismo `file#symbol`. Esto deja de ser disciplina: el checker (`checker-spec.md` §2.5) cuenta como **huérfana** toda cita que no resuelve a una fila → **defecto mecánico**, no "el modelo debería". Citar fuera del mapa era el peor defecto (autoridad fabricada); ahora es **atrapable sin LLM**. Lo no trazable se escribe `[inferred · inferido → 10]`.
+> **The trace map is the citable allowlist, and now MECHANICAL (foreign key).** A citation `[code · path#symbol]` is valid **only if it resolves to a map row** with that same `file#symbol`. This is no longer discipline: the checker (`checker-spec.md` §2.5) counts as **orphan** any citation that doesn't resolve to a row → **mechanical defect**, not "the model should". Citing outside the map was the worst defect (fabricated authority); now it's **catchable without an LLM**. What can't be traced is written as `[inferred · → 10]`.
 >
-> La cita se **renderiza legible** para humanos (`[code · src/payments/rules.ts#validateCoupon]`) — el formato no cambia —, pero queda **respaldada** por su fila del mapa. El `~Lnn` lo provee la búsqueda, **nunca lo tipea el modelo** (línea adivinada = señal de fabricación). El `hash` de la fila es el que usa staleness (`staleness.md`) para saber si la fuente cambió.
+> The citation **renders human-readable** (`[code · src/payments/rules.ts#validateCoupon]`) — the format doesn't change — but is **backed** by its map row. The `~Lnn` is provided by the search, **never typed by the model** (guessed line number = fabrication signal). The row's `hash` is what staleness (`staleness.md`) uses to detect whether the source changed.
 
-### 4. Merge (corte vertical, no destructivo)
+### 4. Merge (vertical slice, non-destructive)
 
-> **El que escribe ve SOLO el mapa, no el repo (prevención estructural).** El merge corre en un **subagente escritor separado** cuyo contexto es **únicamente** el mapa de traza + los templates (`node-templates.md`) + las rutas de los nodos destino. **No tiene acceso al código fuente.** Por construcción **no puede fabricar** una cita a un símbolo de afuera del mapa: no tiene de dónde inventar un path plausible, y el único universo citable son las filas del mapa. La fabricación deja de depender de la disciplina del modelo y pasa a ser **imposible por contexto**. (El trazado lee el repo; la escritura no — separación deliberada.)
+> **The writer sees ONLY the map, not the repo (structural prevention).** The merge runs in a **separate writer sub-agent** whose context is **exclusively** the trace map + the templates (`node-templates.md`) + the paths of the destination nodes. **It has no access to the source code.** By construction **it cannot fabricate** a citation to a symbol outside the map: it has nowhere to invent a plausible path from, and the only citable universe is the map rows. Fabrication stops depending on model discipline and becomes **impossible by context**. (Tracing reads the repo; writing does not — deliberate separation.)
 
-Documentar una funcionalidad es una **actualización quirúrgica de varios nodos a la vez**, nunca una regeneración total:
+Documenting a functionality is a **surgical update to several nodes at once**, never a full regeneration:
 
-| Nodo | Qué se escribe para la feature |
+| Node | What gets written for the feature |
 |---|---|
-| 04 modelos-apis | entidades y contratos que la feature toca (`modelos/pago.md`, `contratos-api/pagos.md`) |
-| 05 reglas-de-negocio | reglas detectadas en el código (`pagos.md` → `RN-PAGOS-NN`) |
-| 06 funcionalidades | la historia de usuario / épica (`pagos.md` → `US-NNN`) |
-| 07 flujos-principales | el flujo extremo a extremo (`pagos-checkout.md`) |
+| 04 modelos-apis | entities and contracts the feature touches (`modelos/pago.md`, `contratos-api/pagos.md`) |
+| 05 reglas-de-negocio | rules detected in the code (`pagos.md` → `RN-PAGOS-NN`) |
+| 06 funcionalidades | the user story / epic (`pagos.md` → `US-NNN`) |
+| 07 flujos-principales | the end-to-end flow (`pagos-checkout.md`) |
 
-Si el nodo es archivo (sistema chico) se mergea en el archivo; si es carpeta, se escribe el archivo de la unidad. Merge no destructivo: respetá lo que ya está, completá, marcá lo cambiado.
+If the node is a file (small system) it gets merged into the file; if it's a folder, the unit file gets written. Non-destructive merge: respect what's already there, complete it, mark what changed.
 
-> **Cita obligatoria al escribir (Mode C es el caso central de procedencia).** Cada afirmación que escribas lleva su cita `[code · ruta#símbolo ~Lnn]` apuntando al lugar exacto del que la derivaste — el **símbolo** que estás leyendo en ese momento es el ancla, y **debe estar en el mapa de traza** (ver §3 — la allowlist). Para flujos (07), una cita por paso. Lo que no puedas anclar a un símbolo del mapa **no se escribe como hecho**: `[inferred · inferido → 10]`. El `~Lnn` sale de la búsqueda, no de tu memoria. Ver `provenance.md`.
+> **Mandatory citation when writing (Mode C is the central provenance case).** Every statement you write carries its citation `[code · path#symbol ~Lnn]` pointing to the exact place it was derived from — the **symbol** you are reading at that moment is the anchor, and **it must be in the trace map** (see §3 — the allowlist). For flows (07), one citation per step. What you cannot anchor to a symbol in the map **is not written as fact**: `[inferred · → 10]`. The `~Lnn` comes from the search, not from memory. See `provenance.md`.
 
 ---
 
-## Tests como fuente (la mejor para reglas)
+## Tests as source (the best source for rules)
 
-Un test es la fuente **más fuerte** de reglas de negocio: la implementación te dice qué hace el código (bugs incluidos), el test te dice qué **debería** hacer (el contrato). El nombre del test suele ser la regla en castellano y la aserción es un ejemplo concreto.
+A test is the **strongest** source for business rules: the implementation tells you what the code does (bugs included), the test tells you what it **should** do (the contract). The test name is usually the rule in plain language and the assertion is a concrete example.
 
-- **Durante el trazado**, buscá también los tests de la feature por convención: `*.test.*`, `*.spec.*`, `*_test.*`, `test/`, `tests/`, `__tests__/`, `spec/`.
-- **Una regla derivada de un test cita el test**: `[code · tests/payments.test.ts#"no aplica cupón dos veces"]`. Mismo formato de procedencia, evidencia más fuerte.
-- El test **rellena parte del PORQUÉ sin inventar** — el nombre codifica intención.
+- **During tracing**, also search for the feature's tests by convention: `*.test.*`, `*.spec.*`, `*_test.*`, `test/`, `tests/`, `__tests__/`, `spec/`.
+- **A rule derived from a test cites the test**: `[code · tests/payments.test.ts#"no aplica cupón dos veces"]`. Same provenance format, stronger evidence.
+- The test **fills in part of the WHY without inventing** — the name encodes intent.
 
-### Si no hay tests (manejar todos los casos)
+### If there are no tests (handle all cases)
 
-| Caso | Qué hace |
+| Case | What to do |
 |---|---|
-| Hay tests de la feature | Fuente **primaria**; la regla cita el test. |
-| **No hay tests** (el proyecto no tiene) | Deriva de la implementación, pero marca la regla **`⚠ sin test`** (documenta *lo que hace*, no *lo que debería*). |
-| Hay tests, pero no de esta feature | impl-only para esta feature, marcada `⚠ sin test`. |
-| Tests triviales / solo smoke | Evidencia **débil**: no afirmes intención que el test no prueba. |
+| Feature has tests | **Primary** source; the rule cites the test. |
+| **No tests** (project has none) | Derive from the implementation, but mark the rule **`⚠ no test`** (documents *what it does*, not *what it should*). |
+| Tests exist, but not for this feature | impl-only for this feature, marked `⚠ no test`. |
+| Trivial / smoke tests only | **Weak** evidence: don't assert intent the test doesn't prove. |
 
-El marcador **`⚠ sin test`** vive pegado a la regla y **se auto-limpia**: cuando se agrega el test, el próximo Update se lo saca. La métrica agregada (cuántas reglas tienen test) la reporta el Audit on-demand (ver `quality-rubric.md`). **No** se crea un archivo de "huecos de test" — se desincronizaría, justo lo que la skill combate.
+The **`⚠ no test`** marker lives next to the rule and **self-clears**: when the test is added, the next Update removes it. The aggregate metric (how many rules have tests) is reported by Audit on-demand (see `quality-rubric.md`). A "test gap" file is **not** created — it would desync, which is exactly what the skill fights against.
 
 ---
 
-## Extraer, no narrar (donde hay fuente estructurada)
+## Extract, don't narrate (where there's a structured source)
 
-Donde existe una fuente **estructurada y determinista**, no la narres de memoria: **extraela**. El LLM narrando entidades de cabeza puede driftear; una extracción mecánica de la fuente no. Esto achica la superficie de fabricación (es el flanco "achicar la superficie" del gap #5) y de paso ahorra tokens. La narración del LLM se reserva para el **PORQUÉ**, que la fuente estructurada no tiene.
+Where a **structured and deterministic** source exists, don't narrate it from memory: **extract it**. The LLM narrating entities from scratch can drift; a mechanical extraction from the source cannot. This shrinks the fabrication surface (it's the "shrink the surface" angle of gap #5) and saves tokens. LLM narration is reserved for the **WHY**, which the structured source doesn't have.
 
-| Fuente estructurada | Extraé (mecánico) → nodo | El LLM agrega (el PORQUÉ) |
+| Structured source | Extract (mechanical) → node | LLM adds (the WHY) |
 |---|---|---|
-| `prisma/schema.prisma`, migraciones, `*.sql` | entidades, campos, relaciones → **04** | el porqué del modelado, invariantes no obvias |
-| `openapi.*` / `swagger.*` | endpoints, request/response → **04** contratos | reglas de negocio detrás del contrato |
-| router / archivo de rutas | paths + handlers → **04/07** | el flujo y su intención |
-| `.env.example` / config | env vars, flags → **08** | qué es sensible y por qué existe |
+| `prisma/schema.prisma`, migrations, `*.sql` | entities, fields, relations → **04** | the why behind the modeling, non-obvious invariants |
+| `openapi.*` / `swagger.*` | endpoints, request/response → **04** contracts | business rules behind the contract |
+| router / routes file | paths + handlers → **04/07** | the flow and its intent |
+| `.env.example` / config | env vars, flags → **08** | what's sensitive and why it exists |
 
-Lo extraído **igual lleva cita** (`[code · prisma/schema.prisma#Model]`) — es procedencia **más fuerte**, porque salió de leer la fuente, no de la memoria — y entra al **mapa de traza** como cualquier símbolo (es citable, §3). El PORQUÉ que no esté en la fuente va a `09`/`10`, **nunca inventado**.
-
----
-
-## El QUÉ vs el PORQUÉ (no-invención)
-
-El código te da el **QUÉ**: qué entidades hay, qué rutas existen, qué validaciones corren. No te da el **PORQUÉ**: por qué ese `if` valida dos veces el cupón, por qué esa decisión de diseño.
-
-- ¿Pregunta respondible por el usuario? → preguntala; la respuesta va a `09_decisiones` (decisión documentada).
-- ¿No hay respuesta o el usuario no está? → va a `10_preguntas_abiertas.md` como duda.
-- **Suposiciones**: si inferís intención del código, marcala con `**Suposición:**` y registrala en `09` (con origen y cómo validarla). **Nunca** la escribas como hecho.
+What's extracted **still carries a citation** (`[code · prisma/schema.prisma#Model]`) — it's **stronger** provenance, because it came from reading the source, not from memory — and it enters the **trace map** like any symbol (it's citable, §3). The WHY that isn't in the source goes to `09`/`10`, **never invented**.
 
 ---
 
-## Escalado en Mode C (notario, no consultor)
+## The WHAT vs the WHY (non-invention)
 
-Documentando código existente sos **notario**: registrás la realidad. Si detectás un techo de escalado (estado en memoria, N+1, sin colas/caché), **no rediseñás** — lo registrás:
-- como **riesgo** en `09` o **pregunta** en `10` (ej: "estado en memoria → bloquea escalado horizontal, ¿se va a multi-instancia?"),
-- **nunca** en `08` como si la solución ya estuviera implementada.
+The code gives you the **WHAT**: what entities exist, what routes exist, what validations run. It doesn't give you the **WHY**: why that `if` validates the coupon twice, why that design decision was made.
 
-Solo cuando `trajectory = semilla | produccion` se activa el **checklist de escalado** que dispara estas preguntas/riesgos. Una demo descartable no los genera.
+- Question answerable by the user? → ask it; the answer goes to `09_decisiones` (documented decision).
+- No answer or user unavailable? → goes to `10_preguntas_abiertas.md` as an open question.
+- **Assumptions**: if you infer intent from the code, mark it with `**Assumption:**` and record it in `09` (with origin and how to validate it). **Never** write it as fact.
+
+---
+
+## Scaling in Mode C (notary, not consultant)
+
+When documenting existing code you are a **notary**: you record reality. If you detect a scaling ceiling (in-memory state, N+1, no queues/cache), **you don't redesign** — you record it:
+- as a **risk** in `09` or a **question** in `10` (e.g.: "in-memory state → blocks horizontal scaling, is multi-instance planned?"),
+- **never** in `08` as if the solution were already implemented.
+
+The **scaling checklist** that triggers these questions/risks is only activated when `trajectory = seed | production`. A throwaway demo doesn't generate them.

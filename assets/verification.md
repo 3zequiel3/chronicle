@@ -1,94 +1,94 @@
-# Verification — correctitud contra la fuente (Audit profundo, on-demand)
+# Verification — correctness against the source (deep Audit, on-demand)
 
-Verifica que la documentación **coincida con la realidad**, no solo consigo misma. Toma cada afirmación con cita `code`/`doc`, vuelve a la fuente citada, y dictamina si la afirmación se sostiene.
+Verifies that the documentation **matches reality**, not just itself. Takes each `code`/`doc`-cited claim, returns to the cited source, and rules on whether the claim holds.
 
-> Consistencia = la doc concuerda consigo misma. Completitud = tiene todas sus partes. **Correctitud = concuerda con la fuente.** Esto último es lo que verifica este pase.
+> Consistency = the doc agrees with itself. Completeness = it has all its parts. **Correctness = it agrees with the source.** The latter is what this pass verifies.
 
-Es una **profundidad opcional del Mode Audit**, no un modo nuevo. Lee código en modo **read-only** (consistente con la regla madre: leer sí, modificar nunca).
-
----
-
-## Economía de tokens (principio de diseño, no opcional)
-
-Verificar es lo que más fácil funde una sesión. Por eso el pase está acotado por diseño:
-
-1. **On-demand** — corre solo cuando el usuario (o CI) lo pide. La generación nunca verifica contra código; solo auto-chequea la forma.
-2. **Subagente aislado** — toda la lectura cara ocurre en un subagente con contexto propio que devuelve **solo veredictos compactos**. La sesión principal no se infla.
-3. **Agrupar por fuente** — las citas se agrupan por `archivo#símbolo`; cada fuente se lee **una vez** y se verifican todas sus afirmaciones juntas.
-4. **Leer la rebanada, no el archivo** — el ancla apunta a un símbolo; se lee esa función/región, no el archivo entero.
-5. **Acotado por presupuesto y priorizado por riesgo** — verifica lo importante primero, corta al llegar al budget, y **reporta cobertura**. Nunca finge haber verificado todo.
+This is an **optional depth of Mode Audit**, not a new mode. It reads code in **read-only** mode (consistent with the master rule: reading yes, modifying never).
 
 ---
 
-## Mecánico primero, semántico después (división de trabajo)
+## Token economy (design principle, not optional)
 
-La verificación tiene dos partes con costos y naturalezas distintas — **no las mezcles**:
+Verification is what most easily burns a session. The pass is bounded by design:
 
-- **Lo mecánico lo resuelve el checker** (`checker-spec.md`), determinista y sin tokens: ¿el símbolo citado **existe**? ¿su fingerprint **cambió** desde el ledger? Eso es un oráculo independiente, no opinión del modelo.
-- **Lo semántico lo resuelve el LLM**, y **solo eso**: ¿la afirmación **coincide** con lo que el símbolo realmente hace? Es la única parte irreducible a regex.
-
-El staleness (barato, mecánico) filtra qué llega al LLM: no re-verificás semánticamente lo que no cambió. Lo barato acota lo caro.
+1. **On-demand** — runs only when the user (or CI) requests it. Generation never verifies against code; it only auto-checks form.
+2. **Isolated sub-agent** — all expensive reading happens in a sub-agent with its own context that returns **only compact verdicts**. The main session does not inflate.
+3. **Group by source** — citations are grouped by `file#symbol`; each source is read **once** and all its claims verified together.
+4. **Read the slice, not the file** — the anchor points to a symbol; that function/region is read, not the whole file.
+5. **Budget-bounded and risk-prioritized** — verifies the important claims first, stops at budget, and **reports coverage**. Never pretends to have verified everything.
 
 ---
 
-## El pase, paso a paso
+## Mechanical first, semantic after (division of labor)
 
-1. **Recolectar** las citas `code`/`doc` del scope (toda la KB, un nodo, o una funcionalidad). Las `user`/`inferred` **no se verifican** — no hay fuente factual contra qué chequear.
-2. **Filtro mecánico** — el checker resuelve existencia + cambio de fingerprint contra el ledger. Lo que existe y **no cambió** se reusa (veredicto cacheado); lo que desapareció ya queda marcado sin gastar LLM. Solo lo **cambiado o nunca verificado** pasa al juicio semántico.
-3. **Agrupar** las afirmaciones pendientes por archivo (cada fuente se lee una vez).
-4. **Priorizar** por riesgo: `RN` (reglas de negocio) → entidades/contratos (`04`) → flujos (`07`) → resto.
-5. **Despachar al subagente para REFUTAR, no para confirmar.** El batch lleva `(afirmación, cita, ruta#símbolo)` y la instrucción: *"buscá evidencia de que la doc está MAL. Si no podés sostenerla con la fuente, el veredicto es `contradicted`/`unsupported`. Ante la duda, NO la confirmes."* El framing de refutación atrapa más que el de confirmación, al mismo costo. **Preferí el test como fuente**: si la afirmación tiene una cita a un test, verificá contra la aserción del test (el contrato), no contra la implementación. El subagente lee read-only solo esos símbolos y devuelve veredictos.
-6. **Cortar** al agotar el presupuesto; lo no alcanzado queda `unverified` (reportado, no oculto).
-7. **Persistir y reportar.** Los veredictos se escriben al ledger **a través del checker** (ver §propiedad del ledger), nunca editando el JSON a mano. Reportá cobertura.
+Verification has two parts with different costs and natures — **do not mix them**:
 
-### Veredictos
+- **The mechanical part is handled by the checker** (`checker-spec.md`), deterministic and token-free: does the cited symbol **exist**? did its fingerprint **change** since the ledger? That is an independent oracle, not a model opinion.
+- **The semantic part is handled by the LLM**, and **only that**: does the claim **match** what the symbol actually does? That is the only part irreducible to regex.
 
-| Veredicto | Significa | Acción |
+Staleness (cheap, mechanical) filters what reaches the LLM: you don't re-verify semantically what hasn't changed. The cheap bounds the expensive.
+
+---
+
+## The pass, step by step
+
+1. **Collect** the `code`/`doc` citations within scope (the whole KB, a node, or a feature). `user`/`inferred` citations **are not verified** — there is no factual source to check against.
+2. **Mechanical filter** — the checker resolves existence + fingerprint change against the ledger. What exists and **hasn't changed** is reused (cached verdict); what has disappeared is already flagged without spending LLM tokens. Only **changed or never-verified** items proceed to semantic judgment.
+3. **Group** pending claims by file (each source is read once).
+4. **Prioritize** by risk: `RN` (business rules) → entities/contracts (`04`) → flows (`07`) → rest.
+5. **Dispatch to the sub-agent to REFUTE, not to confirm.** The batch carries `(claim, citation, path#symbol)` with the instruction: *"find evidence that the doc is WRONG. If you cannot support it with the source, the verdict is `contradicted`/`unsupported`. When in doubt, do NOT confirm it."* The refutation framing catches more than the confirmation framing at the same cost. **Prefer the test as source**: if the claim cites a test, verify against the test assertion (the contract), not against the implementation. The sub-agent reads only those symbols in read-only and returns verdicts.
+6. **Stop** when the budget is exhausted; anything not reached stays `unverified` (reported, not hidden).
+7. **Persist and report.** Verdicts are written to the ledger **through the checker** (see §ledger ownership), never by hand-editing the JSON. Report coverage.
+
+### Verdicts
+
+| Verdict | Meaning | Action |
 |---|---|---|
-| `confirmed` | el código/doc sostiene la afirmación | nada |
-| `contradicted` | la fuente dice otra cosa | registrar en `10` + marcar el ítem |
-| `unsupported` | la cita no alcanza para sostenerla | revisar la cita o la afirmación |
-| `unverified` | no se llegó (budget/sin fuente accesible) | reportado en cobertura |
+| `confirmed` | the code/doc supports the claim | nothing |
+| `contradicted` | the source says something else | log in `10` + flag the item |
+| `unsupported` | the citation is insufficient to support it | review the citation or the claim |
+| `unverified` | not reached (budget/source not accessible) | reported in coverage |
 
-### Verificación reforzada (multi-juez, opcional — para alto riesgo)
+### Reinforced verification (multi-judge, optional — for high risk)
 
-Un solo subagente juzgando "¿coincide?" es la misma familia de modelo con los mismos puntos ciegos. Para las afirmaciones de **mayor riesgo** (las `RN` de negocio, o las que el usuario marque críticas), reforzá con **2-3 jueces independientes**, cada uno con el framing de refutación y **sin ver el veredicto de los otros**:
+A single sub-agent judging "does it match?" is the same model family with the same blind spots. For **higher-risk claims** (business `RN` rules, or those the user marks critical), reinforce with **2-3 independent judges**, each using the refutation framing and **without seeing the others' verdicts**:
 
-- La afirmación **se sostiene solo si la mayoría la confirma**. Un solo `contradicted` la baja a **sospechosa** (→ `10`), no la confirma.
-- Para diversificar (no redundar), dales **lentes distintas** cuando aplique: uno chequea contra el **test**, otro contra la **implementación**, otro contra el **contrato/uso**. Lentes diferentes atrapan fallas que tres jueces idénticos no.
+- A claim **holds only if the majority confirms it**. A single `contradicted` downgrades it to **suspect** (→ `10`), it does not confirm it.
+- To diversify (not redundate), give them **different lenses** when applicable: one checks against the **test**, another against the **implementation**, another against the **contract/usage**. Different lenses catch failures that three identical judges miss.
 
-Es **opt-in y acotado por presupuesto** (token economy): se reserva para el alto riesgo, no para toda la KB. El default es juez único; el multi-juez se pide ("verificá reforzado") o se dispara solo sobre las `RN` cuando hay budget. Reportá cuántos jueces votaron por afirmación.
+It is **opt-in and budget-bounded** (token economy): reserved for high risk, not the whole KB. The default is single judge; multi-judge is requested ("verify reinforced") or triggered automatically on `RN` items when budget allows. Report how many judges voted per claim.
 
-### Auditoría post-generación (muestra adversarial, fresh-context)
+### Post-generation audit (adversarial sample, fresh-context)
 
-Es el complemento **semántico barato** del gate mecánico del cierre (`edge-cases.md` §Auto-chequeo). El gate mecánico ve si la cita **existe y resuelve** (forma); esta auditoría ve si el **contenido** de la afirmación coincide con la fuente — la falla que el grep no puede ver.
+This is the cheap **semantic complement** to the close-gate mechanical check (`edge-cases.md` §Auto-check). The mechanical gate checks whether the citation **exists and resolves** (form); this audit checks whether the **content** of the claim matches the source — the failure grep cannot see.
 
-- **Disparo**: al cerrar un modo generador (opcional), o cuando el usuario pide "auditá lo que generaste".
-- **Fresh-context**: la corre un subagente **sin memoria de haber generado**. Ojos frescos atrapan el drift que el autor no ve en sí mismo (es `requesting-code-review` aplicado al propio output).
-- **Muestra, no todo**: N afirmaciones de alto riesgo (`RN` primero), acotada por presupuesto. No es el pase exhaustivo — es un **spot-audit** barato y temprano.
-- **Adversarial**: mismo framing de refutación ("buscá evidencia de que está MAL").
-- **Reporta, NO bloquea**: es nivel LLM (cuesta tokens, no determinista) → **nunca** es gate bloqueante (regla de `automation.md`). El que bloquea es el gate mecánico; esto registra hallazgos en el `10`. Si encuentra contradicciones, el usuario decide correr el pase completo o pasar a Mode Update.
+- **Trigger**: when closing a generator mode (optional), or when the user asks "audit what you generated".
+- **Fresh-context**: run by a sub-agent **with no memory of having generated**. Fresh eyes catch the drift that the author cannot see in their own output (this is `requesting-code-review` applied to one's own output).
+- **Sample, not exhaustive**: N high-risk claims (`RN` first), bounded by budget. Not the full pass — a cheap, early **spot-audit**.
+- **Adversarial**: same refutation framing ("find evidence it is WRONG").
+- **Reports, does NOT block**: this is LLM-level (costs tokens, non-deterministic) → **never** a blocking gate (rule from `automation.md`). The blocking gate is the mechanical one; this logs findings in `10`. If contradictions are found, the user decides whether to run the full pass or move to Mode Update.
 
 ---
 
-## El ledger (mecanismo compartido con #5)
+## The ledger (shared mechanism with #5)
 
-Se persiste en `knowledge-base/.chronicle/verification.json`. Markdown limpio; estado de tooling aparte.
+Persisted at `knowledge-base/.chronicle/verification.json`. Clean Markdown; tooling state kept separate.
 
-> **Propiedad del ledger (regla dura).** El `verification.json` lo escribe **solo el checker mecánico** (`checker-spec.md` §6). El LLM **nunca lo edita a mano** — solo lo lee para decidir qué re-verificar. El estado de tooling es responsabilidad del tooling; mantenerlo en lenguaje natural deriva.
+> **Ledger ownership (hard rule).** `verification.json` is written **only by the mechanical checker** (`checker-spec.md` §6). The LLM **never edits it by hand** — it only reads it to decide what to re-verify. Tooling state is the tooling's responsibility; keeping it in natural language drifts.
 
 ```json
 {
   "version": 1,
   "verified_at": "<timestamp>",
-  "ref": "<git commit en el que se fingerprinteó, si hay git>",
+  "ref": "<git commit at fingerprint time, if git is available>",
   "coverage": { "verified": 40, "total": 120, "unverified": 80 },
   "claims": [
     {
       "id": "RN-PAGOS-01",
       "node": "05_reglas-de-negocio/pagos.md",
       "citation": "code · src/payments/rules.ts#validateCoupon",
-      "fingerprint": "<digest del cuerpo del símbolo citado>",
+      "fingerprint": "<digest of the cited symbol's body>",
       "verdict": "confirmed",
       "note": ""
     }
@@ -96,36 +96,36 @@ Se persiste en `knowledge-base/.chronicle/verification.json`. Markdown limpio; e
 }
 ```
 
-**El `fingerprint`** es un hash del cuerpo del símbolo citado, **normalizado** — espacios, formato y comentarios colapsados — de modo que un reformateo o un comentario nuevo **no** cuentan como cambio (solo el cambio real de lógica). Se calcula con la herramienta de hashing disponible (`sha256sum`/`shasum` u otra); sin hashing, una firma estructural normalizada como fallback. El campo `ref` guarda el commit git de la corrida (si hay git), que la #5 usa de línea base. Es el backbone que comparten dos features:
+**The `fingerprint`** is a hash of the cited symbol's body, **normalized** — spaces, formatting, and comments collapsed — so a reformat or a new comment does **not** count as a change (only real logic changes do). Calculated with the available hashing tool (`sha256sum`/`shasum` or equivalent); without hashing, a normalized structural signature as fallback. The `ref` field stores the git commit of the run (if git is available), used by #5 as baseline. This is the backbone shared by two features:
 
-- **#3 (este pase)** lo usa para **saltar** afirmaciones cuya fuente no cambió.
-- **#5 (staleness)** lo compara contra el fingerprint actual: si difiere, la fuente cambió y la afirmación queda **sospechosa**.
+- **#3 (this pass)** uses it to **skip** claims whose source has not changed.
+- **#5 (staleness)** compares it against the current fingerprint: if it differs, the source changed and the claim becomes **suspect**.
 
-Diseñar el fingerprint una sola vez es lo que hace que la #5 se enchufe sin rediseño.
+Designing the fingerprint once is what lets #5 plug in without redesign.
 
 ---
 
-## Casos borde
+## Edge cases
 
-| Caso | Qué hacer |
+| Case | What to do |
 |---|---|
-| La fuente citada ya no existe (símbolo borrado) | `contradicted`/`unsupported` + nota; la #5 lo tomará como stale. |
-| Afirmación con varias citas | se sostiene si **todas** sus fuentes la confirman; si una contradice, `contradicted`. |
-| Cita `doc` (Mode A) | se verifica contra el documento fuente, igual que `code` contra código. |
-| Sin presupuesto para todo | priorizá por riesgo y reportá `unverified` honestamente; nunca marques verde lo no verificado. |
-| El usuario no tiene acceso al código (solo docs) | se verifican las `doc`; las `code` quedan `unverified`. |
+| The cited source no longer exists (symbol deleted) | `contradicted`/`unsupported` + note; #5 will treat it as stale. |
+| Claim with multiple citations | holds only if **all** its sources confirm it; if one contradicts, `contradicted`. |
+| `doc` citation (Mode A) | verified against the source document, just as `code` against code. |
+| No budget for everything | prioritize by risk and honestly report `unverified`; never mark green what was not verified. |
+| User has no code access (docs only) | `doc` citations are verified; `code` citations stay `unverified`. |
 
 ---
 
-## Salida
+## Output
 
-El Mode Audit incorpora una sección de correctitud al reporte (ver `quality-rubric.md`):
+Mode Audit adds a correctness section to the report (see `quality-rubric.md`):
 
 ```markdown
-## Correctitud (verificación profunda)
-- Cobertura: 40/120 afirmaciones verificadas (budget agotado).
-- ✅ 37 confirmadas · ❌ 2 contradichas · ⚠️ 1 no soportada.
-- ❌ RN-PAGOS-07 contradicha: el código no reintenta de forma idempotente → 10.
+## Correctness (deep verification)
+- Coverage: 40/120 claims verified (budget exhausted).
+- ✅ 37 confirmed · ❌ 2 contradicted · ⚠️ 1 unsupported.
+- ❌ RN-PAGOS-07 contradicted: the code does not retry idempotently → 10.
 ```
 
-El pase **no modifica la KB** por sí mismo; las contradicciones se registran en `10` y el usuario decide pasar a Mode Update.
+The pass **does not modify the KB** by itself; contradictions are logged in `10` and the user decides whether to move to Mode Update.

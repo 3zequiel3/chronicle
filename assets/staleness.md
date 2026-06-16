@@ -1,80 +1,80 @@
-# Staleness — ¿la doc envejeció? (chequeo barato, on-demand)
+# Staleness — did the doc go stale? (cheap check, on-demand)
 
-Detecta cuándo la documentación quedó vieja respecto al código, comparando el fingerprint **actual** de cada fuente citada contra el guardado en el ledger (`verification.json`). Sin esto, la doc miente en silencio cuando el código cambia.
+Detects when documentation has gone stale relative to the code, by comparing the **current** fingerprint of each cited source against the one stored in the ledger (`verification.json`). Without this, the doc silently lies when code changes.
 
-> **Staleness ≠ verificación.** Staleness pregunta *"¿la fuente cambió?"* — comparación **mecánica** de fingerprints, barata. La verificación (#3) pregunta *"¿la afirmación sigue coincidiendo?"* — juicio, cara. **El staleness es el filtro barato que le dice a la #3 qué re-verificar.**
+> **Staleness ≠ verification.** Staleness asks *"did the source change?"* — a **mechanical** fingerprint comparison, cheap. Verification (#3) asks *"does the claim still match?"* — judgment, expensive. **Staleness is the cheap filter that tells #3 what to re-verify.**
 
-Read-only, on-demand, en **subagente aislado** (principio token-economy). Reusa el ledger, el fingerprint **normalizado** y la búsqueda-primero ya construidos — no rediseña nada.
+Read-only, on-demand, in an **isolated sub-agent** (token-economy principle). Reuses the already-built ledger, **normalized** fingerprint, and search-first approach — no redesign needed.
 
 ---
 
-## El pase
+## The pass
 
-1. **Git fast-path** (si hay git, ver abajo) → la lista de citas candidatas (las que apuntan a archivos cambiados). Sin git → todas las citas `code`, acotado por presupuesto.
-2. Por cada cita candidata: re-localizá el símbolo (búsqueda-primero), re-calculá el **fingerprint normalizado**, compará con el del ledger.
-3. **Clasificá:**
+1. **Git fast-path** (if git is available, see below) → the list of candidate citations (those pointing to changed files). Without git → all `code` citations, bounded by budget.
+2. For each candidate citation: re-locate the symbol (search-first), re-compute the **normalized fingerprint**, compare against the ledger.
+3. **Classify:**
 
-| Resultado | Significa | Acción |
+| Result | Meaning | Action |
 |---|---|---|
-| igual | la afirmación sigue fresca | nada |
-| distinto | el símbolo cambió | **stale** → marcar sospechosa |
-| desaparecido | símbolo borrado/renombrado | **huérfana** → marcar |
-| movido | el símbolo existe en otro lado | refrescar el ancla (`~Lnn`/archivo) + revisar |
+| equal | the claim is still fresh | nothing |
+| different | the symbol changed | **stale** → mark as suspect |
+| gone | symbol deleted/renamed | **orphan** → flag |
+| moved | symbol exists elsewhere | refresh the anchor (`~Lnn`/file) + review |
 
-4. **Actualizá el ledger** (estado + nuevo fingerprint/`ref`) y **reportá**. La escritura del `verification.json` la hace el **checker mecánico**, nunca el LLM a mano (regla de propiedad del ledger — ver `checker-spec.md` §6 y `verification.md`).
-
----
-
-## Git fast-path (la optimización que la hace viable correr seguido)
-
-El ledger guarda el `ref` (commit) de la última corrida. Con git:
-
-```
-git diff <ref> --name-only        # archivos cambiados desde la línea base, incluye sin commitear
-```
-
-Solo las citas que apuntan a **esos archivos** son candidatas; el resto se presume fresco. De re-fingerprintear 200 símbolos pasás a los ~5 archivos que se tocaron. **Por eso es barato hasta para correr por commit en CI** (#6).
-
-> `git diff <ref>` (sin `..HEAD`) compara la línea base contra el **working tree**, así que **también capta cambios sin commitear**. Eso resuelve el agujero que tendría un fingerprint puramente git-based.
-
-**Sin git**: re-fingerprinteá todas las citas `code`, priorizado por riesgo y acotado por presupuesto; reportá cobertura. Más caro, pero correcto.
+4. **Update the ledger** (status + new fingerprint/`ref`) and **report**. Writing to `verification.json` is done by the **mechanical checker**, never by the LLM directly (ledger ownership rule — see `checker-spec.md` §6 and `verification.md`).
 
 ---
 
-## Qué produce (no auto-arregla)
+## Git fast-path (the optimization that makes frequent runs viable)
 
-Read-only + no destructivo: **marca, no reescribe.**
+The ledger stores the `ref` (commit) of the last run. With git:
+
+```
+git diff <ref> --name-only        # files changed since the baseline, includes uncommitted changes
+```
+
+Only citations pointing to **those files** are candidates; the rest are presumed fresh. Instead of re-fingerprinting 200 symbols you process ~5 touched files. **That is why it is cheap enough to run per-commit in CI** (#6).
+
+> `git diff <ref>` (without `..HEAD`) compares the baseline against the **working tree**, so it **also catches uncommitted changes**. This closes the gap that a purely git-based fingerprint would have.
+
+**Without git**: re-fingerprint all `code` citations, prioritized by risk and bounded by budget; report coverage. More expensive, but correct.
+
+---
+
+## What it produces (no auto-fix)
+
+Read-only + non-destructive: **flags, does not rewrite.**
 
 ```markdown
 ## Staleness
-- 6 stale (fuente cambió) · 1 huérfana (símbolo borrado) · 2 movidas.
-- ❌ RN-PAGOS-01 stale: `validateCoupon` cambió desde la última corrida.
-- ⚠️ RN-STOCK-03 huérfana: `reserveStock` ya no existe.
-→ Sugerencia: Mode Update scopeado SOLO a estas 9 afirmaciones.
+- 6 stale (source changed) · 1 orphaned (symbol deleted) · 2 moved.
+- ❌ RN-PAGOS-01 stale: `validateCoupon` changed since the last run.
+- ⚠️ RN-STOCK-03 orphaned: `reserveStock` no longer exists.
+→ Suggestion: Mode Update scoped ONLY to these 9 claims.
 ```
 
-El usuario decide: dispara un **Mode Update** acotado a lo stale (no a toda la KB). Y opcionalmente, las stale se pasan a la **#3** para re-verificar si, además de cambiar, ahora **contradicen** la doc.
+The user decides: trigger a **Mode Update** scoped to the stale items (not the whole KB). Optionally, the stale items are passed to **#3** to re-verify whether, beyond changing, they now **contradict** the doc.
 
 ---
 
-## Composición con la #3 (lo barato filtra lo caro)
+## Composition with #3 (cheap filters the expensive)
 
 ```
-staleness (barato)  →  marca las 9 afirmaciones cuya fuente cambió
+staleness (cheap)  →  flags the 9 claims whose source changed
                           ↓
-verificación #3 (cara)  →  corre SOLO sobre esas 9, no sobre las 120
+verification #3 (expensive)  →  runs ONLY on those 9, not on all 120
 ```
 
-No re-verificás lo que no cambió. Las dos se abaratan mutuamente.
+You don't re-verify what hasn't changed. The two make each other cheaper.
 
 ---
 
-## Casos borde
+## Edge cases
 
-| Caso | Qué hacer |
+| Case | What to do |
 |---|---|
-| Cita `inferred` / `user` | No tiene fuente de código → staleness **no aplica**. |
-| Sin ledger previo (nunca se fingerprinteó) | No hay contra qué comparar → primero corré una verificación/fingerprint inicial (#3) que **siembra** el ledger. |
-| Repo enorme | El git fast-path lo hace barato; sin git, budget-bounded + reporte de cobertura. |
-| El archivo cambió pero el símbolo citado no | El fast-path lo marca candidato, pero el fingerprint normalizado da **igual** → fresco. Sin falso positivo. |
-| Símbolo movido a otro archivo | `movido` → actualizá el ancla de la cita y marcalo para revisión, no lo tires. |
+| `inferred` / `user` citation | Has no code source → staleness **does not apply**. |
+| No prior ledger (never fingerprinted) | Nothing to compare against → first run a verification/fingerprint pass (#3) that **seeds** the ledger. |
+| Huge repo | The git fast-path keeps it cheap; without git, budget-bounded + coverage report. |
+| File changed but cited symbol did not | The fast-path marks it as a candidate, but the normalized fingerprint is **equal** → fresh. No false positive. |
+| Symbol moved to another file | `moved` → update the citation anchor and flag for review, do not discard it. |

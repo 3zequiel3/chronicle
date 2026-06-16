@@ -1,105 +1,105 @@
-# Provenance — citas de origen (el backbone verificable)
+# Provenance — the verifiable backbone
 
-Toda afirmación factual en la KB lleva una **cita de origen** con un formato único y parseable por máquina. Esto convierte la regla madre ("nada se inventa") de una promesa en una **garantía verificable**, y es el contrato sobre el que se apoyan la verificación de correctitud, la detección de staleness y los chequeos de CI.
+Every factual claim in the KB carries a **provenance citation** in a single, machine-parseable format. This turns the master rule ("nothing is invented") from a promise into a **verifiable guarantee**, and is the contract on which correctness verification, staleness detection, and CI checks all rely.
 
-> Regla dura: **una afirmación factual sin cita es un defecto.** O cita su fuente, o se declara `inferred` y va al `09`/`10`. No hay tercer estado.
+> Hard rule: **a factual claim without a citation is a defect.** Either it cites its source, or it is declared `inferred` and goes to `09`/`10`. There is no third state.
 
-> Regla dura (anti-fabricación): una cita `code` **solo es válida si su símbolo fue realmente leído** — en Mode C, si **resuelve a una fila del mapa de traza** (`reverse-documentation.md` §3). Esto no es disciplina: es un **foreign key verificable mecánicamente**. El checker (`checker-spec.md` §2.5) marca como **huérfana** toda cita `code` sin fila en `trace-map.json` → defecto, sin LLM. La cita se renderiza legible (`[code · file#symbol]`) pero queda respaldada por su fila. El `~Lnn` lo provee la búsqueda, nunca el modelo de memoria. La cita es un subproducto de haber leído, no un campo que se completa al escribir.
+> Hard rule (anti-fabrication): a `code` citation **is only valid if its symbol was actually read** — in Mode C, if it **resolves to a row in the trace map** (`reverse-documentation.md` §3). This is not discipline: it is a **mechanically verifiable foreign key**. The checker (`checker-spec.md` §2.5) flags as **orphan** any `code` citation without a row in `trace-map.json` → defect, no LLM required. The citation is rendered human-readable (`[code · file#symbol]`) but is backed by its row. The `~Lnn` is provided by the search, never by the model's memory. The citation is a byproduct of having read, not a field to fill in while writing.
 
 ---
 
-## El formato de cita
+## Citation format
 
-Se renderiza como **código inline** (visualmente distinto y greppable):
+Rendered as **inline code** (visually distinct and greppable):
 
 ```
-[<tipo> · <ancla>]
+[<type> · <anchor>]
 ```
 
-| `tipo` | Significa | Forma del `ancla` |
+| `type` | Meaning | `anchor` form |
 |---|---|---|
-| `code` | leído del código (Mode C / cross-check) | `ruta/archivo.ext#símbolo ~Lnn` |
-| `doc` | de un documento fuente (Mode A) | `docs/archivo.ext §sección` |
-| `user` | declarado por el usuario (Mode B / Q-WHY) | `usuario` (opcional: ronda/fecha) |
-| `inferred` | sin fuente — deducido por el agente | `inferido → 09:DD-NN` o `→ 10` |
+| `code` | read from code (Mode C / cross-check) | `path/file.ext#symbol ~Lnn` |
+| `doc` | from a source document (Mode A) | `docs/file.ext §section` |
+| `user` | declared by the user (Mode B / Q-WHY) | `user` (optional: round/date) |
+| `inferred` | no source — deduced by the agent | `→ 09:DD-NN` or `→ 10` |
 
-**Ancla de `code`** (decisión de diseño): el **símbolo** (función/clase/método) es la fuente de verdad — sobrevive a refactors y movimientos de línea. La línea (`~Lnn`) es solo una **pista de navegación**, nunca la referencia canónica.
+**`code` anchor** (design decision): the **symbol** (function/class/method) is the source of truth — it survives refactors and line moves. The line number (`~Lnn`) is only a **navigation hint**, never the canonical reference.
 
-### Gramática (para tooling — #3, #5, #6)
+### Grammar (for tooling — §3, §5, §6)
 
 ```
-cita    = "[" tipo " · " ancla "]"
-tipo    = "code" | "doc" | "user" | "inferred"
-ancla_code     = ruta "#" símbolo [ " ~L" entero ]
-ancla_doc      = ruta [ " §" sección ]
-ancla_user     = "usuario" [ ":" referencia ]
-ancla_inferred = "inferido → " destino     # destino: 09:DD-NN | 10
+citation = "[" type " · " anchor "]"
+type     = "code" | "doc" | "user" | "inferred"
+anchor_code     = path "#" symbol [ " ~L" integer ]
+anchor_doc      = path [ " §" section ]
+anchor_user     = "user" [ ":" reference ]
+anchor_inferred = "→ " destination     # destination: 09:DD-NN | 10
 ```
-Regex de extracción: `\[(code|doc|user|inferred) · ([^\]]+)\]`
+Extraction regex: `\[(code|doc|user|inferred) · ([^\]]+)\]`
 
 ---
 
-## Ejemplos
+## Examples
 
 ```markdown
-- **RN-PAGOS-01**: el cupón no se aplica dos veces. `[code · src/payments/rules.ts#validateCoupon ~L42]`
-- **Entidad Pago**: estados pending|paid|refunded. `[code · prisma/schema.prisma#Payment]`
-- **RN-STOCK-03**: reserva expira a las 24h. `[doc · docs/spec.txt §Inventario]`
-- **DD-02**: se eligió Postgres por consistencia transaccional. `[user]`
-- **RN-PAGOS-07**: (posible) reintento idempotente. `[inferred · inferido → 10]`
+- **RN-PAGOS-01**: coupon cannot be applied twice. `[code · src/payments/rules.ts#validateCoupon ~L42]`
+- **Entity Payment**: states pending|paid|refunded. `[code · prisma/schema.prisma#Payment]`
+- **RN-STOCK-03**: reservation expires after 24h. `[doc · docs/spec.txt §Inventario]`
+- **DD-02**: Postgres was chosen for transactional consistency. `[user]`
+- **RN-PAGOS-07**: (possible) idempotent retry. `[inferred · → 10]`
 ```
 
 ---
 
-## Qué lleva cita (por nodo)
+## What carries a citation (by node)
 
-| Nodo | ¿Cita? | Tipo típico |
+| Node | Citation? | Typical type |
 |---|---|---|
-| 04 entidades / contratos | **sí, por ítem** | `code` / `doc` |
-| 05 reglas (RN) | **sí, por regla** | `code` / `doc` |
-| 06 historias (US) | sí, por criterio derivado | `code` / `doc` / `user` |
-| 07 flujos | **sí, por paso** | `code` (un tag por salto) |
-| 09 decisiones (DD) | sí | `user` (nunca finge un `code`) |
-| 01 visión · 03 actores | sí | `user` / `doc` |
-| 02 · 08 (arquitectura) | sí donde es factual | `code` / `doc` / `user` |
-| 10 preguntas | n/a (es el destino de lo no citable) | — |
+| 04 entities / contracts | **yes, per item** | `code` / `doc` |
+| 05 rules (RN) | **yes, per rule** | `code` / `doc` |
+| 06 stories (US) | yes, per derived criterion | `code` / `doc` / `user` |
+| 07 flows | **yes, per step** | `code` (one tag per hop) |
+| 09 decisions (DD) | yes | `user` (never a fabricated `code`) |
+| 01 vision · 03 actors | yes | `user` / `doc` |
+| 02 · 08 (architecture) | yes where factual | `code` / `doc` / `user` |
+| 10 questions | n/a (it is the destination for the uncitable) | — |
 
-> Los nodos de **PORQUÉ** (09) citan `user`, jamás un `code` — el código no contiene la intención. Inventar un `file#símbolo` para una decisión es una violación de la regla madre.
+> **WHY nodes** (09) cite `user`, never `code` — code does not contain intent. Inventing a `file#symbol` for a decision is a violation of the master rule.
 
-> **Tests = evidencia más fuerte.** Cuando una regla tiene un test que la respalda, citá el test (`[code · tests/…#"nombre del test"]`) antes que la implementación: el test es el contrato esperado, la implementación es solo el mecanismo. Si la regla sale **solo** de la implementación, marcala `⚠ sin test` (ver `reverse-documentation.md` §Tests como fuente).
-
----
-
-## Comportamiento por modo
-
-- **Mode A (ingest)**: cada afirmación cita `doc` (qué fuente la originó). Lo no rastreable a una fuente → `inferred → 10`.
-- **Mode B (scratch)**: no hay sistema construido → las afirmaciones citan `user` (lo que el usuario decidió) o quedan como propuesta. No se fabrica `code`.
-- **Mode C (reverse)**: el caso central. Cada claim del QUÉ cita `code` con ancla de símbolo. El PORQUÉ que el usuario responda (Q-WHY) cita `user`; lo que no responde → `inferred → 10`.
-- **Mode Update**: las citas se mantienen y se actualizan al re-documentar; un claim re-derivado refresca su ancla.
-- **Mode Audit**: no genera, pero **mide cobertura de citas** (ver `quality-rubric.md`).
+> **Tests = strongest evidence.** When a rule has a test backing it, cite the test (`[code · tests/…#"test name"]`) before the implementation: the test is the expected contract, the implementation is just the mechanism. If the rule comes **only** from the implementation, mark it `⚠ no test` (see `reverse-documentation.md` §Tests as source).
 
 ---
 
-## Casos borde (manejar todos)
+## Behavior by mode
 
-| Caso | Qué hacer |
+- **Mode A (ingest)**: each claim cites `doc` (which source originated it). Anything not traceable to a source → `[inferred · → 10]`.
+- **Mode B (scratch)**: no system is built yet → claims cite `user` (what the user decided) or remain as proposals. No `code` is fabricated.
+- **Mode C (reverse)**: the central case. Each WHAT claim cites `code` with a symbol anchor. WHY answers the user gives (Q-WHY) cite `user`; unanswered WHYs → `[inferred · → 10]`.
+- **Mode Update**: citations are kept and refreshed when re-documenting; a re-derived claim refreshes its anchor.
+- **Mode Audit**: does not generate, but **measures citation coverage** (see `quality-rubric.md`).
+
+---
+
+## Edge cases (handle all)
+
+| Case | What to do |
 |---|---|
-| El código no tiene un símbolo nombrable (config, SQL suelto) | Ancla = `ruta ~Lnn` sin `#símbolo`; preferí siempre el símbolo nombrado más cercano. |
-| Una afirmación tiene **varias** fuentes | Listá varias citas: `` `[code · a.ts#x]` `[code · b.ts#y]` ``. |
-| Flujo (07) que cruza lenguajes | Una cita `code` **por paso/salto** del flujo, cada una a su archivo/símbolo. |
-| Regla que está implementada Y en un doc | Citá ambas: `` `[code · …]` `[doc · …]` `` — refuerza la confianza. |
-| Símbolo renombrado/movido (en Update) | Re-trazá y actualizá el ancla; si ya no existe, marcá la afirmación como sospechosa → `10`. |
-| Afirmación que el agente "sabe" pero no puede señalar | **No** la escribas como hecho: `inferred → 10`. Esto es el enforcement de la regla madre. |
-| El símbolo que querés citar no está en el mapa de traza | No inventes la cita. O lo trazás (entra al mapa) o va como `inferred → 10`. Citar fuera de la allowlist es fabricación. |
+| Code has no nameable symbol (loose config, inline SQL) | Anchor = `path ~Lnn` without `#symbol`; always prefer the nearest named symbol. |
+| A claim has **multiple** sources | List multiple citations: `` `[code · a.ts#x]` `[code · b.ts#y]` ``. |
+| Flow (07) that crosses languages | One `code` citation **per step/hop** of the flow, each pointing to its file/symbol. |
+| Rule that is both implemented AND in a doc | Cite both: `` `[code · …]` `[doc · …]` `` — reinforces confidence. |
+| Symbol renamed/moved (in Update) | Re-trace and update the anchor; if it no longer exists, mark the claim as suspect → `10`. |
+| Claim the agent "knows" but cannot point to | **Do not** write it as fact: `[inferred · → 10]`. This is the master rule enforcement. |
+| The symbol you want to cite is not in the trace map | Do not fabricate the citation. Either trace it (it enters the map) or use `[inferred · → 10]`. Citing outside the allowlist is fabrication. |
 
 ---
 
-## Por qué esto es el backbone
+## Why this is the backbone
 
-El formato es deliberadamente **parseable** porque tres features futuras lo consumen:
+The format is deliberately **parseable** because three features consume it:
 
-- **#3 Correctitud** — toma cada `code`/`doc` y verifica la afirmación contra su ancla.
-- **#5 Staleness** — re-busca el `#símbolo`; si cambió o desapareció, marca la sección como sospechosa.
-- **#6 CI** — parsea las citas y reporta cobertura (% de afirmaciones citadas) como métrica de calidad con exit code.
+- **§3 Correctness** — takes each `code`/`doc` citation and verifies the claim against its anchor.
+- **§5 Staleness** — re-resolves the `#symbol`; if it changed or disappeared, marks the section as suspect.
+- **§6 CI** — parses citations and reports coverage (% of cited claims) as a quality metric with exit code.
 
-Diseñar la cita una sola vez, bien, es lo que hace que esas tres se enchufen sin rediseño.
+Designing the citation format once, correctly, is what lets those three features plug in without redesign.

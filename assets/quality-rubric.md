@@ -1,88 +1,88 @@
-# Quality Rubric — completeness score por nodo
+# Quality Rubric — completeness score per node
 
-Criterios concretos para puntuar qué tan completa está la KB. Lo usa **Mode Audit** para reportar, y todo modo generador para el **auto-chequeo final** antes de cerrar.
+Concrete criteria for scoring how complete the KB is. Used by **Mode Audit** for reporting, and by all generator modes for the **final self-check** before closing.
 
 ---
 
-## Cómo se puntúa
+## How scoring works
 
-Cada nodo se evalúa contra su **checklist** (definido en `node-templates.md`). El score es el porcentaje de ítems del checklist cumplidos:
+Each node is evaluated against its **checklist** (defined in `node-templates.md`). The score is the percentage of checklist items satisfied:
 
 ```
-score(nodo) = ítems_cumplidos / ítems_totales del checklist
+score(node) = items_satisfied / total_items_in_checklist
 ```
 
-Banda de calidad:
+Quality bands:
 
-| Score | Estado | Acción |
+| Score | Status | Action |
 |---|---|---|
-| ≥ 80% | ✅ Completo | nada |
-| 50-79% | ⚠️ Parcial | listar lo faltante |
-| < 50% | ❌ Insuficiente | marcar como prioridad |
+| ≥ 80% | ✅ Complete | none |
+| 50-79% | ⚠️ Partial | list what is missing |
+| < 50% | ❌ Insufficient | mark as priority |
 
 ---
 
-## Criterios por nodo
+## Criteria per node
 
-| Nodo | Ítems del checklist |
+| Node | Checklist items |
 |---|---|
-| 01 Visión | propósito en 1 frase · alcance explícito · fuera-de-alcance |
-| 02 Descripción | stack por capa · diagrama · integraciones |
-| 03 Actores | matriz RBAC · rutas públicas *(N/A en CLI)* |
-| 04 Datos | ERD · entidades con atributos+relaciones · contratos request/response |
-| 05 Reglas | toda regla con código · tag MVP · justificación |
-| 06 Funcionalidades | formato US-NNN · criterios de aceptación · enlace a reglas |
-| 07 Flujos | disparador+actor · diagrama de secuencia · casos de error |
-| 08 Arquitectura | patrones justificados · seguridad · env vars con sensibilidad |
-| 09 Decisiones | alternativas+trade-offs · supuestos con validación |
-| 10 Preguntas | inconsistencias con impacto · preguntas priorizadas |
+| 01 Vision | purpose in 1 sentence · explicit scope · out-of-scope |
+| 02 Description | stack per layer · diagram · integrations |
+| 03 Actors | RBAC matrix · public routes *(N/A for CLI)* |
+| 04 Data | ERD · entities with attributes+relations · request/response contracts |
+| 05 Rules | every rule with code · MVP tag · justification |
+| 06 Features | US-NNN format · acceptance criteria · link to rules |
+| 07 Flows | trigger+actor · sequence diagram · error cases |
+| 08 Architecture | justified patterns · security · env vars with sensitivity |
+| 09 Decisions | alternatives+trade-offs · assumptions with validation |
+| 10 Questions | inconsistencies with impact · prioritized questions |
 
-> Los nodos que el **profile** del `system_type` desactiva (ej. RBAC en un CLI, flujos-UI en una librería, historias en un pipeline — ver `node-templates.md` §Eje 1) no penalizan el score: se marcan **N/A**, no 0%. Solo se puntúan los slots **activos** del profile.
-
----
-
-## Chequeos transversales (además del score por nodo)
-
-Estos no son de completitud sino de **integridad**, y valen para Mode Audit:
-
-1. **Consistencia cruzada** — toda `RN-XX-NN`, `US-NNN`, `DD-NN` referenciada existe y resuelve.
-2. **Drift interno** — sin contradicciones entre nodos (ej. cantidad de entidades en 04 vs 02).
-3. **Enlaces vivos** — las referencias a archivos de entidad/dominio apuntan a rutas reales.
-4. **Tags MVP** — los ítems de 05/06/07 tienen tag de alcance (o nota de por qué no).
-5. **Cobertura de citas** (ver `provenance.md`) — toda afirmación factual lleva cita de origen. Métrica: `afirmaciones_citadas / afirmaciones_factuales`. Una afirmación sin cita ni marca `inferred` es un **defecto**. Extracción con `\[(code|doc|user|inferred) · ([^\]]+)\]`.
-6. **Cobertura por test** (ver `reverse-documentation.md` §Tests como fuente) — qué porcentaje de reglas (`05`) está respaldado por un test vs solo por implementación. Métrica mecánica: contar reglas con cita a un test vs reglas con `⚠ sin test`. No es defecto, es **riesgo visible**: dice qué reglas no tienen red de seguridad.
+> Nodes that the **profile** of `system_type` deactivates (e.g. RBAC on a CLI, UI-flows on a library, user stories on a pipeline — see `node-templates.md` §Axis 1) do not penalize the score: they are marked **N/A**, not 0%. Only **active** profile slots are scored.
 
 ---
 
-## Formato de reporte (Mode Audit y auto-chequeo)
+## Cross-cutting checks (in addition to per-node score)
+
+These are not about completeness but about **integrity**, and they apply to Mode Audit:
+
+1. **Cross-consistency** — every referenced `RN-XX-NN`, `US-NNN`, `DD-NN` exists and resolves.
+2. **Internal drift** — no contradictions between nodes (e.g. entity count in 04 vs 02).
+3. **Live links** — references to entity/domain files point to real paths.
+4. **MVP tags** — items in 05/06/07 have a scope tag (or a note explaining why not).
+5. **Citation coverage** (see `provenance.md`) — every factual claim carries a source citation. Metric: `cited_claims / factual_claims`. A claim without a citation or `inferred` mark is a **defect**. Extraction regex: `\[(code|doc|user|inferred) · ([^\]]+)\]`.
+6. **Test coverage** (see `reverse-documentation.md` §Tests as source) — what percentage of rules (`05`) are backed by a test vs. implementation only. Mechanical metric: count rules with a test citation vs. rules with `⚠ no test`. Not a defect — it is **visible risk**: it shows which rules have no safety net.
+
+---
+
+## Report format (Mode Audit and self-check)
 
 ```markdown
 ## Completeness
 
-| Nodo | Score | Faltante |
+| Node | Score | Missing |
 |---|---|---|
-| 05 reglas | 60% ⚠️ | dominios sin código RN; sin tags MVP |
-| 07 flujos | 40% ❌ | faltan casos de error en 3/5 flujos |
+| 05 rules | 60% ⚠️ | domains without code RN; no MVP tags |
+| 07 flows | 40% ❌ | missing error cases in 3/5 flows |
 
-## Integridad
-- ❌ US-014 referencia RN-PAGOS-09 que no existe en 05.
-- ⚠️ 04 declara 8 entidades; 02 menciona 11.
+## Integrity
+- ❌ US-014 references RN-PAGOS-09 which does not exist in 05.
+- ⚠️ 04 declares 8 entities; 02 mentions 11.
 
-## Procedencia
-- Cobertura de citas: 84% (47/56 afirmaciones).
-- ❌ 9 afirmaciones sin cita ni marca `inferred` → defecto.
+## Provenance
+- Citation coverage: 84% (47/56 claims).
+- ❌ 9 claims with no citation or `inferred` mark → defect.
 
-## Cobertura por test
-- Reglas respaldadas por test: 18/25 (72%).
-- ⚠️ 7 reglas `sin test` → riesgo visible (no defecto).
+## Test coverage
+- Rules backed by a test: 18/25 (72%).
+- ⚠️ 7 rules `no test` → visible risk (not a defect).
 
-## Correctitud (solo si se pidió Audit profundo — ver verification.md)
-- Cobertura verificada: 40/120 (budget agotado).
-- ✅ 37 confirmadas · ❌ 2 contradichas · ⚠️ 1 no soportada.
+## Correctness (only if deep Audit was requested — see verification.md)
+- Verified coverage: 40/120 (budget exhausted).
+- ✅ 37 confirmed · ❌ 2 contradicted · ⚠️ 1 unsupported.
 
-## Prioridad
-1. [Alta] Resolver RN-PAGOS-09 faltante.
-2. [Media] Completar casos de error del 07.
+## Priority
+1. [High] Resolve missing RN-PAGOS-09.
+2. [Medium] Complete error cases in 07.
 ```
 
-En modos generadores, el auto-chequeo corre este rubric **sobre el propio output** antes de cerrar; si algo queda < 50%, lo anota en `10_preguntas_abiertas.md` en vez de fingir que está completo.
+In generator modes, the self-check runs this rubric **against its own output** before closing; if anything falls below 50%, it notes it in `10_preguntas_abiertas.md` rather than pretending it is complete.

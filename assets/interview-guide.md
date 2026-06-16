@@ -1,223 +1,223 @@
-# Strategic Questions — el interrogatorio de Mode B (y el discovery)
+# Strategic Questions — the Mode B interview (and discovery)
 
-En Mode B no generás archivos de entrada: actuás como **arquitecto senior + product manager** que obliga al usuario a clarificar su pensamiento *antes* de documentar. Las preguntas no son un trámite — son la herramienta que evita documentar una idea floja.
+In Mode B you do not generate input files: you act as a **senior architect + product manager** who forces the user to clarify their thinking *before* documenting. The questions are not a formality — they are the tool that prevents documenting a weak idea.
 
-> Principio rector: **la situación se detecta, la intención se pregunta.** Lo que la huella del filesystem ya resolvió (`detection-funnel.md`) se confirma, no se vuelve a preguntar.
-
----
-
-## Reglas para preguntar
-
-1. **Máximo 3-5 preguntas por ronda.** Más que eso es ruido y el usuario se satura.
-2. Cada pregunta lleva **opciones (a/b/c)** y un **"por qué importa"** explícito.
-3. Priorizá lo que **bloquea decisiones de arquitectura**, no lo estético.
-4. **Cazá los supuestos disfrazados.** Si el usuario dice "obvio que va con Postgres", preguntá por qué — puede ser un sesgo, no un requisito.
-
-### Poda adaptativa (no preguntes lo que ya sabés)
-
-Antes de cada pregunta, chequeá el discovery que ya tenés de la Capa 0:
-
-- Si el `stack` ya salió de un `package.json`, **no preguntes P4** — confirmá: *"Detecté Next.js + Prisma, ¿hay alguna restricción más que no esté en el código?"*.
-- Si los nombres de carpeta ya revelan los dominios, **acortá P3** a confirmar actores, no a relevarlos de cero.
-- Solo `intent`, `trajectory`, `maintenance_context` y `language` se preguntan **siempre** (son intención humana, nunca detectables — el idioma no se infiere del repo por el riesgo de *espanglish*, ver `conventions.md` §6).
-
-Cada pregunta que podés saltar es una ronda menos y tokens menos.
+> Guiding principle: **the situation is detected, the intent is asked.** What the filesystem footprint already resolved (`detection-funnel.md`) is confirmed, not re-asked.
 
 ---
 
-## Q-INTENT — Router de intención
+## Rules for asking
 
-Se resuelve apenas termina el embudo de detección. Si el contexto ya es inequívoco, anunciá el modo en vez de preguntar.
+1. **Maximum 3-5 questions per round.** More than that is noise and saturates the user.
+2. Each question carries **options (a/b/c)** and an explicit **"why it matters"**.
+3. Prioritize what **blocks architecture decisions**, not aesthetics.
+4. **Catch disguised assumptions.** If the user says "obviously Postgres", ask why — it may be a bias, not a requirement.
 
-> ¿Qué querés hacer?
+### Adaptive pruning (don't ask what you already know)
 
-| Opción | Setea | Rutea a |
+Before each question, check the discovery already gathered from Layer 0:
+
+- If `stack` already came from a `package.json`, **skip P4** — confirm instead: *"I detected Next.js + Prisma, are there any additional constraints not in the code?"*
+- If folder names already reveal the domains, **shorten P3** to confirming actors, not surveying from scratch.
+- Only `intent`, `trajectory`, `maintenance_context`, and `language` are **always** asked (they are human intent, never detectable — language is not inferred from the repo due to the risk of *Spanglish*, see `conventions.md` §6).
+
+Every question you can skip is one fewer round and fewer tokens.
+
+---
+
+## Q-INTENT — Intent router
+
+Resolved as soon as the detection funnel completes. If the context is already unambiguous, announce the mode instead of asking.
+
+> What do you want to do?
+
+| Option | Sets | Routes to |
 |---|---|---|
-| (a) Crear KB desde cero | `intent = create` | Mode B |
-| (b) Generar KB desde `docs/` | `intent = ingest` | Mode A |
-| (c) Documentar una funcionalidad del código | `intent = reverse` | Mode C |
-| (d) Actualizar / mejorar una KB existente | `intent = update` | Mode Update |
-| (e) Auditar la KB existente | `intent = audit` | Mode Audit |
+| (a) Create KB from scratch | `intent = create` | Mode B |
+| (b) Generate KB from `docs/` | `intent = ingest` | Mode A |
+| (c) Document a code feature | `intent = reverse` | Mode C |
+| (d) Update / improve an existing KB | `intent = update` | Mode Update |
+| (e) Audit the existing KB | `intent = audit` | Mode Audit |
 
 ---
 
-## Preguntas de discovery
+## Discovery questions
 
-Recomendadas en todo run de Mode B; en Mode C, `system_type`/`scale`/`stack` ya vienen de la Capa 0 y solo se confirman.
+Recommended on every Mode B run; in Mode C, `system_type`/`scale`/`stack` come from Layer 0 and are only confirmed.
 
-### Q-idioma — Idioma de la KB (se pregunta SIEMPRE, en todos los modos)
+### Q-language — KB language (asked ALWAYS, in all modes)
 
-> ¿En qué idioma querés la documentación?
+> Which language do you want the documentation in?
 
-- (a) Español → `language = es`
+- (a) Spanish → `language = es`
 - (b) English → `language = en`
 
-**Por qué importa**: define nombres de archivo y contenido de toda la KB. **No se infiere del repo** (el *espanglish* da señal ambigua y errar = regenerar todo). Es la única pregunta que se hace **incluso en Mode A** silencioso, porque es estructural y barata. Se cachea y no se vuelve a preguntar. Ver `conventions.md` §6.
+**Why it matters**: defines file names and the content of the entire KB. **Not inferred from the repo** (*Spanglish* gives an ambiguous signal and guessing wrong means regenerating everything). This is the only question asked **even in silent Mode A**: it is a structural decision — like `system_type` — where a cheap question prevents the most expensive mistake. It is cached and never asked again. See `conventions.md` §6.
 
-### P0-sys — Tipo de sistema
+### P0-sys — System type
 
-> ¿Qué tipo de sistema estamos documentando?
+> What type of system are we documenting?
 
-- (a) Aplicación web (frontend + backend con UI)
-- (b) API / backend puro (sin frontend propio)
-- (c) CLI / herramienta de línea de comandos
-- (d) Aplicación móvil
-- (e) SaaS multi-tenant (múltiples organizaciones aisladas)
-- (f) Librería / SDK (se consume por código, sin UI propia)
-- (g) Pipeline de datos / ETL / batch
-- (h) Otro (describilo)
+- (a) Web application (frontend + backend with UI)
+- (b) API / pure backend (no own frontend)
+- (c) CLI / command-line tool
+- (d) Mobile application
+- (e) Multi-tenant SaaS (multiple isolated organizations)
+- (f) Library / SDK (consumed by code, no own UI)
+- (g) Data pipeline / ETL / batch
+- (h) Other (describe it)
 
-**Por qué importa**: condiciona patrones de arquitectura, autenticación y qué documentación tiene valor. Setea `system_type` → **selecciona el profile** (núcleo de 4 + variables; ver `node-templates.md` §Eje 1): un CLI no lleva RBAC, una librería no lleva flujos de UI, un pipeline no lleva historias de usuario.
+**Why it matters**: conditions architecture patterns, authentication, and what documentation has value. Sets `system_type` → **selects the profile** (core of 4 + variables; see `node-templates.md` §Axis 1): a CLI carries no RBAC, a library carries no UI flows, a pipeline carries no user stories.
 
-### P0-scale — Escala de operación
+### P0-scale — Operating scale
 
-> ¿A qué escala opera (o se espera que opere)?
+> At what scale does it operate (or is expected to operate)?
 
-- (a) Usuario único o equipo chico (< 50)
-- (b) Organización mediana (100-10k)
-- (c) Público multi-usuario (> 10k, un solo tenant)
-- (d) Multi-tenant (varias organizaciones, cada una con sus usuarios)
+- (a) Single user or small team (< 50)
+- (b) Mid-sized organization (100-10k)
+- (c) Public multi-user (> 10k, single tenant)
+- (d) Multi-tenant (multiple organizations, each with their users)
 
-**Por qué importa**: determina decisiones de DB, caché, colas y separación de datos por tenant. Setea `scale` → ajusta la profundidad con que se documentan datos e infraestructura.
+**Why it matters**: determines DB, cache, queue, and per-tenant data separation decisions. Sets `scale` → adjusts the depth at which data and infrastructure are documented.
 
-### Q-trayectoria — Hoy y a dónde va
+### Q-trayectoria — Today and where it's going
 
-> ¿Qué es esto hoy y a dónde va?
+> What is this today and where is it headed?
 
-- (a) Demo / PoC que probablemente se descarta → `trajectory = descartable`
-- (b) Semilla de un producto real → `trajectory = semilla`
-- (c) Producto ya en producción → `trajectory = produccion`
+- (a) Demo / PoC that will probably be thrown away → `trajectory = throwaway`
+- (b) Seed of a real product → `trajectory = seed`
+- (c) Product already in production → `trajectory = production`
 
-**Por qué importa**: es distinta de `scale` (dónde está hoy) — es la **ambición**. Efectos: `descartable` → estructura plana, sin governance, sin sección de escalado; `semilla` → **activa el checklist de escalado** (los techos detectados van al `10` como riesgos, jamás al `08` como implementados); `produccion` → tratamiento completo.
+**Why it matters**: different from `scale` (where it stands today) — this is the **ambition**. Effects: `throwaway` → flat structure, no governance, no scaling section; `seed` → **activates the scaling checklist** (detected ceilings go to `10` as risks, never to `08` as implemented); `production` → full treatment.
 
-### Q-maintenance — Quién mantiene la doc
+### Q-maintenance — Who maintains the docs
 
-> ¿Quién va a mantener esta documentación?
+> Who will maintain this documentation?
 
-- (a) Yo solo / proyecto personal o freelance → `maintenance_context = solo`
-- (b) Un equipo, o se entrega a un cliente → `maintenance_context = team`
+- (a) Just me / personal or freelance project → `maintenance_context = solo`
+- (b) A team, or handed off to a client → `maintenance_context = team`
 
-**Por qué importa**: gatea la **gobernanza**. El driver no es el tipo de empleo sino "¿una persona o equipo/handoff?". `solo` → metadata de ownership OFF, changelog opcional. `team` → governance ON. El compliance es un eje aparte (lo decide el tipo de dato).
-
----
-
-## Primera ronda — las 5 fundamentales
-
-### P1 — Problema raíz
-
-> ¿Cuál es el **problema concreto** que el sistema resuelve, y para **quién**?
-
-**Por qué importa**: si no entra en una frase, todo lo demás es ruido. Detecta el clásico "solución buscando problema". Setea `problem`.
-
-**Rechazá respuestas vagas**: "ayudar a la gente", "modernizar el sector", "ser una plataforma". Pedí concreción antes de seguir.
-
-### P2 — Alcance del MVP
-
-> ¿Cuál es el **alcance mínimo viable** para considerarlo "lanzable"?
-
-- (a) Solo el flujo principal end-to-end con datos simulados.
-- (b) Flujo principal + integración real con el servicio externo crítico.
-- (c) Flujo principal + integraciones + panel admin.
-
-**Por qué importa**: define qué entra en la v1 y qué se posterga → alimenta el **tagging `[MVP]`/`[Post-MVP]`**. Vaguedad acá = scope creep en el sprint 2.
-
-### P3 — Actores principales
-
-> ¿Quiénes usan el sistema y **qué hace cada uno**? Un verbo principal por rol.
-
-**Por qué importa**: el RBAC y la mitad de las pantallas se derivan de acá. Setea los actores e infiere `domain`.
-
-### P4 — Restricciones técnicas no negociables
-
-> ¿Hay restricciones **dadas de arriba** que no podés cambiar?
-
-Sub-preguntas: ¿stack obligatorio? ¿cloud específica / on-prem? ¿legacy? ¿compliance (GDPR/HIPAA/PCI)?
-
-**Por qué importa**: una restricción real condiciona toda la arquitectura; una falsa (preferencia disfrazada) te encierra sin necesidad. El stack obligatorio setea `stack`; las sub-preguntas de infra resuelven `needs_infra`.
-
-### P5 — Prioridad de calidad
-
-> Si tuvieras que elegir: ¿**velocidad de entrega**, **escalabilidad**, **mantenibilidad** o **costo**?
-
-**Por qué importa**: no se puede maximizar todo. Filtra los patrones del `08`. Quien prioriza velocidad acepta deuda que quien prioriza escala no perdona.
+**Why it matters**: gates **governance**. The driver is not employment type but "one person or team/handoff?". `solo` → ownership metadata OFF, changelog optional. `team` → governance ON. Compliance is a separate axis (decided by data type).
 
 ---
 
-## Segunda ronda — condicional (activá según las respuestas)
+## First round — the 5 fundamentals
 
-- **Transacciones financieras / datos sensibles** → ¿audit trail append-only? ¿idempotencia? ¿rollbacks? → dispara el archivo de **compliance**.
-- **Múltiples actores con permisos** → ¿RBAC simple o ABAC? ¿herencia entre roles? ¿permisos a nivel de recurso? → profundidad del `03`.
-- **Flujos largos / asincrónicos** → ¿webhooks? ¿máquina de estados? ¿notificaciones? → detalle del `07`.
-- **Datos estructurados complejos** → ¿jerárquicos? ¿versionados? ¿soft vs hard delete? → detalle del `04`.
+### P1 — Root problem
+
+> What is the **concrete problem** the system solves, and **for whom**?
+
+**Why it matters**: if it does not fit in one sentence, everything else is noise. Detects the classic "solution looking for a problem". Sets `problem`.
+
+**Reject vague answers**: "help people", "modernize the sector", "be a platform". Demand concreteness before continuing.
+
+### P2 — MVP scope
+
+> What is the **minimum viable scope** to consider it "launchable"?
+
+- (a) Main end-to-end flow with simulated data only.
+- (b) Main flow + real integration with the critical external service.
+- (c) Main flow + integrations + admin panel.
+
+**Why it matters**: defines what goes into v1 and what is deferred → feeds the **`[MVP]`/`[Post-MVP]` tagging**. Vagueness here = scope creep in sprint 2.
+
+### P3 — Main actors
+
+> Who uses the system and **what does each one do**? One main verb per role.
+
+**Why it matters**: RBAC and half the screens derive from this. Sets actors and infers `domain`.
+
+### P4 — Non-negotiable technical constraints
+
+> Are there **top-down constraints** you cannot change?
+
+Sub-questions: mandatory stack? specific cloud / on-prem? legacy? compliance (GDPR/HIPAA/PCI)?
+
+**Why it matters**: a real constraint conditions the entire architecture; a false one (a disguised preference) locks you in unnecessarily. Mandatory stack sets `stack`; infra sub-questions resolve `needs_infra`.
+
+### P5 — Quality priority
+
+> If you had to choose: **delivery speed**, **scalability**, **maintainability**, or **cost**?
+
+**Why it matters**: you cannot maximize everything. Filters the patterns in `08`. Those who prioritize speed accept debt that those who prioritize scale will not forgive.
 
 ---
 
-## Encuadre por `system_type` (afiná el framing)
+## Second round — conditional (activate based on answers)
 
-La misma pregunta se formula distinto según lo detectado:
+- **Financial transactions / sensitive data** → append-only audit trail? idempotency? rollbacks? → triggers the **compliance** file.
+- **Multiple actors with permissions** → simple RBAC or ABAC? role inheritance? resource-level permissions? → depth of `03`.
+- **Long / asynchronous flows** → webhooks? state machine? notifications? → detail in `07`.
+- **Complex structured data** → hierarchical? versioned? soft vs. hard delete? → detail in `04`.
 
-| system_type | Ajuste al interrogatorio |
+---
+
+## Framing by `system_type` (refine the framing)
+
+The same question is phrased differently based on what was detected:
+
+| system_type | Interview adjustment |
 |---|---|
-| `cli` | Saltá RBAC; preguntá por comandos, flags, formato de salida, exit codes. |
-| `api` | Foco en contratos, versionado de API, auth de servicio; sin preguntas de UI. |
-| `saas_multi_tenant` | Sumá: ¿aislamiento por schema o por fila? ¿onboarding de tenant? ¿límites por plan? |
-| `mobile` | Preguntá por estado offline, sincronización, permisos del dispositivo. |
-| `library_sdk` | Saltá actores/UI; preguntá por superficie de API pública, semver/compat, ejemplos de uso, breaking changes. |
-| `data_pipeline` | Saltá actores/historias; preguntá por fuentes/sinks, contratos de datos, scheduling/orquestación, idempotencia y reprocesos. |
+| `cli` | Skip RBAC; ask about commands, flags, output format, exit codes. |
+| `api` | Focus on contracts, API versioning, service auth; no UI questions. |
+| `saas_multi_tenant` | Add: schema-level or row-level isolation? tenant onboarding? per-plan limits? |
+| `mobile` | Ask about offline state, sync, device permissions. |
+| `library_sdk` | Skip actors/UI; ask about public API surface, semver/compat, usage examples, breaking changes. |
+| `data_pipeline` | Skip actors/stories; ask about sources/sinks, data contracts, scheduling/orchestration, idempotency, and reprocessing. |
 
 ---
 
-## Detección de respuestas flojas
+## Detecting weak answers
 
-Si el usuario contesta con frases como estas, **no avances** — cuestioná y pedí concreción:
+If the user responds with phrases like these, **do not proceed** — challenge them and ask for specifics:
 
-| Respuesta floja | Tu repregunta |
+| Weak answer | Your follow-up |
 |---|---|
-| "todo lo que se pueda" | "No se documenta 'todo'. Dame 3 cosas concretas en orden de prioridad." |
-| "que sea escalable" | "¿Escalable a qué? 100 usuarios, 100k, 100M — cada una es otra arquitectura." |
-| "como otros sistemas similares" | "Nombrame UNO concreto y QUÉ específico de él querés copiar." |
-| "lo estándar de la industria" | "No existe 'el estándar'. Dame contexto: tipo de empresa, equipo, presupuesto." |
+| "everything possible" | "We don't document 'everything'. Give me 3 concrete things in priority order." |
+| "make it scalable" | "Scalable to what? 100 users, 100k, 100M — each is a different architecture." |
+| "like other similar systems" | "Name ONE specific system and WHAT specifically about it you want to replicate." |
+| "the industry standard" | "There is no 'the standard'. Give me context: company type, team size, budget." |
 
 ---
 
-## Mapeo pregunta → efecto, por modo
+## Question → effect mapping, by mode
 
-### Mode A (silent) — 1 sola confirmación estructural
-No pregunta nada salvo una confirmación de los **dos campos estructurales** antes de escribir: **idioma** (Q-idioma) y **`system_type`** inferido (que selecciona el profile → qué nodos existen). Ambos son baratos de confirmar y catastróficos de errar (regenerás toda la KB). Mostralos juntos:
+### Mode A (silent) — 1 structural confirmation only
+Asks nothing except a confirmation of the **two structural fields** before writing: **language** (Q-language) and the inferred **`system_type`** (which selects the profile → which nodes exist). Both are cheap to confirm and catastrophic to get wrong (you regenerate the entire KB). Show them together:
 
 ```
-Voy a generar la KB como: idioma=español · tipo=web_app (inferido de las fuentes).
-¿Confirmás? (sí / corregir)
+I will generate the KB as: language=english · type=web_app (inferred from sources).
+Confirm? (yes / correct)
 ```
 
-El resto lo infiere de las fuentes (ver `discovery-fields.md`). `trajectory` y `maintenance_context` caen en default conservador + nota en el `10`.
+Everything else is inferred from the sources (see `discovery-fields.md`). `trajectory` and `maintenance_context` fall to conservative defaults + a note in `10`.
 
-### Mode B (desde cero) — batería completa
-Q-idioma → language · Q-INTENT → modo · P0-sys → set adaptativo · P0-scale → profundidad datos/infra · Q-trayectoria → checklist escalado · Q-maintenance → governance · P1 → problema (rechaza vago) · P2 → tags MVP · P3 → actores+dominio · P4 → stack+infra · P5 → patrones del 08 · ronda 2 → compliance/ABAC/state-machine/versionado.
+### Mode B (from scratch) — full battery
+Q-language → language · Q-INTENT → mode · P0-sys → adaptive set · P0-scale → data/infra depth · Q-trayectoria → scaling checklist · Q-maintenance → governance · P1 → problem (reject vague) · P2 → MVP tags · P3 → actors+domain · P4 → stack+infra · P5 → patterns in 08 · round 2 → compliance/ABAC/state-machine/versioning.
 
-### Mode C (reverse) — mínimo, confirmación
-Q-idioma → language · Q-feature → target del trazado · Q-confirm-anchor → (sí/ajustar/no) · Q-trayectoria y Q-maintenance solo si faltan · Q-MVP-tag por ítem (el código no lo sabe) · Q-WHY ante ambigüedad → respuesta al `09`, sin respuesta al `10`. No pregunta system_type/scale/stack (vienen de Capa 0).
+### Mode C (reverse) — minimal, confirmation
+Q-language → language · Q-feature → tracing target · Q-confirm-anchor → (yes/adjust/no) · Q-trayectoria and Q-maintenance only if missing · Q-MVP-tag per item (the code does not carry it) · Q-WHY on ambiguity → answer to `09`, no answer to `10`. Does not ask system_type/scale/stack (come from Layer 0).
 
 ### Mode Update / Audit
-- **Update**: reusa preguntas de B (si faltan campos) o el trazado de C (si es una feature nueva). No regenera lo bueno.
-- **Audit**: no pregunta — reporta.
+- **Update**: reuses B questions (if fields are missing) or C tracing (if it is a new feature). Does not regenerate what is already good.
+- **Audit**: does not ask — reports.
 
 ---
 
-## Cierre de cada ronda
+## Round close
 
-Al terminar una ronda, escribí:
+At the end of each round, write:
 
 ```markdown
-**Lo que entendí**:
-- [punto 1]
-- [punto 2]
+**What I understood**:
+- [point 1]
+- [point 2]
 
-**Supuestos que estoy haciendo** (corregilos si no son ciertos):
-- **Suposición**: [...]
+**Assumptions I am making** (correct them if wrong):
+- **Assumption**: [...]
 
-**Próximos pasos**:
+**Next steps**:
 1. [...]
 ```
 
-Esto deja explícito qué interpretaste y dónde podés estar errando — fuerza al usuario a corregir antes de que escribas algo malo en la KB.
+This makes explicit what you interpreted and where you may be wrong — it forces the user to correct before you write something bad into the KB.

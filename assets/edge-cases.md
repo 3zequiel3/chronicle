@@ -1,68 +1,68 @@
-# Edge Cases — bordes y auto-chequeo final
+# Edge Cases — boundaries and final self-check
 
-Qué hacer cuando la situación no es limpia, y la verificación que corre el agente antes de cerrar. Cargá este asset cuando la detección sea ambigua o antes de finalizar.
+What to do when the situation is not clean, and the verification the agent runs before closing. Load this asset when detection is ambiguous or before finalizing.
 
 ---
 
-## Bordes de detección (Step 0)
+## Detection boundaries (Step 0)
 
-| Situación | Qué hacer |
+| Situation | What to do |
 |---|---|
-| `docs/` **y** `knowledge-base/` existen | Preguntá: ¿actualizar la KB (Update) o regenerar desde docs (A)? No asumas. |
-| `docs/` con solo un `README` | No es fuente → tratá como Mode B (desde cero), no Mode A. |
-| `knowledge-base/` existe pero incompleta | Mode Update (completar huecos), no recrear desde cero. |
-| No hay manifest reconocible (stack desconocido) | No inventes el stack → preguntá, o marcá `stack: desconocido` y nota en `10`. |
-| Monorepo políglota | `stack` estructurado por servicio; en Mode C, trazá cross-language. |
-| Código sin docs y sin pedido de feature concreta | Mode C necesita un target → pedí qué funcionalidad documentar primero. |
-| Intención ambigua del usuario | Resolvé con Q-INTENT explícita antes de actuar. |
-| Sin herramienta de búsqueda (Mode C, ni nativa ni `rg`/`git grep`/`grep`) | **No traces a ciegas.** Pedí instalar ripgrep con el comando del SO y el porqué (ver `reverse-documentation.md` §0 Preflight). |
-| Windows (separador de rutas `\`) | Normalizá las rutas de las citas a `/` para que sean estables entre SO. |
+| `docs/` **and** `knowledge-base/` both exist | Ask: update the KB (Update) or regenerate from docs (A)? Do not assume. |
+| `docs/` with only a `README` | Not a source → treat as Mode B (from scratch), not Mode A. |
+| `knowledge-base/` exists but is incomplete | Mode Update (fill gaps), not recreate from scratch. |
+| No recognizable manifest (unknown stack) | Do not invent the stack → ask, or mark `stack: unknown` and add a note to `10`. |
+| Polyglot monorepo | `stack` structured per service; in Mode C, trace cross-language. |
+| Code with no docs and no concrete feature request | Mode C needs a target → ask which functionality to document first. |
+| Ambiguous user intent | Resolve with an explicit Q-INTENT before acting. |
+| No search tool available (Mode C, neither native nor `rg`/`git grep`/`grep`) | **Do not trace blindly.** Ask the user to install ripgrep with the OS-specific command and explain why (see `reverse-documentation.md` §0 Preflight). |
+| Windows (path separator `\`) | Normalize citation paths to `/` for cross-OS stability. |
 
 ---
 
-## Bordes de estructura
+## Structural boundaries
 
-| Situación | Qué hacer |
+| Situation | What to do |
 |---|---|
-| Colección cruza el umbral durante un Update | Promové archivo→carpeta y **actualizá las referencias cruzadas** (no las dejes rotas). |
-| Una feature (Mode C) toca otra funcionalidad | Regla de frontera: cross-reference y parar, no documentar la otra. |
-| Nodo desactivado por el profile del `system_type` | Anotá la omisión en el índice; no dejes un archivo vacío. Ver `node-templates.md` §Eje 1. |
-| Idioma mezclado en la KB existente | Detectá el idioma dominante y mantenelo; no mezcles (ver `conventions.md`). |
+| A collection crosses the threshold during an Update | Promote file→folder and **update cross-references** (do not leave them broken). |
+| A feature (Mode C) touches another piece of functionality | Boundary rule: cross-reference and stop — do not document the other. |
+| Node disabled by the `system_type` profile | Note the omission in the index; do not leave an empty file. See `node-templates.md` §Axis 1. |
+| Mixed language in the existing KB | Detect the dominant language and keep it; do not mix (see `conventions.md`). |
 
 ---
 
-## Bordes de contenido (regla madre)
+## Content boundaries (master rule)
 
-| Situación | Qué hacer |
+| Situation | What to do |
 |---|---|
-| El código hace algo y no se entiende por qué | El QUÉ va al nodo; el PORQUÉ → preguntá (→ `09`) o → `10`. Nunca inventes. |
-| Dos fuentes se contradicen (Mode A) | Registralo como `IN-NN` en `10`, no elijas en silencio. |
-| Campo de discovery no inferible | Default conservador + nota `[DISCOVERY]` en `10` (ver `discovery-fields.md`). |
-| Tag MVP/Post-MVP desconocido en Mode C | Sin tag + duda en `10`; el código no carga roadmap. |
+| The code does something and the reason is unclear | The WHAT goes in the node; the WHY → ask (→ `09`) or → `10`. Never invent. |
+| Two sources contradict each other (Mode A) | Record it as `IN-NN` in `10`, do not choose silently. |
+| Discovery field cannot be inferred | Conservative default + `[DISCOVERY]` note in `10` (see `discovery-fields.md`). |
+| MVP/Post-MVP tag unknown in Mode C | No tag + doubt in `10`; the code does not carry roadmap intent. |
 
 ---
 
-## Auto-chequeo final (antes de cerrar, todo modo generador)
+## Final self-check (before closing, all generator modes)
 
-El cierre tiene **dos niveles** — y el mecánico manda.
+Closing has **two levels** — and the mechanical level takes authority.
 
-### Nivel mecánico (AUTORIDAD — lo corre el checker, no el LLM)
+### Mechanical level (AUTHORITY — run by the checker, not the LLM)
 
-Estos chequeos son deterministas, así que **no los "verifica" el modelo sobre sí mismo**: los corre el **checker mecánico** (`checker-spec.md`), el **mismo binario que el gate de CI**. Es **fail-closed**: no declares la KB completa si el checker está en rojo.
+These checks are deterministic, so **the model does not "verify" them against itself**: they are run by the **mechanical checker** (`checker-spec.md`), the **same binary as the CI gate**. It is **fail-closed**: do not declare the KB complete if the checker is red.
 
-1. **Consistencia cruzada** — toda `RN`/`US`/`DD` referenciada existe y resuelve.
-2. **Enlaces vivos** — las rutas a archivos de entidad/dominio resuelven.
-3. **Cobertura de procedencia** — toda afirmación factual lleva cita (`[code/doc/user]`) o está marcada `[inferred → 10]`. Sin cita = defecto (regla madre, ver `provenance.md`).
-4. **Spot-check de existencia (anti-cita-fabricada)** — los símbolos citados **existen** en la ruta citada. Escala con el tamaño, no es tope fijo: **todas** las citas de alto riesgo (`RN` + contratos/entidades del `04`) siempre, + muestra proporcional (~20%, mínimo 10) del resto, acotada por presupuesto. Reportá cobertura real (`chequeadas/total`); ancla rota → se marca y va al `10`.
+1. **Cross-consistency** — every referenced `RN`/`US`/`DD` exists and resolves.
+2. **Live links** — paths to entity/domain files resolve.
+3. **Provenance coverage** — every factual claim carries a citation (`[code/doc/user]`) or is marked `[inferred → 10]`. No citation = defect (master rule, see `provenance.md`).
+4. **Existence spot-check (anti-fabricated-citation)** — cited symbols **exist** at the cited path. Scales with size, not a fixed cap: **all** high-risk citations (`RN` + contracts/entities from `04`) always, + a proportional sample (~20%, minimum 10) of the rest, bounded by budget. Report actual coverage (`checked/total`); broken anchor → mark it and add to `10`.
 
-**Persistencia + enforcement.** El resultado se guarda en `knowledge-base/.chronicle/last-check.json` con el git ref. Si el proyecto todavía **no tiene checker generado**, corré estos cuatro con tus tools deterministas (grep/regex sobre la KB) como equivalente y **ofrecé generar el checker persistente** para que CI/pre-commit los re-corra sin vos. La atrapada **real** es CI; el cierre de run es la atrapada temprana. Si algo está en rojo: **arreglalo o marcalo `inferred`/`→10`** y re-corré — nunca cierres declarando "completo" sobre rojo.
+**Persistence + enforcement.** The result is saved to `knowledge-base/.chronicle/last-check.json` with the git ref. If the project **does not yet have a generated checker**, run these four using your deterministic tools (grep/regex over the KB) as an equivalent, and **offer to generate the persistent checker** so CI/pre-commit can re-run them without you. The **real** catch is CI; the run close is the early catch. If anything is red: **fix it or mark it `inferred`/`→10`** and re-run — never close declaring "complete" over red.
 
-### Nivel de juicio (lo corre el LLM — no es mecanizable)
+### Judgment level (run by the LLM — not mechanizable)
 
-5. **Completitud** — pasá el `quality-rubric.md`. Cualquier nodo < 50% → nota en `10`.
-6. **Sin código tocado** — confirmá que no se modificó ningún archivo de código fuente.
-7. **Idioma** — un solo idioma en toda la KB.
+5. **Completeness** — run `quality-rubric.md`. Any node < 50% → note in `10`.
+6. **No source code touched** — confirm that no source code files were modified.
+7. **Language** — a single language throughout the entire KB.
 
-La honestidad del estado es parte del contrato: reportá cobertura real, nunca "completo" sobre una muestra parcial.
+Honesty about status is part of the contract: report actual coverage, never "complete" over a partial sample.
 
-> **Complemento semántico (opcional, no bloquea).** El gate mecánico ve forma (existe/resuelve), no contenido. Si querés cazar la afirmación que existe pero está **mal**, corré la **auditoría post-generación** (`verification.md` §Auditoría post-generación): un subagente fresco audita una muestra de alto riesgo, adversarial. Cuesta tokens → reporta al `10`, no bloquea. El gate que bloquea sigue siendo el mecánico.
+> **Semantic complement (optional, non-blocking).** The mechanical gate sees form (exists/resolves), not content. To catch a claim that exists but is **wrong**, run the **post-generation audit** (`verification.md` §Post-generation audit): a fresh subagent adversarially audits a high-risk sample. Costs tokens → reports to `10`, does not block. The blocking gate remains the mechanical one.
