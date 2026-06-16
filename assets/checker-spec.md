@@ -13,6 +13,7 @@ Define **qué debe hacer** el chequeo mecánico de `chronicle`, sin atarlo a nin
 | Directorio de la KB | `knowledge-base/` | sí |
 | Config | `knowledge-base/.chronicle/checks.json` | no (defaults) |
 | Ledger | `knowledge-base/.chronicle/verification.json` | no (staleness lo necesita) |
+| Trace map | `knowledge-base/.chronicle/trace-map.json` | no (resolución de citas `code` lo necesita) |
 | `ref` de git | del ledger o argumento | no (sin git → modo full) |
 
 ---
@@ -48,6 +49,15 @@ Requiere ledger. Con git: `git diff <ref> --name-only` (sin `..HEAD`, capta lo n
 
 ### 2.4 Cobertura por test (métrica, no defecto)
 Cuenta reglas (05) con cita a un test vs reglas con `⚠ sin test`. Riesgo visible, no bloqueante salvo que se configure un mínimo.
+
+### 2.5 Resolución citación→mapa (anti-cita-fabricada, mecánica)
+Requiere `trace-map.json`. Por cada cita `code` de la KB, extraé su `file#symbol` y buscá una **fila del mapa** con ese mismo `file` + `symbol`. Convierte el allowlist de disciplina a chequeo mecánico (ver `reverse-documentation.md` §3, `provenance.md`).
+
+- `code_citations` = total de citas `code`.
+- `resolved` = las que matchean una fila del mapa.
+- `orphans` = las que **no** resuelven → **defecto** (cita fabricada o símbolo no trazado). `orphan_items` = lista `file#symbol`.
+
+> Las citas `doc`/`user`/`inferred` no aplican (no salen del mapa de traza). Si no hay `trace-map.json` (KB no generada por Mode C), este chequeo se omite y se reporta `n/a`.
 
 ---
 
@@ -109,9 +119,10 @@ Cuando el agente **genera** el checker para un proyecto, antes de usarlo:
 
 1. Corré el checker generado contra `assets/conformance/sample-kb/` y compará su salida con `assets/conformance/expected.json` (campos `claims`, `cited`, `uncited`, `broken`, `items`).
 2. Corré la normalización + hash sobre `assets/conformance/fingerprint/sample.js` y compará con `assets/conformance/fingerprint/expected.json` (el string `normalized` **y** el `fingerprint` SHA-256).
-3. **Si todo coincide exacto → conformante**, usalo. **Si no → regenerá** el checker y repetí. No uses un checker que no pasó el fixture.
+3. Corré la resolución citación→mapa sobre `assets/conformance/trace-map/` (usando su `trace-map.json`) y compará con `assets/conformance/trace-map/expected.json` (`code_citations`, `resolved`, `orphans`, `orphan_items`).
+4. **Si todo coincide exacto → conformante**, usalo. **Si no → regenerá** el checker y repetí. No uses un checker que no pasó el fixture.
 
-El fixture es **data, no código** (markdown + JSON + un snippet), runtime-agnóstico. Valida las tres piezas deterministas: extracción de citas, consistencia cruzada **y la normalización del fingerprint** (la parte más delicada). Lo único que no se fixtura es el `git diff` del staleness, que necesita un repo git real y se valida en el repo objetivo.
+El fixture es **data, no código** (markdown + JSON + un snippet), runtime-agnóstico. Valida las cuatro piezas deterministas: extracción de citas, consistencia cruzada, normalización del fingerprint **y la resolución citación→mapa** (el foreign key anti-fabricación). Lo único que no se fixtura es el `git diff` del staleness, que necesita un repo git real y se valida en el repo objetivo.
 
 > Así el chequeo es turnkey **sin** que chronicle mantenga un script por plataforma, y su correctitud queda **verificada por generación** en vez de asumida.
 

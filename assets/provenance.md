@@ -4,7 +4,7 @@ Toda afirmación factual en la KB lleva una **cita de origen** con un formato ú
 
 > Regla dura: **una afirmación factual sin cita es un defecto.** O cita su fuente, o se declara `inferred` y va al `09`/`10`. No hay tercer estado.
 
-> Regla dura (anti-fabricación): una cita `code` **solo es válida si su símbolo fue realmente leído** — en Mode C, si está en el **mapa de traza** (la allowlist, ver `reverse-documentation.md` §3). Una cita a un símbolo que no se leyó es una **fabricación**, peor que la ausencia de cita porque simula autoridad. El `~Lnn` lo provee la herramienta de búsqueda, nunca el modelo de memoria. La cita es un subproducto de haber leído, no un campo que se completa al escribir.
+> Regla dura (anti-fabricación): una cita `code` **solo es válida si su símbolo fue realmente leído** — en Mode C, si **resuelve a una fila del mapa de traza** (`reverse-documentation.md` §3). Esto no es disciplina: es un **foreign key verificable mecánicamente**. El checker (`checker-spec.md` §2.5) marca como **huérfana** toda cita `code` sin fila en `trace-map.json` → defecto, sin LLM. La cita se renderiza legible (`[code · file#symbol]`) pero queda respaldada por su fila. El `~Lnn` lo provee la búsqueda, nunca el modelo de memoria. La cita es un subproducto de haber leído, no un campo que se completa al escribir.
 
 ---
 

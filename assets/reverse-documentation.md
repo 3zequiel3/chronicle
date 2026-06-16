@@ -89,13 +89,25 @@ Estrategia **híbrida**: búsqueda-primero para mapear el territorio + seguir-ll
 
 **Regla de frontera**: cuando un símbolo encontrado pertenece claramente a **otra funcionalidad**, no lo expandas — cross-reference y seguí. La frontera se decide por **dominio**, no por distancia de llamada.
 
-**Salida — el mapa de traza**: el subagente devuelve la lista compacta de `(símbolo, rol, archivo, línea)` confirmados + el estado (`completo` | `parcial`, con lo no explorado). Ese mapa es lo que **alimenta las citas `[code · #símbolo]`** del merge (paso 4): cada afirmación documentada sale de un nodo del mapa.
+**Salida — el mapa de traza (persistido)**: el subagente devuelve y **persiste** el mapa en `knowledge-base/.chronicle/trace-map.json`. Cada fila es una unidad citable:
 
-> **El mapa de traza es la allowlist de anclas citables (regla dura).** Una cita `[code · ruta#símbolo]` **solo es emitible si ese símbolo está en el mapa** — es decir, si el subagente realmente lo leyó. Citar un símbolo que no está en el mapa es **fabricar una cita**: el peor defecto, porque tiene cara de autoridad sin serlo. Si querés afirmar algo que no tenés en el mapa, o lo trazás (y entra al mapa) o se escribe como `[inferred · inferido → 10]`. La cita es un **subproducto de haber leído**, no un campo de texto que se completa de memoria.
+```json
+{ "version": 1, "rows": [
+  { "id": "t1", "symbol": "validateCoupon", "role": "regla",
+    "file": "src/payments/rules.ts", "line": 42, "hash": "<fingerprint normalizado>" }
+]}
+```
+
+Más el estado del trazado (`completo` | `parcial`, con lo no explorado). El mapa es **tooling-owned**: lo escribe el subagente de trazado / el checker, **nunca el LLM a mano** (misma regla que el ledger, `checker-spec.md` §6).
+
+> **El mapa de traza es la allowlist citable, y ahora MECÁNICA (foreign key).** Una cita `[code · ruta#símbolo]` es válida **solo si resuelve a una fila del mapa** con ese mismo `file#symbol`. Esto deja de ser disciplina: el checker (`checker-spec.md` §2.5) cuenta como **huérfana** toda cita que no resuelve a una fila → **defecto mecánico**, no "el modelo debería". Citar fuera del mapa era el peor defecto (autoridad fabricada); ahora es **atrapable sin LLM**. Lo no trazable se escribe `[inferred · inferido → 10]`.
 >
-> El número de línea (`~Lnn`) lo provee la **herramienta de búsqueda** que ubicó el símbolo; **nunca lo tipea el modelo**. Una línea adivinada es señal de fabricación.
+> La cita se **renderiza legible** para humanos (`[code · src/payments/rules.ts#validateCoupon]`) — el formato no cambia —, pero queda **respaldada** por su fila del mapa. El `~Lnn` lo provee la búsqueda, **nunca lo tipea el modelo** (línea adivinada = señal de fabricación). El `hash` de la fila es el que usa staleness (`staleness.md`) para saber si la fuente cambió.
 
 ### 4. Merge (corte vertical, no destructivo)
+
+> **El que escribe ve SOLO el mapa, no el repo (prevención estructural).** El merge corre en un **subagente escritor separado** cuyo contexto es **únicamente** el mapa de traza + los templates (`node-templates.md`) + las rutas de los nodos destino. **No tiene acceso al código fuente.** Por construcción **no puede fabricar** una cita a un símbolo de afuera del mapa: no tiene de dónde inventar un path plausible, y el único universo citable son las filas del mapa. La fabricación deja de depender de la disciplina del modelo y pasa a ser **imposible por contexto**. (El trazado lee el repo; la escritura no — separación deliberada.)
+
 Documentar una funcionalidad es una **actualización quirúrgica de varios nodos a la vez**, nunca una regeneración total:
 
 | Nodo | Qué se escribe para la feature |
