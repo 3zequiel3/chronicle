@@ -18,7 +18,22 @@ metadata:
 > - La intención, el porqué de una decisión, el roadmap y la frontera MVP **no están en el código** — los aporta el usuario.
 > - Toda ambigüedad o suposición que no pueda confirmarse va a `09_decisiones_y_supuestos.md` (si es una decisión inferida) o a `10_preguntas_abiertas.md` (si es una duda). **Nunca se documenta una suposición como si fuera un hecho.**
 
+> **Enforcement (procedencia obligatoria).** Esta regla no es voluntaria: **toda afirmación factual lleva una cita de origen** (`[code · …]`, `[doc · …]`, `[user]`) o se declara `[inferred · inferido → 10]`. Una afirmación sin cita es un **defecto**, no un estilo. Contrato completo en `assets/provenance.md`.
+
 Esta regla decide el comportamiento en cada modo: la skill es **notario** cuando documenta lo que existe, y solo se vuelve **consultor** cuando todavía no hay nada construido (Mode B).
+
+---
+
+## Token economy (gobierna toda operación cara)
+
+Documentar no debe fundir la sesión. Toda operación costosa (leer código, verificar, re-trazar) sigue estas reglas:
+
+1. **On-demand, no automático** — lo caro corre cuando se pide, no en cada run.
+2. **Subagente aislado** — el trabajo pesado ocurre en un subagente con contexto propio que devuelve solo el resultado compacto; la sesión principal no se infla.
+3. **Acotado por presupuesto y priorizado por riesgo** — primero lo importante, cortar al llegar al límite.
+4. **Reportar cobertura** — siempre decir qué se hizo y qué quedó afuera; nunca cortar en silencio.
+
+Esto se complementa con el **mapa de carga de assets** (más abajo): cada modo lee solo lo que necesita.
 
 ---
 
@@ -30,6 +45,7 @@ Esta regla decide el comportamiento en cada modo: la skill es **notario** cuando
 - Documentar **una funcionalidad de un sistema ya construido** leyendo el código (read-only).
 - **Actualizar o mejorar** una KB existente sin destruir trabajo previo.
 - **Auditar** una KB existente: consistencia cruzada, drift interno y completitud.
+- **Automatizar** el chequeo de frescura: correr un chequeo mecánico (sin LLM) o generar un artefacto de CI/hook a medida del proyecto.
 
 **Don't use when:**
 - El usuario pide modificar, refactorizar o escribir **código** — esta skill nunca toca código.
@@ -90,7 +106,11 @@ La Capa 0 **propone** el modo; Q-INTENT lo **confirma**. Si el contexto ya es in
 
 **Trigger**: el usuario pide auditar/revisar la KB.
 
-**Comportamiento**: **no genera contenido nuevo**, reporta. Chequea consistencia cruzada (códigos `RN`/`US`/`DD` que se referencian existen), drift interno entre documentos (contradicciones), y un **completeness score** por nodo. Devuelve un reporte priorizado.
+**Comportamiento**: **no genera contenido nuevo**, reporta. Chequea consistencia cruzada (códigos `RN`/`US`/`DD` que se referencian existen), drift interno entre documentos (contradicciones), cobertura de citas, y un **completeness score** por nodo. Devuelve un reporte priorizado.
+
+**Profundidad opcional — verificación de correctitud (on-demand)**: si el usuario lo pide ("auditá con verificación"), el Audit valida que cada afirmación citada **coincida con su fuente** (no solo que esté completa). Corre en un subagente aislado, acotado por presupuesto, y persiste el resultado en un ledger. Es la operación más cara de la skill — por eso es opt-in. Ver `assets/verification.md`.
+
+**Profundidad opcional — staleness (on-demand, barata)**: detecta si el **código cambió** desde que se documentó, comparando fingerprints contra el ledger (con git fast-path, casi gratis). Es el filtro barato que dice qué re-verificar; marca, no reescribe. Ver `assets/staleness.md`.
 
 ---
 
@@ -140,9 +160,13 @@ Archivos extra con prefijo `1X_`/`2X_` y nombre kebab-case complementan los 10 c
 | Mode B (scratch) | `interview-guide.md`, `node-templates.md`, `conventions.md` | reverse-documentation, lifecycle |
 | Mode C (reverse) | `reverse-documentation.md`, `node-templates.md` | interview-guide (salvo Q-WHY) |
 | Mode Update | `lifecycle.md`, `node-templates.md` | interview-guide, reverse-documentation |
-| Mode Audit | `lifecycle.md`, `quality-rubric.md` | el resto |
+| Mode Audit | `lifecycle.md`, `quality-rubric.md` (+ `verification.md` y/o `staleness.md` **solo** si Audit profundo on-demand) | el resto |
 | Bordes / dudas | `edge-cases.md` | — |
 | Ejemplos (few-shot) | `examples.md` (solo la sección del modo activo) | otras secciones |
+
+`provenance.md` se carga en **todo modo que escribe o audita afirmaciones** (A, B, C, Update, Audit) — define el contrato de citas de origen, obligatorio por la regla madre.
+
+`automation.md` se carga **on-demand** cuando el usuario pide correr el chequeo mecánico o generar un artefacto de CI ("armá el chequeo de CI", "¿la doc quedó vieja?").
 
 `conventions.md` (Mermaid, tagging, idioma, compliance) se consulta puntualmente cuando aplica, no entero.
 
@@ -153,8 +177,12 @@ Archivos extra con prefijo `1X_`/`2X_` y nombre kebab-case complementan los 10 c
 - **Detection funnel**: [assets/detection-funnel.md](assets/detection-funnel.md) — 3 capas + tabla manifest→stack.
 - **Canonical templates**: [assets/node-templates.md](assets/node-templates.md) — estructura de los 10 nodos, regla archivo↔carpeta, promoción dinámica.
 - **Strategic questions**: [assets/interview-guide.md](assets/interview-guide.md) — banco de preguntas (Mode B) + discovery + mapeo pregunta→efecto por modo.
+- **Provenance**: [assets/provenance.md](assets/provenance.md) — contrato de citas de origen (`code`/`doc`/`user`/`inferred`); enforcement de la regla madre y backbone de verificación.
 - **Reverse documentation**: [assets/reverse-documentation.md](assets/reverse-documentation.md) — protocolo del Mode C (read-only por funcionalidad).
 - **Lifecycle**: [assets/lifecycle.md](assets/lifecycle.md) — Mode Update (merge no destructivo + promoción), gobernanza condicional, Mode Audit.
+- **Verification**: [assets/verification.md](assets/verification.md) — verificación de correctitud contra la fuente (Audit profundo on-demand, subagente, ledger + fingerprint).
+- **Staleness**: [assets/staleness.md](assets/staleness.md) — detección de doc vieja vs código (git fast-path, fingerprint normalizado); filtra qué re-verificar.
+- **Automation**: [assets/automation.md](assets/automation.md) — chequeo mecánico sin LLM (cobertura/consistencia/staleness) con reporte JSON + exit codes; agnóstico de superficie (PR/pre-commit/manual/agente); generado a medida.
 - **Conventions**: [assets/conventions.md](assets/conventions.md) — Mermaid, tagging MVP/Post-MVP, set canónico adaptativo por `system_type`, compliance condicional, glosario, flag de idioma.
 - **Discovery fields**: [assets/discovery-fields.md](assets/discovery-fields.md) — el modelo de discovery (estado interno), inferencia Mode A, regla de baja confianza.
 - **Examples**: [assets/examples.md](assets/examples.md) — un ejemplo end-to-end por modo (few-shot). Cargá solo la sección del modo activo.

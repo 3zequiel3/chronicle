@@ -11,6 +11,8 @@ La KB tiene dos tipos de nodo, y solo uno se explota en carpeta.
 - **Mapas (archivo único)** — se leen enteros para tener la foto completa; partirlos fragmenta la historia. Son **01, 02, 03, 08, 10**.
 - **Colecciones (archivo o carpeta)** — listas de unidades discretas, organizadas por funcionalidad/dominio, que crecen y se navegan por unidad. Son **04, 05, 06, 07, 09**. Son exactamente los nodos que **Mode C escribe** al documentar una funcionalidad.
 
+> **Procedencia obligatoria**: cada ítem factual de las colecciones (04-07) y cada decisión (09) lleva su **cita de origen** (`[code · …]` / `[doc · …]` / `[user]`), o se marca `[inferred · inferido → 10]`. Ver `provenance.md`. Los checklists de abajo la exigen.
+
 ### Regla archivo ↔ carpeta (condicional por tamaño)
 
 Una colección **arranca como archivo** y se **promueve a carpeta** al cruzar un umbral. No infles estructura en sistemas chicos.
@@ -130,15 +132,15 @@ erDiagram
     PEDIDO ||--|{ ITEM : contiene
 ```
 
-## Entidad: {Nombre}
+## Entidad: {Nombre}   `[code · prisma/schema.prisma#{Nombre}]`
 - Atributos (con tipo)
 - Relaciones (con cardinalidad)
 - Constraints / índices
 
 ## Contrato de API: {dominio}
-[Por endpoint: método, path, request, response, errores.]
+[Por endpoint: método, path, request, response, errores.] `[code · src/api/{dominio}.route.ts#handler]`
 ```
-**Checklist**: ERD presente · cada entidad con atributos+relaciones · contratos con request/response.
+**Checklist**: ERD presente · cada entidad con atributos+relaciones · contratos con request/response · **cita de origen por ítem**.
 
 ---
 
@@ -149,10 +151,12 @@ erDiagram
 
 Código único `RN-{DOMINIO}-NN` para trazabilidad.
 
-- **RN-PAGOS-01** `[MVP]`: [regla] — [justificación si no es obvia]
-- **RN-PAGOS-02** `[Post-MVP]`: ...
+- **RN-PAGOS-01** `[MVP]`: [regla] — [justificación] `[code · tests/payments.test.ts#"no aplica cupón dos veces"]`
+- **RN-PAGOS-02** `[Post-MVP]`: ... `[code · src/payments/rules.ts#applyDiscount]` ⚠ sin test
 ```
-**Checklist**: toda regla con código · tag MVP/Post-MVP · justificación donde no sea obvia.
+Preferí citar el **test** cuando existe (evidencia más fuerte). Si la regla sale solo de la implementación, marcala `⚠ sin test` — el marcador se auto-limpia cuando se agrega el test.
+
+**Checklist**: toda regla con código · tag MVP/Post-MVP · justificación donde no sea obvia · **cita de origen por regla** · marcador `⚠ sin test` donde aplique.
 
 ---
 
@@ -165,10 +169,10 @@ Código único `RN-{DOMINIO}-NN` para trazabilidad.
 **Como** [actor] **quiero** [acción] **para** [beneficio].
 
 **Criterios de aceptación**:
-- [ ] CA-1
+- [ ] CA-1  `[code · src/checkout/handler.ts#submit]`
 **Reglas relacionadas**: RN-PAGOS-01
 ```
-**Checklist**: historias en formato US-NNN · criterios de aceptación · enlace a reglas existentes.
+**Checklist**: historias en formato US-NNN · criterios de aceptación · enlace a reglas existentes · **cita de origen en criterios derivados**.
 
 ---
 
@@ -187,10 +191,14 @@ sequenceDiagram
     API-->>Actor: confirmación
 ```
 
+## Pasos (cita por salto)
+1. [Componente] hace X `[code · src/checkout/handler.ts#submit]`
+2. [Componente] hace Y `[code · src/stock/reserve.ts#reserve]`
+
 ## Casos de error
 - [caso] → [manejo]
 ```
-**Checklist**: disparador+actor · diagrama de secuencia · casos de error.
+**Checklist**: disparador+actor · diagrama de secuencia · casos de error · **cita de origen por paso**.
 
 ---
 
@@ -218,7 +226,7 @@ sequenceDiagram
 ## 09 · Decisiones y Supuestos *(colección ADR)*
 
 ```markdown
-# DD-01 — {título}
+# DD-01 — {título}   `[user]`
 **Decisión**: [qué se decidió]
 **Contexto**: [por qué hubo que decidir]
 **Alternativas**: [opciones evaluadas]
@@ -246,6 +254,8 @@ sequenceDiagram
 | Prioridad | Pregunta | Bloquea | Decisor |
 ```
 **Checklist**: inconsistencias con impacto · preguntas con prioridad y decisor.
+
+> **Backlog VIVO, no log.** Cuando una pregunta se resuelve, su respuesta **migra** a su nodo propio (decisión → `09`, regla → `05`, etc.) y la pregunta **se borra del `10`**. El historial de la resolución va al `CHANGELOG.md`, no acá. Así el `10` se achica al resolver y nunca se convierte en un cementerio de miles de líneas. Misma regla para los supuestos `SU-NN` del `09`.
 
 ---
 

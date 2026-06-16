@@ -49,6 +49,8 @@ Estos no son de completitud sino de **integridad**, y valen para Mode Audit:
 2. **Drift interno** — sin contradicciones entre nodos (ej. cantidad de entidades en 04 vs 02).
 3. **Enlaces vivos** — las referencias a archivos de entidad/dominio apuntan a rutas reales.
 4. **Tags MVP** — los ítems de 05/06/07 tienen tag de alcance (o nota de por qué no).
+5. **Cobertura de citas** (ver `provenance.md`) — toda afirmación factual lleva cita de origen. Métrica: `afirmaciones_citadas / afirmaciones_factuales`. Una afirmación sin cita ni marca `inferred` es un **defecto**. Extracción con `\[(code|doc|user|inferred) · ([^\]]+)\]`.
+6. **Cobertura por test** (ver `reverse-documentation.md` §Tests como fuente) — qué porcentaje de reglas (`05`) está respaldado por un test vs solo por implementación. Métrica mecánica: contar reglas con cita a un test vs reglas con `⚠ sin test`. No es defecto, es **riesgo visible**: dice qué reglas no tienen red de seguridad.
 
 ---
 
@@ -65,6 +67,18 @@ Estos no son de completitud sino de **integridad**, y valen para Mode Audit:
 ## Integridad
 - ❌ US-014 referencia RN-PAGOS-09 que no existe en 05.
 - ⚠️ 04 declara 8 entidades; 02 menciona 11.
+
+## Procedencia
+- Cobertura de citas: 84% (47/56 afirmaciones).
+- ❌ 9 afirmaciones sin cita ni marca `inferred` → defecto.
+
+## Cobertura por test
+- Reglas respaldadas por test: 18/25 (72%).
+- ⚠️ 7 reglas `sin test` → riesgo visible (no defecto).
+
+## Correctitud (solo si se pidió Audit profundo — ver verification.md)
+- Cobertura verificada: 40/120 (budget agotado).
+- ✅ 37 confirmadas · ❌ 2 contradichas · ⚠️ 1 no soportada.
 
 ## Prioridad
 1. [Alta] Resolver RN-PAGOS-09 faltante.

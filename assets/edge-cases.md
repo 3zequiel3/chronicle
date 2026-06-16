@@ -15,6 +15,8 @@ Qué hacer cuando la situación no es limpia, y la verificación que corre el ag
 | Monorepo políglota | `stack` estructurado por servicio; en Mode C, trazá cross-language. |
 | Código sin docs y sin pedido de feature concreta | Mode C necesita un target → pedí qué funcionalidad documentar primero. |
 | Intención ambigua del usuario | Resolvé con Q-INTENT explícita antes de actuar. |
+| Sin herramienta de búsqueda (Mode C, ni nativa ni `rg`/`git grep`/`grep`) | **No traces a ciegas.** Pedí instalar ripgrep con el comando del SO y el porqué (ver `reverse-documentation.md` §0 Preflight). |
+| Windows (separador de rutas `\`) | Normalizá las rutas de las citas a `/` para que sean estables entre SO. |
 
 ---
 
@@ -47,7 +49,7 @@ Corré esta verificación sobre tu **propio output** antes de devolverle al usua
 1. **Completitud** — pasá el `quality-rubric.md`. Cualquier nodo < 50% → nota en `10`.
 2. **Consistencia cruzada** — toda `RN`/`US`/`DD` referenciada existe.
 3. **Enlaces** — las rutas a archivos de entidad/dominio resuelven.
-4. **Regla madre** — ninguna suposición quedó escrita como hecho; ¿todas marcadas o en `09`/`10`?
+4. **Procedencia** — toda afirmación factual lleva cita (`[code/doc/user]`) o está marcada `[inferred → 10]`. Sin cita = defecto (ver `provenance.md`). Este es el enforcement de la regla madre.
 5. **Sin código tocado** — confirmá que no se modificó ningún archivo de código fuente.
 6. **Idioma** — un solo idioma en toda la KB.
 

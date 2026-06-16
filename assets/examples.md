@@ -61,8 +61,11 @@ Por qué importa: define la v1. Lo que quede afuera se etiqueta [Post-MVP].
    ¿Es esto? (sí / ajustar / no)
    ```
 4. **Trazado acotado** (read-only, cross-language si aplica). Al tocar `inventory` → frontera: cross-reference, no lo documenta.
-5. **Merge corte vertical**: escribe `04/modelos/pago.md`, `05/pagos.md`, `06/pagos.md`, `07/pagos-checkout.md`.
-6. Un `if` valida el cupón dos veces y no se sabe por qué → Q-WHY; sin respuesta → `10`. **No inventa.**
+5. **Merge corte vertical** con **cita por afirmación**: escribe `04/modelos/pago.md`, `05/pagos.md`, `06/pagos.md`, `07/pagos-checkout.md`. Ej:
+   ```markdown
+   - **RN-PAGOS-01**: el cupón no se aplica dos veces. `[code · src/payments/rules.ts#validateCoupon ~L42]`
+   ```
+6. Un `if` valida el cupón dos veces y no se sabe por qué → Q-WHY; sin respuesta → `[inferred · inferido → 10]`. **No inventa.**
 
 ---
 
