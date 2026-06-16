@@ -57,7 +57,7 @@ Este principio es lo que hace que la documentación sea **confiable**: no mezcla
 ## Instalación
 
 ```bash
-npx skills add https://github.com/<tu-usuario>/chronicle
+npx skills add https://github.com/3zequiel3/chronicle
 ```
 
 La skill se carga automáticamente cuando pedís crear, documentar, actualizar o auditar una base de conocimiento.
