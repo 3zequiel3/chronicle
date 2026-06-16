@@ -11,7 +11,7 @@ chronicle establece un puñado de **hechos del proyecto** al arrancar (el discov
 | Campo | Qué representa | Cómo se obtiene | Qué dispara |
 |---|---|---|---|
 | `intent` | La operación pedida | preguntado (Q-INTENT) | Elige el modo (create/ingest/reverse/update/audit) |
-| `system_type` | Tipo de sistema | detectado (Capa 0) / preguntado (P0-sys) | Set canónico adaptativo |
+| `system_type` | Tipo de sistema | detectado (Capa 0) / preguntado (P0-sys) | Selecciona el **profile** (núcleo de 4 + variables 03-08) — ver `node-templates.md` §Eje 1 |
 | `scale` | Escala actual | detectado / preguntado (P0-scale) | Profundidad de datos/caché/tenancy |
 | `domain` | Dominio de negocio | detectado / inferido | Naming, agrupación de dominios |
 | `trajectory` | Ambición (hoy → futuro) | preguntado (Q-trayectoria) | Checklist de escalado |
@@ -34,7 +34,7 @@ Mode A es fire-and-forget salvo por Q-idioma (ver más abajo). Los campos detect
 | Campo | Inferir de | Señal |
 |---|---|---|
 | `problem` | la visión generada | la primera frase declarativa sobre qué resuelve el sistema |
-| `system_type` | la descripción/arquitectura | "web app", "REST API", "CLI", "mobile", "SaaS", "multi-tenant" |
+| `system_type` | la descripción/arquitectura | "web app", "REST API", "CLI", "mobile", "SaaS", "multi-tenant", "librería/SDK", "pipeline/ETL" |
 | `domain` | actores + funcionalidades | nombres de actores y agrupación de features (ecommerce → productos/carrito; fintech → transacciones) |
 | `scale` | actores + menciones de escala/RBAC | conteo de actores, complejidad de RBAC, keywords de escala |
 | `stack` | la descripción general | frameworks, lenguajes, DB, servicios externos |

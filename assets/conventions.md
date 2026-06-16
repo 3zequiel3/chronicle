@@ -58,17 +58,19 @@ Tags válidos: `[MVP]`, `[Post-MVP]`, `[v2]` (o versión concreta). Por qué tag
 
 ---
 
-## 3. Set canónico adaptativo (gate: `system_type`)
+## 3. Set canónico adaptativo (gate: `system_type` → profile)
 
-`system_type` **agrega y quita** nodos. No fuerces los 10 idénticos en todo sistema.
+`system_type` selecciona un **profile** que agrega y quita nodos. No fuerces los 10 idénticos en todo sistema. **La tabla de profiles que decide qué slot vive y cómo se encuadra es la autoridad y vive en `node-templates.md` §Eje 1.** Acá solo el resumen de intención por tipo:
 
-| system_type | Ajuste sobre el set canónico |
+| system_type | Intención del profile |
 |---|---|
 | `web_app` | Set completo (RBAC, flujos UI, contratos front-back) |
 | `api` | Quita pantallas; enfatiza contratos de API en el 04 |
 | `cli` | **Quita** RBAC del 03 y flujos web del 07; agrega "comandos y argumentos" |
 | `mobile` | Flujos de navegación + estado offline |
 | `saas_multi_tenant` | **Agrega** aislamiento de datos + modelo de tenancy (extra `1X_tenancy.md`) |
+| `library_sdk` | **Quita** actores/flujos-UI; el 04 es la **superficie de API pública**, el 08 suma versionado/compat |
+| `data_pipeline` | **Quita** actores/historias-UI; el 04 son **data contracts**, el 06 son stages/jobs, el 07 es el **DAG**, el 08 suma orquestación |
 
 Los nodos quitados no se generan vacíos: se omiten y se nota la omisión en el `README` index.
 

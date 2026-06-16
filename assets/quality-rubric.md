@@ -37,7 +37,7 @@ Banda de calidad:
 | 09 Decisiones | alternativas+trade-offs · supuestos con validación |
 | 10 Preguntas | inconsistencias con impacto · preguntas priorizadas |
 
-> Los nodos omitidos por `system_type` (ej. RBAC en un CLI) no penalizan el score: se marcan **N/A**, no 0%.
+> Los nodos que el **profile** del `system_type` desactiva (ej. RBAC en un CLI, flujos-UI en una librería, historias en un pipeline — ver `node-templates.md` §Eje 1) no penalizan el score: se marcan **N/A**, no 0%. Solo se puntúan los slots **activos** del profile.
 
 ---
 

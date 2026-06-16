@@ -4,9 +4,44 @@ Estructura **mínima esperada** de cada uno de los 10 nodos canónicos. Adaptala
 
 ---
 
-## Taxonomía: mapas vs colecciones
+## Dos taxonomías ortogonales
 
-La KB tiene dos tipos de nodo, y solo uno se explota en carpeta.
+Cada nodo se clasifica en dos ejes **independientes**:
+
+1. **Núcleo vs variable** — *qué* nodos existen. Lo decide el `system_type` vía su **profile**.
+2. **Mapa vs colección** — archivo único vs carpeta. Lo decide el **tamaño**.
+
+Los dos ejes se combinan: un nodo puede estar activo (eje 1) y ser archivo o carpeta (eje 2).
+
+---
+
+## Eje 1 — Núcleo + profile por `system_type`
+
+No todos los sistemas llevan los mismos nodos. Un CLI no tiene RBAC; una librería no tiene flujos de UI; un pipeline de datos no tiene historias de usuario. Forzar los 10 idénticos genera nodos vacíos o forzados. En cambio:
+
+- **Núcleo (4 nodos, SIEMPRE presentes)** — aplican a cualquier sistema: **01** (visión), **02** (descripción/stack), **09** (decisiones), **10** (preguntas abiertas).
+- **Variables (6 nodos, 03-08)** — su **presencia y encuadre** los define el profile del `system_type`. Un nodo que el profile desactiva **no se genera vacío**: se omite y se anota la omisión en el `README` index.
+
+### Tabla de profiles (qué slot vive y cómo se encuadra)
+
+| Slot | `web_app` | `api` | `cli` | `mobile` | `saas_multi_tenant` | `library_sdk` | `data_pipeline` |
+|---|---|---|---|---|---|---|---|
+| **03** actores | RBAC completo | auth de servicio | ✗ (el invocador) | RBAC completo | RBAC + roles de tenant | ✗ (consumidores de la API) | ✗ (operadores / upstreams) |
+| **04** datos | entidades + contratos | énfasis en contratos de API | esquema de config/IO | entidades + sync | + aislamiento por tenant | **superficie de API pública** | **data contracts (in/out) + esquemas** |
+| **05** reglas | reglas de dominio | reglas de dominio | semántica de comandos | reglas de dominio | + límites por plan | invariantes/contratos de comportamiento | reglas de transformación/validación |
+| **06** funcionalidades | historias (US) | endpoints como features | **comandos y flags** | historias (US) | historias (US) | **recetas de uso de la API** | **stages / jobs del pipeline** |
+| **07** flujos | flujos de UI | flujos de request | flujo de ejecución del comando | navegación + offline | flujos de UI | secuencias de llamada típicas | **DAG del pipeline / linaje de datos** |
+| **08** arquitectura | completo | completo | completo | completo | + modelo de tenancy | + **versionado / compatibilidad** | + **orquestación / scheduling** |
+
+> El profile se resuelve del `system_type` (detectado en Capa 0 / preguntado en P0-sys). La **selección** de profile no agrega tokens: cada run instancia **un solo profile**, y el asset-loading map ya carga solo lo necesario. `conventions.md` §3 encuadra el *tono* del interrogatorio por tipo; esta tabla decide *qué nodos existen*.
+
+> **Extras gateados aparte** (no por profile): `12_seguridad_compliance.md` lo gatea el **tipo de dato** (PII/pagos), `1X_tenancy.md` lo agrega `saas_multi_tenant`. Ver `conventions.md` §3-4.
+
+---
+
+## Eje 2 — Mapas vs colecciones
+
+De los nodos **activos**, solo las colecciones se explotan en carpeta.
 
 - **Mapas (archivo único)** — se leen enteros para tener la foto completa; partirlos fragmenta la historia. Son **01, 02, 03, 08, 10**.
 - **Colecciones (archivo o carpeta)** — listas de unidades discretas, organizadas por funcionalidad/dominio, que crecen y se navegan por unidad. Son **04, 05, 06, 07, 09**. Son exactamente los nodos que **Mode C escribe** al documentar una funcionalidad.

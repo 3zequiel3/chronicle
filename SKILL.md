@@ -6,7 +6,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Ezequiel González
-  version: "2.2"
+  version: "2.3"
 ---
 
 ## Master rule (governs every mode)
@@ -121,9 +121,14 @@ La Capa 0 **propone** el modo; Q-INTENT lo **confirma**. Si el contexto ya es in
 ### Output location (todos los modos)
 Todos los archivos de la KB van a `knowledge-base/` en la **raíz del proyecto**. **NUNCA** mezclar con `docs/` (que contiene los documentos fuente de Mode A).
 
-### Canonical nodes (10 obligatorios — archivo o carpeta)
+### Canonical nodes (núcleo de 4 + variables por profile)
 
-La KB **DEBE** contener estos 10 nodos canónicos. Cada nodo es un **archivo `.md`** o, si su contenido es una colección que crece, una **carpeta** con el mismo prefijo numérico (decisión condicional por tamaño — ver `assets/node-templates.md`).
+La KB tiene **10 slots canónicos** con numeración estable. **No todos viven en todo sistema**: el `system_type` selecciona un **profile** que decide qué slots están activos y cómo se encuadran (ver `assets/node-templates.md` §Eje 1).
+
+- **Núcleo (siempre presente)**: **01, 02, 09, 10** — aplican a cualquier sistema.
+- **Variables (03-08)**: presencia y encuadre por profile. Un CLI no lleva RBAC (03); una librería no lleva flujos de UI (07); un pipeline no lleva historias de usuario (06). Un slot que el profile desactiva **no se genera vacío** — se omite y se anota en el `README` index.
+
+La tabla siguiente es el set completo (profile `web_app`, el más amplio). Cada nodo activo es un **archivo `.md`** o, si es una colección que crece, una **carpeta** con el mismo prefijo numérico (decisión condicional por tamaño — ver `assets/node-templates.md` §Eje 2).
 
 | # | Nodo | Tipo | Contenido |
 |---|------|------|-----------|

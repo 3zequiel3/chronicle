@@ -5,7 +5,7 @@
 **La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — generándola desde documentos, desde cero, o **documentando código existente sin tocar una sola línea**.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.2-green.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/version-2.3-green.svg)](SKILL.md)
 [![Read-only on code](https://img.shields.io/badge/c%C3%B3digo-read--only-orange.svg)](#regla-de-oro)
 
 *Un cronista registra la realidad tal cual es, sin alterarla. Eso es chronicle: documenta el sistema, no lo modifica.*
@@ -16,7 +16,7 @@
 
 ## ¿Qué es?
 
-`chronicle` toma cualquier proyecto y produce una **base de conocimiento navegable y consistente** en `knowledge-base/`, organizada en **10 nodos canónicos** que cubren todo lo crítico de un sistema: visión, datos, reglas, flujos, arquitectura y decisiones.
+`chronicle` toma cualquier proyecto y produce una **base de conocimiento navegable y consistente** en `knowledge-base/`, organizada en **10 slots canónicos** —un núcleo de 4 siempre presente + variables que se activan según el tipo de sistema— que cubren todo lo crítico: visión, datos, reglas, flujos, arquitectura y decisiones.
 
 A diferencia de un generador de documentación de un solo uso, chronicle cubre el **ciclo de vida completo**: crea, documenta código que ya existe, actualiza sin destruir, y audita lo que se escribió antes.
 
@@ -46,7 +46,7 @@ Este principio es lo que hace que la documentación sea **confiable**: no mezcla
 - 🧭 **5 modos** que cubren todo el ciclo de vida de la documentación.
 - 🔍 **Documentación inversa por funcionalidad** — documenta un corte vertical (checkout, pagos…) que cruza carpetas y lenguajes, leyendo el código en modo read-only.
 - 🪶 **Eficiente en tokens** — detecta el stack desde los *manifests*, no leyendo el código; y carga solo los recursos que el modo activo necesita.
-- 🧩 **Estructura adaptativa** — los nodos crecen de archivo a carpeta según el tamaño; el set canónico se ajusta al tipo de sistema (un CLI no lleva RBAC).
+- 🧩 **Estructura adaptativa** — núcleo de 4 nodos + *profile* por tipo de sistema (web, API, CLI, móvil, SaaS, **librería/SDK**, **pipeline de datos**): un CLI no lleva RBAC, una librería documenta su API pública, un pipeline su DAG. Y los nodos crecen de archivo a carpeta según el tamaño.
 - 🔀 **Merge no destructivo** — actualizar nunca pisa el trabajo previo válido.
 - ✅ **Auditable** — score de completitud por nodo, consistencia cruzada y detección de contradicciones internas.
 - 📊 **Diagramas Mermaid** nativos (ERD, secuencia, arquitectura).
@@ -108,10 +108,12 @@ Por eso documentar un proyecto gigante cuesta casi lo mismo que uno chico: nunca
 
 ## Estructura de la base de conocimiento
 
-Los **10 nodos canónicos** se dividen en dos tipos:
+Los **10 slots canónicos** se clasifican en dos ejes ortogonales:
 
-- **Mapas** (`01`, `02`, `03`, `08`, `10`) — se leen enteros para tener la foto completa → **archivo único**.
-- **Colecciones** (`04`, `05`, `06`, `07`, `09`) — listas que crecen y se navegan por unidad → **archivo o carpeta**, según el tamaño.
+- **Núcleo vs variable** (qué nodos existen) — `01/02/09/10` son el núcleo (siempre); `03`-`08` los activa y encuadra el *profile* del tipo de sistema.
+- **Mapas vs colecciones** (archivo vs carpeta) — **mapas** (`01`, `02`, `03`, `08`, `10`) se leen enteros → archivo único; **colecciones** (`04`, `05`, `06`, `07`, `09`) crecen y se navegan por unidad → archivo o carpeta según el tamaño.
+
+> El árbol de abajo es el set completo (perfil `web_app`). En una librería, un CLI o un pipeline, algunos slots se omiten o se reencuadran.
 
 ```
 knowledge-base/

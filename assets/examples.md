@@ -2,6 +2,8 @@
 
 Ejemplos end-to-end, uno por modo. **Cargá solo la sección del modo activo.** Sirven de referencia de estilo y de flujo esperado.
 
+> Los ejemplos usan el profile `web_app` (ecommerce) por concreción. Con otro `system_type` el flujo es el mismo, pero el **profile reencuadra los nodos** (`node-templates.md` §Eje 1): una librería documenta su API pública en el `04` y no genera `03`/`07-UI`; un pipeline arma el DAG en el `07` y stages en el `06`; un CLI documenta comandos en el `06`. La mecánica de cada modo no cambia.
+
 ---
 
 ## Mode A — silent ingest

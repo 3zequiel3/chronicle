@@ -63,9 +63,11 @@ Recomendadas en todo run de Mode B; en Mode C, `system_type`/`scale`/`stack` ya 
 - (c) CLI / herramienta de línea de comandos
 - (d) Aplicación móvil
 - (e) SaaS multi-tenant (múltiples organizaciones aisladas)
-- (f) Otro (describilo)
+- (f) Librería / SDK (se consume por código, sin UI propia)
+- (g) Pipeline de datos / ETL / batch
+- (h) Otro (describilo)
 
-**Por qué importa**: condiciona patrones de arquitectura, autenticación y qué documentación tiene valor. Setea `system_type` → activa el **set canónico adaptativo** (un CLI no lleva RBAC; un SaaS suma tenancy).
+**Por qué importa**: condiciona patrones de arquitectura, autenticación y qué documentación tiene valor. Setea `system_type` → **selecciona el profile** (núcleo de 4 + variables; ver `node-templates.md` §Eje 1): un CLI no lleva RBAC, una librería no lleva flujos de UI, un pipeline no lleva historias de usuario.
 
 ### P0-scale — Escala de operación
 
@@ -160,6 +162,8 @@ La misma pregunta se formula distinto según lo detectado:
 | `api` | Foco en contratos, versionado de API, auth de servicio; sin preguntas de UI. |
 | `saas_multi_tenant` | Sumá: ¿aislamiento por schema o por fila? ¿onboarding de tenant? ¿límites por plan? |
 | `mobile` | Preguntá por estado offline, sincronización, permisos del dispositivo. |
+| `library_sdk` | Saltá actores/UI; preguntá por superficie de API pública, semver/compat, ejemplos de uso, breaking changes. |
+| `data_pipeline` | Saltá actores/historias; preguntá por fuentes/sinks, contratos de datos, scheduling/orquestación, idempotencia y reprocesos. |
 
 ---
 

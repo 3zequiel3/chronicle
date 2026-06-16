@@ -26,7 +26,7 @@ Qué hacer cuando la situación no es limpia, y la verificación que corre el ag
 |---|---|
 | Colección cruza el umbral durante un Update | Promové archivo→carpeta y **actualizá las referencias cruzadas** (no las dejes rotas). |
 | Una feature (Mode C) toca otra funcionalidad | Regla de frontera: cross-reference y parar, no documentar la otra. |
-| Nodo omitido por `system_type` | Anotá la omisión en el índice; no dejes un archivo vacío. |
+| Nodo desactivado por el profile del `system_type` | Anotá la omisión en el índice; no dejes un archivo vacío. Ver `node-templates.md` §Eje 1. |
 | Idioma mezclado en la KB existente | Detectá el idioma dominante y mantenelo; no mezcles (ver `conventions.md`). |
 
 ---
