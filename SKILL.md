@@ -1,12 +1,12 @@
 ---
 name: chronicle
 description: >
-  Builds and maintains a structured project knowledge base of 10 canonical nodes (files or folders) at knowledge-base/ (project root). Five modes: generate from source docs (silent), build from scratch (interactive), reverse-document existing code by functionality (read-only), update/improve an existing KB (non-destructive merge), and audit an existing KB (consistency + completeness). Reads code but NEVER modifies it.
+  Builds and maintains a structured project knowledge base at knowledge-base/ (project root), organized in canonical nodes — a core set plus variable nodes selected by a per-system-type profile (web, api, cli, mobile, saas, library/SDK, data pipeline). Five modes: generate from source docs (silent), build from scratch (interactive), reverse-document existing code by functionality (read-only), update/improve an existing KB (non-destructive merge), and audit an existing KB (consistency, completeness, optional source-correctness verification). Every factual claim carries a provenance citation. Reads code but NEVER modifies it.
   Trigger: When user asks to create, build, generate, update, improve, or audit a knowledge base; document a project from source documents (.txt, .docx, .pdf) or from existing code; or asks to "armar base de conocimiento" / "crear KB" / "documentar proyecto" / "documentar funcionalidad" / "actualizar la KB".
 license: Apache-2.0
 metadata:
   author: Ezequiel González
-  version: "2.3"
+  version: "2.4"
 ---
 
 ## Master rule (governs every mode)
@@ -84,7 +84,7 @@ La Capa 0 **propone** el modo; Q-INTENT lo **confirma**. Si el contexto ya es in
 
 **Trigger**: `docs/` existe y contiene fuentes (`.txt`, `.docx`, `.pdf`, o `.md` distintos a un README), y el usuario no pidió otra cosa.
 
-**Comportamiento**: leés todas las fuentes desde `docs/`, analizás, y generás la KB canónica completa en `knowledge-base/` con **una sola pregunta**: el idioma (Q-idioma — estructural, evita regenerar toda la KB). Por lo demás es fire-and-forget. Los campos de discovery se **infieren** de las fuentes; los no inferibles (`trajectory`, `maintenance_context`) caen en defaults conservadores + nota en `10_preguntas_abiertas.md`. Ver `assets/discovery-fields.md`.
+**Comportamiento**: leés todas las fuentes desde `docs/`, analizás, y generás la KB canónica completa en `knowledge-base/` con **una sola confirmación estructural** antes de escribir: el **idioma** (Q-idioma) y el **`system_type`** inferido (que selecciona el profile → qué nodos existen). Ambos son estructurales: errarlos obliga a regenerar toda la KB, así que se confirman aunque el modo sea silencioso. Por lo demás es fire-and-forget. El resto de los campos de discovery se **infieren** de las fuentes; los no inferibles (`trajectory`, `maintenance_context`) caen en defaults conservadores + nota en `10_preguntas_abiertas.md`. Ver `assets/discovery-fields.md`.
 
 ### Mode B — From scratch (interactive)
 
@@ -182,7 +182,7 @@ Archivos extra con prefijo `1X_`/`2X_` y nombre kebab-case complementan los 10 c
 ## Resources
 
 - **Detection funnel**: [assets/detection-funnel.md](assets/detection-funnel.md) — 3 capas + tabla manifest→stack.
-- **Canonical templates**: [assets/node-templates.md](assets/node-templates.md) — estructura de los 10 nodos, regla archivo↔carpeta, promoción dinámica.
+- **Canonical templates**: [assets/node-templates.md](assets/node-templates.md) — núcleo + profiles por `system_type`, templates de los 10 slots (web + variantes no-web), regla archivo↔carpeta, promoción dinámica.
 - **Strategic questions**: [assets/interview-guide.md](assets/interview-guide.md) — banco de preguntas (Mode B) + discovery + mapeo pregunta→efecto por modo.
 - **Provenance**: [assets/provenance.md](assets/provenance.md) — contrato de citas de origen (`code`/`doc`/`user`/`inferred`); enforcement de la regla madre y backbone de verificación.
 - **Reverse documentation**: [assets/reverse-documentation.md](assets/reverse-documentation.md) — protocolo del Mode C (read-only por funcionalidad).

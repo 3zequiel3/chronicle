@@ -1,6 +1,6 @@
 # Canonical Templates — estructura de cada nodo
 
-Estructura **mínima esperada** de cada uno de los 10 nodos canónicos. Adaptala al dominio, pero respetá las secciones marcadas. Cada nodo incluye un **checklist de validación** que alimenta el completeness score (`quality-rubric.md`).
+Estructura **mínima esperada** de cada uno de los 10 slots canónicos (núcleo + variables por profile — ver §Eje 1). Adaptala al dominio, pero respetá las secciones marcadas. Cada nodo incluye un **checklist de validación** que alimenta el completeness score (`quality-rubric.md`). Los templates base de abajo son la forma `web_app`; las **variantes no-web** (librería, CLI, pipeline) están en §Templates por profile.
 
 ---
 
@@ -311,3 +311,55 @@ sequenceDiagram
 [2-3 frases con lo más importante.]
 ```
 > Si el `system_type` omitió un nodo (ej. RBAC en un CLI), anotá la omisión en el índice en vez de dejar un archivo vacío.
+
+---
+
+## Templates por profile (variantes no-web)
+
+Los templates de arriba son la forma `web_app`. Cuando el profile (§Eje 1) reencuadra un slot, **usá la variante de abajo en vez del template base** — mismo número de slot, otra forma. Los slots no listados para un profile usan el template base; los marcados ✗ en la tabla de profiles se omiten. La **procedencia es obligatoria igual** (cita por ítem).
+
+### `library_sdk`
+
+- **04 · Superficie de API pública** *(colección)* — reemplaza "modelo de datos". Por símbolo exportado:
+  ```markdown
+  ## `funcionExportada(args)` → ReturnType   `[code · src/index.ts#funcionExportada]`
+  - **Firma**: parámetros (tipo, opcional/requerido), retorno, throws.
+  - **Estabilidad**: `stable` | `beta` | `deprecated` (+ desde qué versión).
+  - **Ejemplo mínimo**: snippet de uso.
+  ```
+  **Checklist**: cada símbolo público con firma · estabilidad/semver · ejemplo · cita.
+- **06 · Recetas de uso** *(colección)* — reemplaza historias de usuario. Por caso de uso: objetivo, snippet end-to-end, notas/gotchas. `[code · …]`
+- **07 · Secuencias de llamada** — el orden esperado de llamadas para un caso típico (init → configurar → usar → liberar), con diagrama de secuencia si aplica.
+- **03 actores** y **07 flujos de UI**: ✗ (omitir; los consumidores no son actores RBAC).
+
+### `cli`
+
+- **04 · Esquema de config/IO** — reemplaza entidades: archivos de config, env vars, formato de entrada y salida (stdin/stdout/archivos), exit codes. `[code · …]`
+- **06 · Comandos** *(colección)* — reemplaza historias. Por comando:
+  ```markdown
+  ## `mi-cli <comando> [flags]`   `[code · src/commands/cmd.ts#run]`
+  - **Sinopsis**: qué hace en una frase.
+  - **Flags**: `--flag` (tipo, default, efecto).
+  - **Ejemplos**: invocación → salida esperada.
+  - **Exit codes**: 0 ok · N error.
+  ```
+- **07 · Flujo de ejecución** — del parseo de args a la salida/exit code.
+- **03 RBAC**: ✗ (el invocador es el usuario; no hay roles).
+
+### `data_pipeline`
+
+- **04 · Data contracts** *(colección)* — reemplaza entidades. Por dataset/stream: esquema (campos + tipos), formato, fuente/sink, particionado, SLA/frescura. `[code · …]`
+- **06 · Stages / Jobs** *(colección)* — reemplaza historias. Por stage: input, transformación, output, idempotencia/reproceso. `[code · …]`
+- **07 · DAG / linaje** — el grafo de dependencias entre stages + linaje de datos:
+  ```markdown
+  ## DAG del pipeline
+  ```mermaid
+  flowchart LR
+      Ingesta --> Limpieza --> Enriquecido --> Carga
+  ```
+  - **Dependencias**: qué stage espera a cuál.
+  - **Linaje**: de qué fuente sale cada campo del output. `[code · …]`
+  ```
+- **03 actores** y **06 historias de UI**: ✗ (operadores/upstreams, no actores RBAC).
+
+> `api`, `mobile` y `saas_multi_tenant` usan los templates base con los ajustes de la tabla de profiles (énfasis en contratos, offline/sync, tenancy) — no necesitan variante de forma completa.

@@ -1,0 +1,8 @@
+{
+  "symbol": "validateCoupon",
+  "source": "sample.js",
+  "language": "javascript",
+  "normalized": "function validateCoupon(code) { return seen.has(code) ? false : seen.add(code); }",
+  "algorithm": "sha256",
+  "fingerprint": "112007c1a9e8addff1c755a366c46830dce11d1cfa3482074ec5a47c0ae79b83"
+}

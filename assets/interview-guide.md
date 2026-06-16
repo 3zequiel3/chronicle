@@ -182,8 +182,15 @@ Si el usuario contesta con frases como estas, **no avances** — cuestioná y pe
 
 ## Mapeo pregunta → efecto, por modo
 
-### Mode A (silent) — 1 sola pregunta (el idioma)
-No pregunta nada salvo **Q-idioma** (estructural, barata, evita regenerar toda la KB). El resto lo infiere de las fuentes (ver `discovery-fields.md`). `trajectory` y `maintenance_context` caen en default conservador + nota en el `10`.
+### Mode A (silent) — 1 sola confirmación estructural
+No pregunta nada salvo una confirmación de los **dos campos estructurales** antes de escribir: **idioma** (Q-idioma) y **`system_type`** inferido (que selecciona el profile → qué nodos existen). Ambos son baratos de confirmar y catastróficos de errar (regenerás toda la KB). Mostralos juntos:
+
+```
+Voy a generar la KB como: idioma=español · tipo=web_app (inferido de las fuentes).
+¿Confirmás? (sí / corregir)
+```
+
+El resto lo infiere de las fuentes (ver `discovery-fields.md`). `trajectory` y `maintenance_context` caen en default conservador + nota en el `10`.
 
 ### Mode B (desde cero) — batería completa
 Q-idioma → language · Q-INTENT → modo · P0-sys → set adaptativo · P0-scale → profundidad datos/infra · Q-trayectoria → checklist escalado · Q-maintenance → governance · P1 → problema (rechaza vago) · P2 → tags MVP · P3 → actores+dominio · P4 → stack+infra · P5 → patrones del 08 · ronda 2 → compliance/ABAC/state-machine/versionado.

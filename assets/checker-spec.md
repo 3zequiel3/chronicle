@@ -107,10 +107,10 @@ El checker corre sobre repos no confiables y se genera por código → es superf
 
 Cuando el agente **genera** el checker para un proyecto, antes de usarlo:
 
-1. Corré el checker generado contra `assets/conformance/sample-kb/`.
-2. Compará su salida con `assets/conformance/expected.json` (campos `claims`, `cited`, `uncited`, `broken`, `items`).
-3. **Si coincide exacto → conformante**, usalo. **Si no → regenerá** el checker y repetí. No uses un checker que no pasó el fixture.
+1. Corré el checker generado contra `assets/conformance/sample-kb/` y compará su salida con `assets/conformance/expected.json` (campos `claims`, `cited`, `uncited`, `broken`, `items`).
+2. Corré la normalización + hash sobre `assets/conformance/fingerprint/sample.js` y compará con `assets/conformance/fingerprint/expected.json` (el string `normalized` **y** el `fingerprint` SHA-256).
+3. **Si todo coincide exacto → conformante**, usalo. **Si no → regenerá** el checker y repetí. No uses un checker que no pasó el fixture.
 
-El fixture es **data, no código** (markdown + JSON), runtime-agnóstico. Valida la lógica determinista (extracción de citas + consistencia cruzada); el stalening depende de git+código real y se valida en el repo objetivo, no en el fixture.
+El fixture es **data, no código** (markdown + JSON + un snippet), runtime-agnóstico. Valida las tres piezas deterministas: extracción de citas, consistencia cruzada **y la normalización del fingerprint** (la parte más delicada). Lo único que no se fixtura es el `git diff` del staleness, que necesita un repo git real y se valida en el repo objetivo.
 
 > Así el chequeo es turnkey **sin** que chronicle mantenga un script por plataforma, y su correctitud queda **verificada por generación** en vez de asumida.

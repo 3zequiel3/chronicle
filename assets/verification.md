@@ -50,6 +50,15 @@ El staleness (barato, mecánico) filtra qué llega al LLM: no re-verificás sem�
 | `unsupported` | la cita no alcanza para sostenerla | revisar la cita o la afirmación |
 | `unverified` | no se llegó (budget/sin fuente accesible) | reportado en cobertura |
 
+### Verificación reforzada (multi-juez, opcional — para alto riesgo)
+
+Un solo subagente juzgando "¿coincide?" es la misma familia de modelo con los mismos puntos ciegos. Para las afirmaciones de **mayor riesgo** (las `RN` de negocio, o las que el usuario marque críticas), reforzá con **2-3 jueces independientes**, cada uno con el framing de refutación y **sin ver el veredicto de los otros**:
+
+- La afirmación **se sostiene solo si la mayoría la confirma**. Un solo `contradicted` la baja a **sospechosa** (→ `10`), no la confirma.
+- Para diversificar (no redundar), dales **lentes distintas** cuando aplique: uno chequea contra el **test**, otro contra la **implementación**, otro contra el **contrato/uso**. Lentes diferentes atrapan fallas que tres jueces idénticos no.
+
+Es **opt-in y acotado por presupuesto** (token economy): se reserva para el alto riesgo, no para toda la KB. El default es juez único; el multi-juez se pide ("verificá reforzado") o se dispara solo sobre las `RN` cuando hay budget. Reportá cuántos jueces votaron por afirmación.
+
 ---
 
 ## El ledger (mecanismo compartido con #5)
