@@ -30,6 +30,22 @@ proyecto/                          chronicle                  knowledge-base/
 
 ---
 
+## Empezá acá
+
+1. **Instalá la skill** en tu agente:
+   ```bash
+   npx skills add https://github.com/3zequiel3/chronicle
+   ```
+2. **Pedísela en lenguaje natural** — se activa sola al detectar la intención (crear, documentar, actualizar o auditar):
+   ```text
+   "documentá la funcionalidad de checkout"
+   ```
+3. **Obtenés** los nodos afectados en `knowledge-base/`, cada afirmación con su **cita de procedencia** (`[code · …]`) y sin haber tocado una línea de código.
+
+¿No sabés qué modo necesitás? No importa: chronicle lo detecta solo — ver [Los 5 modos](#los-5-modos).
+
+---
+
 ## Regla de oro
 
 > **El código se LEE pero NUNCA se modifica.**
@@ -50,17 +66,8 @@ Este principio es lo que hace que la documentación sea **confiable**: no mezcla
 - 🔀 **Merge no destructivo** — actualizar nunca pisa el trabajo previo válido.
 - ✅ **Auditable** — score de completitud por nodo, consistencia cruzada y detección de contradicciones internas.
 - 📊 **Diagramas Mermaid** nativos (ERD, secuencia, arquitectura).
-- 🌐 **Multi-idioma** (es/en) — la skill **responde en el idioma en que le hablás**, y el idioma de la **KB generada** se **pregunta una vez** al inicio (no se adivina del repo). Las instrucciones internas están en inglés por economía de tokens; no afecta el idioma con que interactúa ni el de la documentación. Más **gobernanza condicional** para equipos.
-
----
-
-## Instalación
-
-```bash
-npx skills add https://github.com/3zequiel3/chronicle
-```
-
-La skill se carga automáticamente cuando pedís crear, documentar, actualizar o auditar una base de conocimiento.
+- 🌐 **Multi-idioma (es/en)** — responde en el idioma en que le hablás; el idioma de la **KB generada** se pregunta una vez al inicio (no se adivina del repo).
+- 🤝 **Gobernanza condicional** — metadata de ownership y cadencia de revisión que se activa solo cuando hay un equipo o un handoff de por medio, no en proyectos solo.
 
 ---
 
