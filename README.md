@@ -189,14 +189,6 @@ Según el dominio, chronicle agrega nodos extra con prefijo `1X_` que **compleme
 
 Las contribuciones son bienvenidas. Abrí un issue para discutir cambios grandes antes de un PR. La skill vive en `SKILL.md` (el contrato) y `assets/` (los recursos cargados bajo demanda).
 
-Antes de abrir un PR, corré la **red de regresión** y que dé verde:
-
-```bash
-python3 tests/check_skill.py
-```
-
-Valida la integridad de la skill (links entre assets, versión, frontmatter) y corre los goldens de conformancia. CI la dispara sola en cada push/PR (`.github/workflows/skill-check.yml`). Detalle en [`tests/README.md`](tests/README.md).
-
 ---
 
 ## Licencia
