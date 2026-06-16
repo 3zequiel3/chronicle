@@ -18,6 +18,14 @@ Una funcionalidad es un **corte vertical**: el checkout no vive en `pagos/`, viv
 
 > Todo el trazado (búsqueda + lectura de rebanadas) corre en un **subagente aislado** (principio de economía de tokens, ver SKILL.md): la exploración cara ocurre afuera y devuelve un **mapa de traza** compacto. La sesión principal no se infla.
 
+### Unidad de trabajo acotada (la disciplina no escala con el contexto)
+
+La disciplina de citas se degrada en sesiones largas y contextos gigantes. La defensa es **mantener la unidad chica**: **una funcionalidad = una unidad de trabajo cerrada**.
+
+- **Una feature por vez.** No encadenes cinco features en un run. Documentá una, **verificala** (el gate mecánico del cierre — `edge-cases.md` §Auto-chequeo), y recién entonces pasá a la siguiente. Contexto chico = menos drift.
+- **Parar antes que degradar.** Si la frontera de trazado agota el presupuesto antes de secarse, **PARÁ y reportá parcial** (qué quedó sin explorar). Nunca empujes a través de un trazado degradado para "terminar": un mapa incompleto declarado completo es peor que uno parcial declarado parcial.
+- **Verificar antes de seguir.** El merge de un slice no está "hecho" hasta que pasó el gate mecánico sobre ese slice. Una feature con citas rotas no se cierra ni se acumula a la siguiente.
+
 ### 0. Preflight — capacidad de búsqueda
 
 El trazado se apoya en **búsqueda rápida sobre el repo** (mapear por nombre sin leer cuerpos). Antes de trazar, asegurá la capacidad de búsqueda en este orden:

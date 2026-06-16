@@ -44,14 +44,23 @@ Qué hacer cuando la situación no es limpia, y la verificación que corre el ag
 
 ## Auto-chequeo final (antes de cerrar, todo modo generador)
 
-Corré esta verificación sobre tu **propio output** antes de devolverle al usuario:
+El cierre tiene **dos niveles** — y el mecánico manda.
 
-1. **Completitud** — pasá el `quality-rubric.md`. Cualquier nodo < 50% → nota en `10`.
-2. **Consistencia cruzada** — toda `RN`/`US`/`DD` referenciada existe.
-3. **Enlaces** — las rutas a archivos de entidad/dominio resuelven.
-4. **Procedencia** — toda afirmación factual lleva cita (`[code/doc/user]`) o está marcada `[inferred → 10]`. Sin cita = defecto (ver `provenance.md`). Este es el enforcement de la regla madre.
-5. **Spot-check de existencia (anti-cita-fabricada)** — re-grepeá que el símbolo citado **exista** en la ruta citada. Grep es casi gratis, así que el muestreo **escala con el tamaño**, no es un tope fijo: **todas** las citas de alto riesgo (`RN` reglas + contratos/entidades del `04`) se chequean siempre; del resto, una muestra proporcional (~20%, mínimo 10) acotada por presupuesto. No verifica que la afirmación coincida (eso es la verificación profunda, cara y on-demand), pero atrapa el peor caso: una cita a un símbolo que no existe. **Reportá la cobertura real** (`chequeadas/total`, qué quedó sin muestrear); un ancla rota se marca y va al `10`. Nunca declares "citas OK" sobre una muestra parcial sin decir que fue muestra.
+### Nivel mecánico (AUTORIDAD — lo corre el checker, no el LLM)
+
+Estos chequeos son deterministas, así que **no los "verifica" el modelo sobre sí mismo**: los corre el **checker mecánico** (`checker-spec.md`), el **mismo binario que el gate de CI**. Es **fail-closed**: no declares la KB completa si el checker está en rojo.
+
+1. **Consistencia cruzada** — toda `RN`/`US`/`DD` referenciada existe y resuelve.
+2. **Enlaces vivos** — las rutas a archivos de entidad/dominio resuelven.
+3. **Cobertura de procedencia** — toda afirmación factual lleva cita (`[code/doc/user]`) o está marcada `[inferred → 10]`. Sin cita = defecto (regla madre, ver `provenance.md`).
+4. **Spot-check de existencia (anti-cita-fabricada)** — los símbolos citados **existen** en la ruta citada. Escala con el tamaño, no es tope fijo: **todas** las citas de alto riesgo (`RN` + contratos/entidades del `04`) siempre, + muestra proporcional (~20%, mínimo 10) del resto, acotada por presupuesto. Reportá cobertura real (`chequeadas/total`); ancla rota → se marca y va al `10`.
+
+**Persistencia + enforcement.** El resultado se guarda en `knowledge-base/.chronicle/last-check.json` con el git ref. Si el proyecto todavía **no tiene checker generado**, corré estos cuatro con tus tools deterministas (grep/regex sobre la KB) como equivalente y **ofrecé generar el checker persistente** para que CI/pre-commit los re-corra sin vos. La atrapada **real** es CI; el cierre de run es la atrapada temprana. Si algo está en rojo: **arreglalo o marcalo `inferred`/`→10`** y re-corré — nunca cierres declarando "completo" sobre rojo.
+
+### Nivel de juicio (lo corre el LLM — no es mecanizable)
+
+5. **Completitud** — pasá el `quality-rubric.md`. Cualquier nodo < 50% → nota en `10`.
 6. **Sin código tocado** — confirmá que no se modificó ningún archivo de código fuente.
 7. **Idioma** — un solo idioma en toda la KB.
 
-Si algo falla, **arreglalo o anotalo** — no cierres declarando "completo" lo que no lo está. La honestidad del estado es parte del contrato.
+La honestidad del estado es parte del contrato: reportá cobertura real, nunca "completo" sobre una muestra parcial.

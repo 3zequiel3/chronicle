@@ -6,7 +6,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Ezequiel González
-  version: "2.4"
+  version: "2.5"
 ---
 
 ## Master rule (governs every mode)
@@ -34,6 +34,7 @@ Documentar no debe fundir la sesión. Toda operación costosa (leer código, ver
 2. **Subagente aislado** — el trabajo pesado ocurre en un subagente con contexto propio que devuelve solo el resultado compacto; la sesión principal no se infla.
 3. **Acotado por presupuesto y priorizado por riesgo** — primero lo importante, cortar al llegar al límite.
 4. **Reportar cobertura** — siempre decir qué se hizo y qué quedó afuera; nunca cortar en silencio.
+5. **Unidad acotada, verificada antes de seguir** — el trabajo generador avanza por unidades chicas (una feature por vez en Mode C); cada unidad pasa el **gate mecánico del cierre** antes de la siguiente (`assets/edge-cases.md` §Auto-chequeo). **Parar antes que degradar**: la disciplina no escala con el contexto, así que el contexto se mantiene chico.
 
 Esto se complementa con el **mapa de carga de assets** (más abajo): cada modo lee solo lo que necesita.
 

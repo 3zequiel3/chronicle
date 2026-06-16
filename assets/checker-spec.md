@@ -114,3 +114,25 @@ Cuando el agente **genera** el checker para un proyecto, antes de usarlo:
 El fixture es **data, no código** (markdown + JSON + un snippet), runtime-agnóstico. Valida las tres piezas deterministas: extracción de citas, consistencia cruzada **y la normalización del fingerprint** (la parte más delicada). Lo único que no se fixtura es el `git diff` del staleness, que necesita un repo git real y se valida en el repo objetivo.
 
 > Así el chequeo es turnkey **sin** que chronicle mantenga un script por plataforma, y su correctitud queda **verificada por generación** en vez de asumida.
+
+---
+
+## 8. Dos superficies, un solo binario (cierre de run + CI)
+
+El checker corre en **dos momentos**, y debe ser el **mismo binario** en ambos (si divergen, el cierre miente):
+
+1. **Cierre de run (atrapada temprana)** — al terminar cualquier modo generador, antes de declarar la KB completa. Es el nivel mecánico del auto-chequeo final (`edge-cases.md`). **Fail-closed**: no se declara "completo" con el checker en rojo.
+2. **CI / pre-commit (atrapada real)** — corre sin el modelo, reproducible por el usuario. Es el enforcement de verdad; el cierre de run es solo el adelanto.
+
+> **Por qué las dos.** En una sesión pelada, "correr el checker" sigue siendo una instrucción que el LLM ejecuta — el determinismo solo muerde cuando hay una superficie independiente. Por eso el cierre de run **persiste** su resultado y CI lo **re-corre**: lo que una sesión saltee, lo caza el próximo commit.
+
+### Persistencia del resultado
+
+El checker escribe su última corrida en `knowledge-base/.chronicle/last-check.json` (distinto del `verification.json`, que es el ledger de verificación/staleness). Lo escribe **solo el checker**, nunca el LLM (misma regla que §6):
+
+```json
+{ "ran_at": "<timestamp>", "ref": "<git commit>", "status": "pass|fail",
+  "checks": { "citation_coverage": {...}, "cross_ref": {...}, "existence": {...} } }
+```
+
+El próximo run y CI comparan contra este archivo. Si el proyecto aún no tiene checker generado, el cierre corre los chequeos con tools deterministas (grep/regex) como equivalente y **ofrece generar** el checker persistente para que CI los re-corra.

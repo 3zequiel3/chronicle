@@ -60,13 +60,14 @@ Sin config, defaults razonables (cobertura 0.80, staleness y refs rotas bloquean
 
 | Tu workflow | Artefacto |
 |---|---|
+| **Cierre de generación** | el **mismo checker** corre al terminar cualquier modo generador, **fail-closed** (atrapada temprana — ver `edge-cases.md` §Auto-chequeo y `checker-spec.md` §8) |
 | Equipo con PRs | GitHub Action / GitLab CI en el PR o push |
 | **Solo / sin PRs** | hook **pre-commit** o **pre-push** (local, frena el commit malo) |
 | Sin hooks | **comando manual** cuando quieras |
 | Cero automatización | **preguntale al agente**: "¿la doc quedó vieja?" → Mode Audit interactivo |
 | Agendado | cron / agente programado (para el nivel LLM profundo) |
 
-Nadie está obligado a usar PRs: la capacidad es el chequeo; la superficie la elegís vos, o ninguna.
+Nadie está obligado a usar PRs: la capacidad es el chequeo; la superficie la elegís vos, o ninguna. El cierre de generación es el adelanto; CI/pre-commit es el enforcement reproducible (mismo binario en ambos).
 
 ---
 
