@@ -81,7 +81,11 @@ Estrategia **híbrida**: búsqueda-primero para mapear el territorio + seguir-ll
 
 **Regla de frontera**: cuando un símbolo encontrado pertenece claramente a **otra funcionalidad**, no lo expandas — cross-reference y seguí. La frontera se decide por **dominio**, no por distancia de llamada.
 
-**Salida — el mapa de traza**: el subagente devuelve la lista compacta de `(símbolo, rol, archivo)` confirmados + el estado (`completo` | `parcial`, con lo no explorado). Ese mapa es lo que **alimenta las citas `[code · #símbolo]`** del merge (paso 4): cada afirmación documentada sale de un nodo del mapa.
+**Salida — el mapa de traza**: el subagente devuelve la lista compacta de `(símbolo, rol, archivo, línea)` confirmados + el estado (`completo` | `parcial`, con lo no explorado). Ese mapa es lo que **alimenta las citas `[code · #símbolo]`** del merge (paso 4): cada afirmación documentada sale de un nodo del mapa.
+
+> **El mapa de traza es la allowlist de anclas citables (regla dura).** Una cita `[code · ruta#símbolo]` **solo es emitible si ese símbolo está en el mapa** — es decir, si el subagente realmente lo leyó. Citar un símbolo que no está en el mapa es **fabricar una cita**: el peor defecto, porque tiene cara de autoridad sin serlo. Si querés afirmar algo que no tenés en el mapa, o lo trazás (y entra al mapa) o se escribe como `[inferred · inferido → 10]`. La cita es un **subproducto de haber leído**, no un campo de texto que se completa de memoria.
+>
+> El número de línea (`~Lnn`) lo provee la **herramienta de búsqueda** que ubicó el símbolo; **nunca lo tipea el modelo**. Una línea adivinada es señal de fabricación.
 
 ### 4. Merge (corte vertical, no destructivo)
 Documentar una funcionalidad es una **actualización quirúrgica de varios nodos a la vez**, nunca una regeneración total:
@@ -95,7 +99,7 @@ Documentar una funcionalidad es una **actualización quirúrgica de varios nodos
 
 Si el nodo es archivo (sistema chico) se mergea en el archivo; si es carpeta, se escribe el archivo de la unidad. Merge no destructivo: respetá lo que ya está, completá, marcá lo cambiado.
 
-> **Cita obligatoria al escribir (Mode C es el caso central de procedencia).** Cada afirmación que escribas lleva su cita `[code · ruta#símbolo ~Lnn]` apuntando al lugar exacto del que la derivaste — el **símbolo** que estás leyendo en ese momento es el ancla. Para flujos (07), una cita por paso. Lo que no puedas anclar a un símbolo concreto **no se escribe como hecho**: `[inferred · inferido → 10]`. Ver `provenance.md`.
+> **Cita obligatoria al escribir (Mode C es el caso central de procedencia).** Cada afirmación que escribas lleva su cita `[code · ruta#símbolo ~Lnn]` apuntando al lugar exacto del que la derivaste — el **símbolo** que estás leyendo en ese momento es el ancla, y **debe estar en el mapa de traza** (ver §3 — la allowlist). Para flujos (07), una cita por paso. Lo que no puedas anclar a un símbolo del mapa **no se escribe como hecho**: `[inferred · inferido → 10]`. El `~Lnn` sale de la búsqueda, no de tu memoria. Ver `provenance.md`.
 
 ---
 

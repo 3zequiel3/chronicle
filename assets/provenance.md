@@ -4,6 +4,8 @@ Toda afirmación factual en la KB lleva una **cita de origen** con un formato ú
 
 > Regla dura: **una afirmación factual sin cita es un defecto.** O cita su fuente, o se declara `inferred` y va al `09`/`10`. No hay tercer estado.
 
+> Regla dura (anti-fabricación): una cita `code` **solo es válida si su símbolo fue realmente leído** — en Mode C, si está en el **mapa de traza** (la allowlist, ver `reverse-documentation.md` §3). Una cita a un símbolo que no se leyó es una **fabricación**, peor que la ausencia de cita porque simula autoridad. El `~Lnn` lo provee la herramienta de búsqueda, nunca el modelo de memoria. La cita es un subproducto de haber leído, no un campo que se completa al escribir.
+
 ---
 
 ## El formato de cita
@@ -88,6 +90,7 @@ Regex de extracción: `\[(code|doc|user|inferred) · ([^\]]+)\]`
 | Regla que está implementada Y en un doc | Citá ambas: `` `[code · …]` `[doc · …]` `` — refuerza la confianza. |
 | Símbolo renombrado/movido (en Update) | Re-trazá y actualizá el ancla; si ya no existe, marcá la afirmación como sospechosa → `10`. |
 | Afirmación que el agente "sabe" pero no puede señalar | **No** la escribas como hecho: `inferred → 10`. Esto es el enforcement de la regla madre. |
+| El símbolo que querés citar no está en el mapa de traza | No inventes la cita. O lo trazás (entra al mapa) o va como `inferred → 10`. Citar fuera de la allowlist es fabricación. |
 
 ---
 

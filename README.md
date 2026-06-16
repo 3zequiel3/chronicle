@@ -5,7 +5,7 @@
 **La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — generándola desde documentos, desde cero, o **documentando código existente sin tocar una sola línea**.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0-green.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/version-2.1-green.svg)](SKILL.md)
 [![Read-only on code](https://img.shields.io/badge/c%C3%B3digo-read--only-orange.svg)](#regla-de-oro)
 
 *Un cronista registra la realidad tal cual es, sin alterarla. Eso es chronicle: documenta el sistema, no lo modifica.*
@@ -50,7 +50,7 @@ Este principio es lo que hace que la documentación sea **confiable**: no mezcla
 - 🔀 **Merge no destructivo** — actualizar nunca pisa el trabajo previo válido.
 - ✅ **Auditable** — score de completitud por nodo, consistencia cruzada y detección de contradicciones internas.
 - 📊 **Diagramas Mermaid** nativos (ERD, secuencia, arquitectura).
-- 🌐 **Multi-idioma** (es/en) y **gobernanza condicional** para equipos.
+- 🌐 **Multi-idioma** (es/en) — el idioma se **pregunta una vez** al inicio (no se adivina del repo) — y **gobernanza condicional** para equipos.
 
 ---
 
@@ -70,7 +70,7 @@ Un **router de intención** elige el modo tras un embudo de detección barato:
 
 | Modo | Cuándo | Qué hace |
 |------|--------|----------|
-| **A · Ingest** | Hay `docs/` con fuentes | Genera la KB completa **sin preguntas** (fire-and-forget). |
+| **A · Ingest** | Hay `docs/` con fuentes | Genera la KB completa con **una sola pregunta** (el idioma); por lo demás fire-and-forget. |
 | **B · Scratch** | No hay docs ni código | Actúa como **arquitecto + product manager**: pregunta, propone, itera. |
 | **C · Reverse** | Hay código sin documentar | Documenta **una funcionalidad** leyendo el código (read-only). |
 | **Update** | Ya existe `knowledge-base/` | **Merge no destructivo**; promueve nodos archivo→carpeta al crecer. |

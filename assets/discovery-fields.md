@@ -18,17 +18,18 @@ chronicle establece un puñado de **hechos del proyecto** al arrancar (el discov
 | `maintenance_context` | Quién mantiene la doc | preguntado (Q-maintenance) | Gate de governance |
 | `stack` | Tecnologías por capa | detectado (manifests) | Tabla de stack, trazado cross-language |
 | `needs_infra` | ¿Hay infra no trivial? | detectado / inferido | Extras de infra/despliegue |
+| `language` | Idioma de la KB | **preguntado** (Q-idioma) | Nombres de archivo y contenido de toda la KB |
 
 ### Dos naturalezas
 
 - **Detectables / inferibles**: `system_type`, `scale`, `domain`, `stack`, `needs_infra`. Salen de la huella del filesystem (`detection-funnel.md`) o de las fuentes. Se **confirman**, no se preguntan de cero.
-- **Intención humana**: `intent`, `trajectory`, `maintenance_context`. **No** están en el código ni en los docs — se **preguntan**. Nunca se inventan.
+- **Intención humana**: `intent`, `trajectory`, `maintenance_context`, `language`. **No** están en el código ni en los docs — se **preguntan**. Nunca se inventan. (`language` no se infiere del repo por el riesgo de *espanglish*: errar = regenerar toda la KB.)
 
 ---
 
-## Inferencia en Mode A (silent, sin preguntas)
+## Inferencia en Mode A (silent, solo pregunta el idioma)
 
-Mode A es fire-and-forget. Los campos detectables/inferibles se sacan de las fuentes:
+Mode A es fire-and-forget salvo por Q-idioma (ver más abajo). Los campos detectables/inferibles se sacan de las fuentes:
 
 | Campo | Inferir de | Señal |
 |---|---|---|
@@ -54,3 +55,5 @@ Mode A es fire-and-forget. Los campos detectables/inferibles se sacan de las fue
 ### Campos de intención humana en Mode A
 
 `trajectory` y `maintenance_context` **no** son inferibles de docs (son intención de producto/equipo, no contenido). Mode A los pone en **default conservador** — `trajectory` sin setear (sin checklist de escalado) y `maintenance_context = solo` (governance OFF) — y deja una nota `[DISCOVERY]` en `10_preguntas_abiertas.md` para que el usuario los confirme. Nunca los adivina.
+
+`language` es la **excepción**: aunque Mode A es silencioso, el idioma **sí se pregunta** (una sola pregunta, Q-idioma) antes de generar, porque es estructural y errarlo obliga a regenerar toda la KB. No se infiere ni se deja en default. Ver `interview-guide.md` §Q-idioma y `conventions.md` §6.

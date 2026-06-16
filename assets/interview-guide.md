@@ -19,7 +19,7 @@ Antes de cada pregunta, chequeá el discovery que ya tenés de la Capa 0:
 
 - Si el `stack` ya salió de un `package.json`, **no preguntes P4** — confirmá: *"Detecté Next.js + Prisma, ¿hay alguna restricción más que no esté en el código?"*.
 - Si los nombres de carpeta ya revelan los dominios, **acortá P3** a confirmar actores, no a relevarlos de cero.
-- Solo `intent`, `trajectory` y `maintenance_context` se preguntan **siempre** (son intención humana, nunca detectables).
+- Solo `intent`, `trajectory`, `maintenance_context` y `language` se preguntan **siempre** (son intención humana, nunca detectables — el idioma no se infiere del repo por el riesgo de *espanglish*, ver `conventions.md` §6).
 
 Cada pregunta que podés saltar es una ronda menos y tokens menos.
 
@@ -44,6 +44,15 @@ Se resuelve apenas termina el embudo de detección. Si el contexto ya es inequí
 ## Preguntas de discovery
 
 Recomendadas en todo run de Mode B; en Mode C, `system_type`/`scale`/`stack` ya vienen de la Capa 0 y solo se confirman.
+
+### Q-idioma — Idioma de la KB (se pregunta SIEMPRE, en todos los modos)
+
+> ¿En qué idioma querés la documentación?
+
+- (a) Español → `language = es`
+- (b) English → `language = en`
+
+**Por qué importa**: define nombres de archivo y contenido de toda la KB. **No se infiere del repo** (el *espanglish* da señal ambigua y errar = regenerar todo). Es la única pregunta que se hace **incluso en Mode A** silencioso, porque es estructural y barata. Se cachea y no se vuelve a preguntar. Ver `conventions.md` §6.
 
 ### P0-sys — Tipo de sistema
 
@@ -169,14 +178,14 @@ Si el usuario contesta con frases como estas, **no avances** — cuestioná y pe
 
 ## Mapeo pregunta → efecto, por modo
 
-### Mode A (silent) — 0 preguntas
-No pregunta. Infiere de las fuentes (ver `discovery-fields.md`). `trajectory` y `maintenance_context` caen en default conservador + nota en el `10`.
+### Mode A (silent) — 1 sola pregunta (el idioma)
+No pregunta nada salvo **Q-idioma** (estructural, barata, evita regenerar toda la KB). El resto lo infiere de las fuentes (ver `discovery-fields.md`). `trajectory` y `maintenance_context` caen en default conservador + nota en el `10`.
 
 ### Mode B (desde cero) — batería completa
-Q-INTENT → modo · P0-sys → set adaptativo · P0-scale → profundidad datos/infra · Q-trayectoria → checklist escalado · Q-maintenance → governance · P1 → problema (rechaza vago) · P2 → tags MVP · P3 → actores+dominio · P4 → stack+infra · P5 → patrones del 08 · ronda 2 → compliance/ABAC/state-machine/versionado.
+Q-idioma → language · Q-INTENT → modo · P0-sys → set adaptativo · P0-scale → profundidad datos/infra · Q-trayectoria → checklist escalado · Q-maintenance → governance · P1 → problema (rechaza vago) · P2 → tags MVP · P3 → actores+dominio · P4 → stack+infra · P5 → patrones del 08 · ronda 2 → compliance/ABAC/state-machine/versionado.
 
 ### Mode C (reverse) — mínimo, confirmación
-Q-feature → target del trazado · Q-confirm-anchor → (sí/ajustar/no) · Q-trayectoria y Q-maintenance solo si faltan · Q-MVP-tag por ítem (el código no lo sabe) · Q-WHY ante ambigüedad → respuesta al `09`, sin respuesta al `10`. No pregunta system_type/scale/stack (vienen de Capa 0).
+Q-idioma → language · Q-feature → target del trazado · Q-confirm-anchor → (sí/ajustar/no) · Q-trayectoria y Q-maintenance solo si faltan · Q-MVP-tag por ítem (el código no lo sabe) · Q-WHY ante ambigüedad → respuesta al `09`, sin respuesta al `10`. No pregunta system_type/scale/stack (vienen de Capa 0).
 
 ### Mode Update / Audit
 - **Update**: reusa preguntas de B (si faltan campos) o el trazado de C (si es una feature nueva). No regenera lo bueno.

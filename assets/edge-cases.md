@@ -50,7 +50,8 @@ Corré esta verificación sobre tu **propio output** antes de devolverle al usua
 2. **Consistencia cruzada** — toda `RN`/`US`/`DD` referenciada existe.
 3. **Enlaces** — las rutas a archivos de entidad/dominio resuelven.
 4. **Procedencia** — toda afirmación factual lleva cita (`[code/doc/user]`) o está marcada `[inferred → 10]`. Sin cita = defecto (ver `provenance.md`). Este es el enforcement de la regla madre.
-5. **Sin código tocado** — confirmá que no se modificó ningún archivo de código fuente.
-6. **Idioma** — un solo idioma en toda la KB.
+5. **Spot-check de existencia (anti-cita-fabricada)** — muestreá citas `code` (risk-weighted: `RN` primero, tope ~10) y **re-grepeá que el símbolo exista** en la ruta citada. Grep es casi gratis; no verifica que la afirmación coincida (eso es la verificación profunda, cara y on-demand), pero atrapa el peor caso: una cita a un símbolo que no existe. Reportá la cobertura del spot-check; un ancla rota se marca y va al `10`.
+6. **Sin código tocado** — confirmá que no se modificó ningún archivo de código fuente.
+7. **Idioma** — un solo idioma en toda la KB.
 
 Si algo falla, **arreglalo o anotalo** — no cierres declarando "completo" lo que no lo está. La honestidad del estado es parte del contrato.

@@ -112,9 +112,18 @@ Extra recomendado `13_glosario.md` — un solo lugar donde cada término del dom
 
 ---
 
-## 6. Flag de idioma (es / en)
+## 6. Idioma de la KB — se PREGUNTA, no se detecta
 
-La KB se genera en **español por defecto** (nombres de archivo `01_vision_y_objetivos.md` y contenido). Si el usuario pide inglés (o el proyecto claramente lo usa), aplicá el flag de idioma a **nombres de archivo y contenido** de forma consistente:
+El idioma de la KB (nombres de archivo **y** contenido) es una decisión de alto impacto y costo de pregunta nulo: errar significa regenerar toda la KB. Por eso **no se infiere del repo** — un proyecto en *espanglish* (código en inglés, comentarios y README en español) da una señal ambigua, y adivinar mal sale carísimo.
+
+**Preguntá explícitamente, una sola vez, antes de escribir el primer nombre de archivo:**
+
+```
+¿En qué idioma querés la documentación?
+(a) Español   (b) English
+```
+
+La respuesta se **cachea para toda la KB**. Esta es la única pregunta que se hace **incluso en Mode A** (silencioso): es una decisión estructural —como `system_type`— donde una pregunta barata previene el error más caro. Una vez fijado el idioma, aplicalo de forma consistente a **nombres de archivo y contenido**:
 
 | es (default) | en |
 |---|---|
@@ -123,4 +132,4 @@ La KB se genera en **español por defecto** (nombres de archivo `01_vision_y_obj
 | `06_funcionalidades/` | `06_features/` |
 | `07_flujos-principales/` | `07_main-flows/` |
 
-El idioma se decide una vez al inicio y se mantiene en toda la KB. No mezclar idiomas dentro de una misma KB.
+El idioma se decide una vez al inicio (por pregunta) y se mantiene en toda la KB. No mezclar idiomas dentro de una misma KB.

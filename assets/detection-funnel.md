@@ -56,7 +56,7 @@ Detecté: Next.js + Prisma + Postgres. Monorepo con módulos pagos/ y stock/.
 ~18 entidades. No hay docs/ ni knowledge-base/. ¿Es correcto?
 ```
 
-Luego hacé **únicamente** las preguntas que ningún archivo puede responder (conocimiento humano puro): intención, trayectoria, mantenimiento, frontera MVP, y el problema raíz. Todo lo que la Capa 0 ya resolvió (`system_type`, `scale`, `stack`, `domain`) se **confirma**, no se pregunta.
+Luego hacé **únicamente** las preguntas que ningún archivo puede responder (conocimiento humano puro): **idioma de la KB** (Q-idioma — no se infiere del repo por el *espanglish*), intención, trayectoria, mantenimiento, frontera MVP, y el problema raíz. Todo lo que la Capa 0 ya resolvió (`system_type`, `scale`, `stack`, `domain`) se **confirma**, no se pregunta.
 
 El detalle de cada pregunta y su efecto por modo está en [`interview-guide.md`](interview-guide.md).
 
