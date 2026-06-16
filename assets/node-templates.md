@@ -1,0 +1,268 @@
+# Canonical Templates — estructura de cada nodo
+
+Estructura **mínima esperada** de cada uno de los 10 nodos canónicos. Adaptala al dominio, pero respetá las secciones marcadas. Cada nodo incluye un **checklist de validación** que alimenta el completeness score (`quality-rubric.md`).
+
+---
+
+## Taxonomía: mapas vs colecciones
+
+La KB tiene dos tipos de nodo, y solo uno se explota en carpeta.
+
+- **Mapas (archivo único)** — se leen enteros para tener la foto completa; partirlos fragmenta la historia. Son **01, 02, 03, 08, 10**.
+- **Colecciones (archivo o carpeta)** — listas de unidades discretas, organizadas por funcionalidad/dominio, que crecen y se navegan por unidad. Son **04, 05, 06, 07, 09**. Son exactamente los nodos que **Mode C escribe** al documentar una funcionalidad.
+
+### Regla archivo ↔ carpeta (condicional por tamaño)
+
+Una colección **arranca como archivo** y se **promueve a carpeta** al cruzar un umbral. No infles estructura en sistemas chicos.
+
+| Nodo | Umbral sugerido para explotar a carpeta |
+|---|---|
+| 04 modelo de datos | ≥ ~6-8 entidades, o si hay contratos de API |
+| 05 reglas de negocio | ≥ ~20 reglas en ≥ 3 dominios |
+| 06 funcionalidades | ≥ ~3 épicas con varias historias |
+| 07 flujos | ≥ ~5 flujos con diagramas |
+| 09 decisiones | ≥ ~5 decisiones (patrón ADR) |
+
+### Estructura de carpeta
+
+Mantiene el **prefijo numérico** y lleva un `README.md` con el **mapa/overview** — lo único que sí necesitás ver todo junto.
+
+```
+knowledge-base/
+├── 04_modelos-apis/
+│   ├── README.md            ← índice + ERD GLOBAL
+│   ├── modelos/{entidad}.md
+│   └── contratos-api/{dominio}.md
+├── 05_reglas-de-negocio/
+│   ├── README.md            ← índice de dominios
+│   └── {dominio}.md         ← RN-{DOMINIO}-NN
+├── 06_funcionalidades/{epica}.md (+ README)
+├── 07_flujos-principales/{flujo}.md (+ README)
+└── 09_decisiones/
+    ├── README.md            ← índice + supuestos SU-NN
+    └── DD-NN-{titulo}.md     ← un archivo por decisión (ADR)
+```
+
+> **Corte vertical (Mode C)**: documentar "pagos" escribe `pago.md` en 04, `pagos.md` en 05, 06 y 07 — cuatro diffs quirúrgicos en lugar de cuatro monolitos. La carpeta es el reflejo físico del enfoque por funcionalidad.
+
+### Promoción dinámica (Mode Update)
+
+Cuando un update hace que una colección-archivo cruce el umbral, la skill la **refactoriza a carpeta**: crea `0X_<nombre>/`, reparte por unidad, escribe el `README` con el mapa y **actualiza todas las referencias cruzadas**. Refactor de documentación, nunca de código.
+
+### Nodo 09 — variante ADR
+
+Se explota por **longevidad**, no por funcionalidad: un archivo por decisión (`DD-01-elegir-postgres.md`). Los supuestos (`SU-NN`), más livianos, viven en el `README` de la carpeta.
+
+---
+
+## 01 · Visión y Objetivos *(mapa)*
+
+```markdown
+# Visión y Objetivos
+
+## Propósito
+[Una frase + un párrafo de contexto: qué problema resuelve y para quién.]
+
+## Objetivos por actor
+| Actor | Objetivo principal | Objetivos secundarios |
+
+## Alcance v{X.Y}
+- [Qué SÍ hace el sistema en esta versión.]
+
+## Fuera de alcance
+- [Qué NO hace, explícito.]
+
+## Métricas de éxito
+[Cómo se mide que cumple su propósito. Recomendado.]
+```
+**Checklist**: propósito en 1 frase · rango explícito de alcance · fuera-de-alcance presente.
+
+---
+
+## 02 · Descripción General *(mapa)*
+
+```markdown
+# Descripción General
+
+## Stack tecnológico
+| Capa | Tecnología | Versión |
+| Frontend | React + TS | 19 |
+| Backend | FastAPI | 0.11x |
+| Datos | Postgres + Redis | 16 / 7 |
+
+## Arquitectura general
+[Diagrama Mermaid (ver conventions.md) + justificación de alto nivel.]
+
+## Integraciones externas
+| Servicio | Propósito | Tipo (REST/webhook/SDK) |
+```
+**Checklist**: stack por capa · diagrama presente · integraciones listadas.
+
+---
+
+## 03 · Actores y Roles *(mapa)*
+
+```markdown
+# Actores y Roles
+
+## Actores
+| Actor | Descripción | Cómo interactúa |
+
+## RBAC — matriz de permisos
+| Rol | Recurso | C | R | U | D |
+
+## Rutas públicas
+- [Accesibles sin autenticación.]
+```
+**Checklist**: matriz RBAC completa · rutas públicas explícitas. *(Omitir en `system_type = cli`.)*
+
+---
+
+## 04 · Modelo de Datos + Contratos *(colección)*
+
+```markdown
+# Modelo de Datos
+
+## ERD
+```mermaid
+erDiagram
+    USUARIO ||--o{ PEDIDO : crea
+    PEDIDO ||--|{ ITEM : contiene
+```
+
+## Entidad: {Nombre}
+- Atributos (con tipo)
+- Relaciones (con cardinalidad)
+- Constraints / índices
+
+## Contrato de API: {dominio}
+[Por endpoint: método, path, request, response, errores.]
+```
+**Checklist**: ERD presente · cada entidad con atributos+relaciones · contratos con request/response.
+
+---
+
+## 05 · Reglas de Negocio *(colección)*
+
+```markdown
+# Reglas de Negocio — {dominio}
+
+Código único `RN-{DOMINIO}-NN` para trazabilidad.
+
+- **RN-PAGOS-01** `[MVP]`: [regla] — [justificación si no es obvia]
+- **RN-PAGOS-02** `[Post-MVP]`: ...
+```
+**Checklist**: toda regla con código · tag MVP/Post-MVP · justificación donde no sea obvia.
+
+---
+
+## 06 · Funcionalidades *(colección)*
+
+```markdown
+# Funcionalidades — Épica {N}: {nombre}
+
+### US-001 — {título}  `[MVP]`
+**Como** [actor] **quiero** [acción] **para** [beneficio].
+
+**Criterios de aceptación**:
+- [ ] CA-1
+**Reglas relacionadas**: RN-PAGOS-01
+```
+**Checklist**: historias en formato US-NNN · criterios de aceptación · enlace a reglas existentes.
+
+---
+
+## 07 · Flujos Principales *(colección)*
+
+```markdown
+# Flujo: {nombre}
+
+**Disparador**: [evento] · **Actor**: [quién inicia]
+
+## Secuencia
+```mermaid
+sequenceDiagram
+    Actor->>API: POST /checkout
+    API->>DB: reserva stock
+    API-->>Actor: confirmación
+```
+
+## Casos de error
+- [caso] → [manejo]
+```
+**Checklist**: disparador+actor · diagrama de secuencia · casos de error.
+
+---
+
+## 08 · Arquitectura Propuesta *(mapa)*
+
+```markdown
+# Arquitectura Propuesta
+
+## Patrones aplicados
+| Patrón | Dónde | Por qué |
+
+## Estructura de directorios
+[árbol]
+
+## Seguridad
+- Autenticación / Autorización / Validación de input / Secrets
+
+## Variables de entorno
+| Variable | Descripción | Ejemplo | Sensible (Y/N) |
+```
+**Checklist**: patrones justificados · sección de seguridad · env vars con marca de sensibilidad.
+
+---
+
+## 09 · Decisiones y Supuestos *(colección ADR)*
+
+```markdown
+# DD-01 — {título}
+**Decisión**: [qué se decidió]
+**Contexto**: [por qué hubo que decidir]
+**Alternativas**: [opciones evaluadas]
+**Justificación**: [por qué esta]
+**Trade-offs**: [qué se resigna]
+
+---
+# SU-01 — {título}   (en el README de la carpeta)
+**Supuesto**: [...] · **Origen**: [...] · **Riesgo si es falso**: [...] · **Cómo validar**: [...]
+```
+**Checklist**: cada decisión con alternativas+trade-offs · supuestos con origen y forma de validar.
+
+---
+
+## 10 · Preguntas Abiertas *(backlog)*
+
+```markdown
+# Preguntas Abiertas
+
+## Inconsistencias detectadas
+### IN-01 — {título}
+**A dice**: [...] · **B dice**: [...] · **Impacto**: [...] · **Resolución propuesta**: [...]
+
+## Preguntas priorizadas
+| Prioridad | Pregunta | Bloquea | Decisor |
+```
+**Checklist**: inconsistencias con impacto · preguntas con prioridad y decisor.
+
+---
+
+## README de la KB *(índice)*
+
+```markdown
+# {Proyecto} — Base de Conocimiento
+
+## Índice de nodos
+| Nodo | Tipo | Contenido |
+| [01_vision_y_objetivos.md](01_vision_y_objetivos.md) | archivo | ... |
+| [04_modelos-apis/](04_modelos-apis/README.md) | carpeta | ... |
+
+## Quick start para devs
+1. Dominio → 01, 03 · 2. Datos → 04 · 3. Reglas → 05 · 4. Arquitectura → 02, 08 · 5. Implementar → 06, 07 · 6. Antes de codear → 10
+
+## Resumen ejecutivo
+[2-3 frases con lo más importante.]
+```
+> Si el `system_type` omitió un nodo (ej. RBAC en un CLI), anotá la omisión en el índice en vez de dejar un archivo vacío.
