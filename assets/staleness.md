@@ -21,7 +21,7 @@ Read-only, on-demand, en **subagente aislado** (principio token-economy). Reusa 
 | desaparecido | símbolo borrado/renombrado | **huérfana** → marcar |
 | movido | el símbolo existe en otro lado | refrescar el ancla (`~Lnn`/archivo) + revisar |
 
-4. **Actualizá el ledger** (estado + nuevo fingerprint/`ref`) y **reportá**.
+4. **Actualizá el ledger** (estado + nuevo fingerprint/`ref`) y **reportá**. La escritura del `verification.json` la hace el **checker mecánico**, nunca el LLM a mano (regla de propiedad del ledger — ver `checker-spec.md` §6 y `verification.md`).
 
 ---
 

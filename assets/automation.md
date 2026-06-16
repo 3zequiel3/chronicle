@@ -72,14 +72,17 @@ Nadie está obligado a usar PRs: la capacidad es el chequeo; la superficie la el
 
 ## Generado a medida
 
-chronicle **no incluye un script fijo** (te ataría a un runtime y traería los líos de cross-platform de vuelta). En cambio, **emite el artefacto a tu medida** cuando se lo pedís ("armá el chequeo de CI"):
+chronicle **no incluye un script fijo** (te ataría a un runtime y traería los líos de cross-platform de vuelta). En cambio, **emite el artefacto a tu medida** cuando se lo pedís ("armá el chequeo de CI"), implementando el contrato runtime-agnóstico de `checker-spec.md`:
 
 - detecta tu CI y stack (de la Capa 0),
-- genera la GitHub Action / el hook / el script para **tu** entorno,
+- genera el checker en el **runtime que tu proyecto ya usa** (Node → node, Python → python, Go → go) + la GitHub Action / el hook que lo invoca,
 - cross-platform por construcción (Windows/Linux/macOS según el target),
+- aplicando las **reglas de seguridad** del checker (`checker-spec.md` §5: argv-arrays, parse-no-exec, confinamiento a la raíz),
 - usando el preflight de búsqueda de `reverse-documentation.md` §0 cuando el chequeo necesita buscar.
 
-Así el chequeo es turnkey **sin** un script que chronicle tenga que mantener.
+> **Auto-verificación antes de confiar (no opcional).** Apenas generás el checker, corrélo contra el golden fixture (`assets/conformance/sample-kb/`) y compará con `assets/conformance/expected.json`. Si no coincide exacto, el checker está mal generado → **regeneralo**. Ver `checker-spec.md` §7. Así la correctitud queda **verificada por generación**, no asumida.
+
+Así el chequeo es turnkey **sin** un script que chronicle tenga que mantener, y sin imponerte Python ni ningún runtime ajeno al proyecto.
 
 ---
 

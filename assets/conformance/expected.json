@@ -1,0 +1,13 @@
+{
+  "citation_coverage": {
+    "claims": 3,
+    "cited": 2,
+    "uncited": 1,
+    "value": 0.67,
+    "uncited_items": ["RN-PAGOS-03"]
+  },
+  "cross_ref": {
+    "broken": 1,
+    "items": ["US-001 → RN-PAGOS-99"]
+  }
+}

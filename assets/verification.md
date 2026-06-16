@@ -20,15 +20,26 @@ Verificar es lo que más fácil funde una sesión. Por eso el pase está acotado
 
 ---
 
+## Mecánico primero, semántico después (división de trabajo)
+
+La verificación tiene dos partes con costos y naturalezas distintas — **no las mezcles**:
+
+- **Lo mecánico lo resuelve el checker** (`checker-spec.md`), determinista y sin tokens: ¿el símbolo citado **existe**? ¿su fingerprint **cambió** desde el ledger? Eso es un oráculo independiente, no opinión del modelo.
+- **Lo semántico lo resuelve el LLM**, y **solo eso**: ¿la afirmación **coincide** con lo que el símbolo realmente hace? Es la única parte irreducible a regex.
+
+El staleness (barato, mecánico) filtra qué llega al LLM: no re-verificás semánticamente lo que no cambió. Lo barato acota lo caro.
+
+---
+
 ## El pase, paso a paso
 
 1. **Recolectar** las citas `code`/`doc` del scope (toda la KB, un nodo, o una funcionalidad). Las `user`/`inferred` **no se verifican** — no hay fuente factual contra qué chequear.
-2. **Saltar lo cacheado** — si el ledger ya tiene un veredicto para esa afirmación y el **fingerprint de la fuente no cambió**, se reusa. Re-verificar es casi gratis.
-3. **Agrupar** las afirmaciones pendientes por archivo.
+2. **Filtro mecánico** — el checker resuelve existencia + cambio de fingerprint contra el ledger. Lo que existe y **no cambió** se reusa (veredicto cacheado); lo que desapareció ya queda marcado sin gastar LLM. Solo lo **cambiado o nunca verificado** pasa al juicio semántico.
+3. **Agrupar** las afirmaciones pendientes por archivo (cada fuente se lee una vez).
 4. **Priorizar** por riesgo: `RN` (reglas de negocio) → entidades/contratos (`04`) → flujos (`07`) → resto.
-5. **Despachar al subagente** un batch con la lista `(afirmación, cita, ruta#símbolo)`. El subagente lee read-only solo esos símbolos y devuelve veredictos.
+5. **Despachar al subagente para REFUTAR, no para confirmar.** El batch lleva `(afirmación, cita, ruta#símbolo)` y la instrucción: *"buscá evidencia de que la doc está MAL. Si no podés sostenerla con la fuente, el veredicto es `contradicted`/`unsupported`. Ante la duda, NO la confirmes."* El framing de refutación atrapa más que el de confirmación, al mismo costo. **Preferí el test como fuente**: si la afirmación tiene una cita a un test, verificá contra la aserción del test (el contrato), no contra la implementación. El subagente lee read-only solo esos símbolos y devuelve veredictos.
 6. **Cortar** al agotar el presupuesto; lo no alcanzado queda `unverified` (reportado, no oculto).
-7. **Persistir** en el ledger y **reportar** cobertura.
+7. **Persistir y reportar.** Los veredictos se escriben al ledger **a través del checker** (ver §propiedad del ledger), nunca editando el JSON a mano. Reportá cobertura.
 
 ### Veredictos
 
@@ -44,6 +55,8 @@ Verificar es lo que más fácil funde una sesión. Por eso el pase está acotado
 ## El ledger (mecanismo compartido con #5)
 
 Se persiste en `knowledge-base/.chronicle/verification.json`. Markdown limpio; estado de tooling aparte.
+
+> **Propiedad del ledger (regla dura).** El `verification.json` lo escribe **solo el checker mecánico** (`checker-spec.md` §6). El LLM **nunca lo edita a mano** — solo lo lee para decidir qué re-verificar. El estado de tooling es responsabilidad del tooling; mantenerlo en lenguaje natural deriva.
 
 ```json
 {

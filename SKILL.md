@@ -6,7 +6,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Ezequiel González
-  version: "2.1"
+  version: "2.2"
 ---
 
 ## Master rule (governs every mode)
@@ -168,7 +168,7 @@ Archivos extra con prefijo `1X_`/`2X_` y nombre kebab-case complementan los 10 c
 
 `provenance.md` se carga en **todo modo que escribe o audita afirmaciones** (A, B, C, Update, Audit) — define el contrato de citas de origen, obligatorio por la regla madre.
 
-`automation.md` se carga **on-demand** cuando el usuario pide correr el chequeo mecánico o generar un artefacto de CI ("armá el chequeo de CI", "¿la doc quedó vieja?").
+`automation.md` + `checker-spec.md` se cargan juntos **on-demand** cuando el usuario pide correr el chequeo mecánico o generar un artefacto de CI ("armá el chequeo de CI", "¿la doc quedó vieja?"). `checker-spec.md` define el contrato runtime-agnóstico del checker generado y referencia el golden fixture de `assets/conformance/`.
 
 `conventions.md` (Mermaid, tagging, idioma, compliance) se consulta puntualmente cuando aplica, no entero.
 
@@ -185,6 +185,7 @@ Archivos extra con prefijo `1X_`/`2X_` y nombre kebab-case complementan los 10 c
 - **Verification**: [assets/verification.md](assets/verification.md) — verificación de correctitud contra la fuente (Audit profundo on-demand, subagente, ledger + fingerprint).
 - **Staleness**: [assets/staleness.md](assets/staleness.md) — detección de doc vieja vs código (git fast-path, fingerprint normalizado); filtra qué re-verificar.
 - **Automation**: [assets/automation.md](assets/automation.md) — chequeo mecánico sin LLM (cobertura/consistencia/staleness) con reporte JSON + exit codes; agnóstico de superficie (PR/pre-commit/manual/agente); generado a medida.
+- **Checker spec**: [assets/checker-spec.md](assets/checker-spec.md) — contrato runtime-agnóstico del checker mecánico (entradas, chequeos, fingerprint, exit codes), reglas de seguridad (argv-arrays, parse-no-exec, confinamiento), propiedad del ledger, y protocolo de conformancia contra el golden fixture (`assets/conformance/`).
 - **Conventions**: [assets/conventions.md](assets/conventions.md) — Mermaid, tagging MVP/Post-MVP, set canónico adaptativo por `system_type`, compliance condicional, glosario, flag de idioma.
 - **Discovery fields**: [assets/discovery-fields.md](assets/discovery-fields.md) — el modelo de discovery (estado interno), inferencia Mode A, regla de baja confianza.
 - **Examples**: [assets/examples.md](assets/examples.md) — un ejemplo end-to-end por modo (few-shot). Cargá solo la sección del modo activo.
