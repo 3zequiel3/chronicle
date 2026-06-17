@@ -1,5 +1,8 @@
 <div align="center">
 
+<!-- Reemplazá banner.png por tu imagen (dejala en la raíz del repo). Hasta entonces este img puede verse roto. -->
+<img src="banner.png" alt="chronicle" width="640">
+
 # chronicle
 
 **La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — generándola desde documentos, desde cero, o **documentando código existente sin tocar una sola línea**.
@@ -44,34 +47,7 @@ proyecto/                          chronicle                  knowledge-base/
    ```
 3. **Obtenés** los nodos afectados en `knowledge-base/`, cada afirmación con su **cita de procedencia** (`[code · …]`) y sin haber tocado una línea de código.
 
-¿No sabés qué modo necesitás? No importa: chronicle lo detecta solo — ver [Los 5 modos](#los-5-modos).
-
----
-
-## Regla de oro
-
-> **El código se LEE pero NUNCA se modifica.**
-> El **código dice el QUÉ**, el **usuario dice el PORQUÉ**, y **nada se inventa**.
-
-Toda ambigüedad o suposición que no pueda confirmarse va al nodo `09` (decisión inferida) o `10` (pregunta abierta), nunca documentada como un hecho. chronicle actúa como **notario** cuando documenta lo que existe, y solo como **consultor** cuando todavía no hay nada construido.
-
-Este principio es lo que hace que la documentación sea **confiable**: no mezcla lo que el sistema hace con lo que alguien supone que hace.
-
----
-
-## Características
-
-- 🧭 **5 modos** que cubren todo el ciclo de vida de la documentación.
-- 🔍 **Documentación inversa por funcionalidad** — documenta un corte vertical (checkout, pagos…) que cruza carpetas y lenguajes, leyendo el código en modo read-only.
-- 🪶 **Eficiente en tokens** — detecta el stack desde los *manifests*, no leyendo el código; y carga solo los recursos que el modo activo necesita.
-- 🤖 **Lista para orquestadores (headless)** — corre sin humano vía un contrato de parámetros (sin preguntas bloqueantes), devuelve un *result contract* estructurado + un manifest `index.json` navegable por máquina, y se re-sincroniza por delta tras cada cambio. **Sin costo en el uso interactivo: pagás por orquestación solo si orquestás.**
-- 🧩 **Estructura adaptativa** — núcleo de 4 nodos + *profile* por tipo de sistema (web, API, CLI, móvil, SaaS, **librería/SDK**, **pipeline de datos**): un CLI no lleva RBAC, una librería documenta su API pública, un pipeline su DAG. Y los nodos crecen de archivo a carpeta según el tamaño.
-- 🔀 **Merge no destructivo** — actualizar nunca pisa el trabajo previo válido.
-- ✅ **Auditable** — score de completitud por nodo, consistencia cruzada y detección de contradicciones internas.
-- 🛡️ **El código manda sobre el doc viejo** — ante conflicto entre código y documentación, gana el código; el doc desactualizado nunca se documenta como hecho, queda registrado en `09`/`10`.
-- 📊 **Diagramas Mermaid** nativos (ERD, secuencia, arquitectura).
-- 🌐 **Multi-idioma (es/en)** — responde en el idioma en que le hablás; el idioma de la **KB generada** se pregunta una vez al inicio (no se adivina del repo).
-- 🤝 **Gobernanza condicional** — metadata de ownership y cadencia de revisión que se activa solo cuando hay un equipo o un handoff de por medio, no en proyectos solo.
+¿No sabés qué modo necesitás? No importa: chronicle lo detecta solo.
 
 ---
 
@@ -98,7 +74,36 @@ Un **router de intención** elige el modo tras un embudo de detección barato:
 
 ---
 
-## Cómo funciona — el embudo de detección
+## Regla de oro
+
+> **El código se LEE pero NUNCA se modifica.**
+> El **código dice el QUÉ**, el **usuario dice el PORQUÉ**, y **nada se inventa**.
+
+Toda ambigüedad o suposición que no pueda confirmarse va al nodo `09` (decisión inferida) o `10` (pregunta abierta), nunca documentada como un hecho. chronicle actúa como **notario** cuando documenta lo que existe, y solo como **consultor** cuando todavía no hay nada construido. Por eso la documentación es **confiable**: no mezcla lo que el sistema hace con lo que alguien supone que hace.
+
+---
+
+## Más a fondo
+
+<details>
+<summary><b>✨ Características completas</b></summary>
+
+- 🧭 **5 modos** que cubren todo el ciclo de vida de la documentación.
+- 🔍 **Documentación inversa por funcionalidad** — documenta un corte vertical (checkout, pagos…) que cruza carpetas y lenguajes, leyendo el código en modo read-only.
+- 🪶 **Eficiente en tokens** — detecta el stack desde los *manifests*, no leyendo el código; y carga solo los recursos que el modo activo necesita.
+- 🤖 **Lista para orquestadores (headless)** — corre sin humano vía un contrato de parámetros (sin preguntas bloqueantes), devuelve un *result contract* estructurado + un manifest `index.json` navegable por máquina, y se re-sincroniza por delta tras cada cambio. **Sin costo en el uso interactivo: pagás por orquestación solo si orquestás.**
+- 🧩 **Estructura adaptativa** — núcleo de 4 nodos + *profile* por tipo de sistema (web, API, CLI, móvil, SaaS, **librería/SDK**, **pipeline de datos**): un CLI no lleva RBAC, una librería documenta su API pública, un pipeline su DAG. Y los nodos crecen de archivo a carpeta según el tamaño.
+- 🔀 **Merge no destructivo** — actualizar nunca pisa el trabajo previo válido.
+- ✅ **Auditable** — score de completitud por nodo, consistencia cruzada y detección de contradicciones internas.
+- 🛡️ **El código manda sobre el doc viejo** — ante conflicto entre código y documentación, gana el código; el doc desactualizado nunca se documenta como hecho, queda registrado en `09`/`10`.
+- 📊 **Diagramas Mermaid** nativos (ERD, secuencia, arquitectura).
+- 🌐 **Multi-idioma (es/en)** — responde en el idioma en que le hablás; el idioma de la **KB generada** se pregunta una vez al inicio (no se adivina del repo).
+- 🤝 **Gobernanza condicional** — metadata de ownership y cadencia de revisión que se activa solo cuando hay un equipo o un handoff de por medio, no en proyectos solo.
+
+</details>
+
+<details>
+<summary><b>⚙️ Cómo funciona — el embudo de detección</b></summary>
 
 chronicle arranca barato y solo se vuelve caro cuando hace falta. **La situación se detecta; la intención se pregunta.**
 
@@ -115,9 +120,10 @@ Capa 2 · Lectura profunda        →  solo en Mode C, y solo de la funcionalida
 
 Por eso documentar un proyecto gigante cuesta casi lo mismo que uno chico: nunca se lee el gigante entero, solo su huella y la rebanada que pediste.
 
----
+</details>
 
-## Estructura de la base de conocimiento
+<details>
+<summary><b>🗂️ Estructura de la base de conocimiento</b></summary>
 
 Los **10 slots canónicos** se clasifican en dos ejes ortogonales:
 
@@ -143,9 +149,10 @@ knowledge-base/
 
 > En sistemas chicos, las colecciones empiezan como **un solo archivo** y se promueven a carpeta automáticamente cuando cruzan un umbral. No se infla estructura porque sí.
 
----
+</details>
 
-## Diseño destacado
+<details>
+<summary><b>🎯 Diseño destacado</b></summary>
 
 **Corte vertical por funcionalidad.** En Mode C, documentar "pagos" escribe en paralelo cuatro archivos — uno en cada colección — siguiendo el flujo real en vez de la estructura de carpetas del código:
 
@@ -165,9 +172,10 @@ erDiagram
     PEDIDO  }o--|| PAGO   : tiene
 ```
 
----
+</details>
 
-## Extras opcionales
+<details>
+<summary><b>➕ Extras opcionales</b></summary>
 
 Según el dominio, chronicle agrega nodos extra con prefijo `1X_` que **complementan** los 10 canónicos, nunca los reemplazan:
 
@@ -177,9 +185,10 @@ Según el dominio, chronicle agrega nodos extra con prefijo `1X_` que **compleme
 | `13_glosario.md` | conviene fijar el lenguaje ubicuo del dominio |
 | `1X_tenancy.md` | el sistema es SaaS multi-tenant |
 
----
+</details>
 
-## Por qué esta estructura
+<details>
+<summary><b>🤔 Por qué esta estructura</b></summary>
 
 - **Consistencia** — todo proyecto documentado comparte la misma forma → onboarding más rápido.
 - **Trazabilidad** — el nodo `09` (ADR) obliga a documentar el porqué de cada decisión.
@@ -187,13 +196,13 @@ Según el dominio, chronicle agrega nodos extra con prefijo `1X_` que **compleme
 - **Lista para spec-driven development y orquestadores** — corre headless vía un contrato de parámetros (modo, scope, trust), devuelve un *result contract* estructurado y un manifest `index.json` navegable por máquina; la KB sirve de input para flujos tipo SDD/OpenSpec y los tags `[MVP]`/`[Post-MVP]` permiten derivar un roadmap.
 - **Mantenible en el tiempo** — gobernanza condicional, changelog y auditoría de consistencia.
 
+</details>
+
 ---
 
 ## Contribuir
 
 Las contribuciones son bienvenidas. Abrí un issue para discutir cambios grandes antes de un PR. La skill vive en `SKILL.md` (el contrato) y `assets/` (los recursos cargados bajo demanda).
-
----
 
 ## Licencia
 
