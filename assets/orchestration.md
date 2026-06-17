@@ -65,10 +65,14 @@ End-of-run, single snapshot. `knowledge-base/index.json`:
 ```json
 { "version": "1", "kb_language": "es", "system_type": "web_app",
   "nodes": [{ "slot": "06", "path": "06_funcionalidades/checkout.md",
-              "kind": "collection", "codes": ["US-014"], "fingerprint": "sha…" }],
+              "kind": "collection", "codes": ["US-014"],
+              "provenance_summary": { "code": 8, "doc": 1, "user": 2, "inferred": 1 },
+              "fingerprint": "sha…" }],
   "codes": { "US-014": "06_funcionalidades/checkout.md" } }
 ```
 `fingerprint` is **projected from the ledger** (`verification.json`) — never re-computed or duplicated.
+`provenance_summary` is a per-node trust signal (citation-type counts) **recomputed from the node's
+citations on every end-of-run emission** — never patched incrementally, so it cannot desync.
 Humans navigate via `knowledge-base/README`; the manifest is for machines.
 
 ## Post-apply delta sync

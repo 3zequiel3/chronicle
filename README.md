@@ -64,9 +64,11 @@ Este principio es lo que hace que la documentación sea **confiable**: no mezcla
 - 🧭 **5 modos** que cubren todo el ciclo de vida de la documentación.
 - 🔍 **Documentación inversa por funcionalidad** — documenta un corte vertical (checkout, pagos…) que cruza carpetas y lenguajes, leyendo el código en modo read-only.
 - 🪶 **Eficiente en tokens** — detecta el stack desde los *manifests*, no leyendo el código; y carga solo los recursos que el modo activo necesita.
+- 🤖 **Lista para orquestadores (headless)** — corre sin humano vía un contrato de parámetros (sin preguntas bloqueantes), devuelve un *result contract* estructurado + un manifest `index.json` navegable por máquina, y se re-sincroniza por delta tras cada cambio. **Sin costo en el uso interactivo: pagás por orquestación solo si orquestás.**
 - 🧩 **Estructura adaptativa** — núcleo de 4 nodos + *profile* por tipo de sistema (web, API, CLI, móvil, SaaS, **librería/SDK**, **pipeline de datos**): un CLI no lleva RBAC, una librería documenta su API pública, un pipeline su DAG. Y los nodos crecen de archivo a carpeta según el tamaño.
 - 🔀 **Merge no destructivo** — actualizar nunca pisa el trabajo previo válido.
 - ✅ **Auditable** — score de completitud por nodo, consistencia cruzada y detección de contradicciones internas.
+- 🛡️ **El código manda sobre el doc viejo** — ante conflicto entre código y documentación, gana el código; el doc desactualizado nunca se documenta como hecho, queda registrado en `09`/`10`.
 - 📊 **Diagramas Mermaid** nativos (ERD, secuencia, arquitectura).
 - 🌐 **Multi-idioma (es/en)** — responde en el idioma en que le hablás; el idioma de la **KB generada** se pregunta una vez al inicio (no se adivina del repo).
 - 🤝 **Gobernanza condicional** — metadata de ownership y cadencia de revisión que se activa solo cuando hay un equipo o un handoff de por medio, no en proyectos solo.
