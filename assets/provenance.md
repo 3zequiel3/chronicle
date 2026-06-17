@@ -91,6 +91,7 @@ Extraction regex: `\[(code|doc|user|inferred) · ([^\]]+)\]`
 | Symbol renamed/moved (in Update) | Re-trace and update the anchor; if it no longer exists, mark the claim as suspect → `10`. |
 | Claim the agent "knows" but cannot point to | **Do not** write it as fact: `[inferred · → 10]`. This is the master rule enforcement. |
 | The symbol you want to cite is not in the trace map | Do not fabricate the citation. Either trace it (it enters the map) or use `[inferred · → 10]`. Citing outside the allowlist is fabrication. |
+| Code and doc **conflict** (not merely both present) | **Code wins for the WHAT.** Document the code version with `[code]`; record the conflict in `09`/`10` ("doc said X, code does Y → doc stale") citing both. Never keep the doc claim as fact; never overwrite silently. |
 
 ---
 

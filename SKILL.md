@@ -6,7 +6,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Ezequiel González
-  version: "2.9"
+  version: "2.10"
 ---
 
 ## Master rule (governs every mode)
@@ -65,6 +65,14 @@ Before choosing a mode or reading source code, run the **3-layer detection funne
 1. **Layer 0 — filesystem footprint (near-zero tokens, no source code read)**: detect stack via manifests (`package.json`, `go.mod`, `pyproject.toml`, etc. — table in the asset), domains via folder names, mode via presence of `docs/` and `knowledge-base/`, and size via file count.
 2. **Layer 1 — confirm + ask only the gaps**: show what was detected and ask only the questions the filesystem cannot answer.
 3. **Layer 2 — bounded deep read**: only in Mode C, and only for the requested functionality.
+
+### Headless detection (runs before Q-INTENT)
+
+If the invocation contains a `chronicle.run:` param block, run **headless**: load
+`assets/orchestration.md`, resolve `mode`/`kb_language`/`system_type`/`scope` from the
+params, **skip Q-INTENT and Q-language**, and follow the orchestration decision rule and
+pre-flight pass. No `chronicle.run:` block → interactive (the default below). This check is
+near-zero cost; `orchestration.md` is loaded only on a positive detection.
 
 Then resolve **intent** (the situation is detected; the intent is asked):
 
@@ -173,6 +181,7 @@ Extra files with prefix `1X_`/`2X_` and kebab-case names complement the canonica
 | Mode Audit | `lifecycle.md`, `quality-rubric.md` (+ `verification.md` and/or `staleness.md` **only** if deep on-demand Audit) | everything else |
 | Edge cases / doubts | `edge-cases.md` | — |
 | Examples (few-shot) | `examples.md` (active mode section only) | other sections |
+| Headless (param block present) | `orchestration.md` (+ the active mode's assets) | interactive-only prompts |
 
 `provenance.md` is loaded in **every mode that writes or audits claims** (A, B, C, Update, Audit) — it defines the provenance citation contract, mandatory under the master rule.
 

@@ -78,3 +78,13 @@ You don't re-verify what hasn't changed. The two make each other cheaper.
 | Huge repo | The git fast-path keeps it cheap; without git, budget-bounded + coverage report. |
 | File changed but cited symbol did not | The fast-path marks it as a candidate, but the normalized fingerprint is **equal** → fresh. No false positive. |
 | Symbol moved to another file | `moved` → update the citation anchor and flag for review, do not discard it. |
+
+## Feeding the trust gate (beyond audit reporting)
+
+When invoked from the orchestration trust gate, staleness does more than report: it
+**classifies drift by node kind** (spec §10) and emits a trust decision.
+- Drift in rules/flows/models (04–07) → recommend/auto-flip `code_authoritative` for those nodes.
+- Drift touching `system_type`/`kb_language` signals or identity nodes (01/02) → `partial` + risk;
+  do not auto-proceed.
+Interactive: ask before flipping. Headless: auto-flip and report in `risks`/`assumptions`.
+This stays read-only: it decides trust, it does not rewrite.

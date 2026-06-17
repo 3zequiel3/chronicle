@@ -5,7 +5,7 @@
 **La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — generándola desde documentos, desde cero, o **documentando código existente sin tocar una sola línea**.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.9-green.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/version-2.10-green.svg)](SKILL.md)
 [![Read-only on code](https://img.shields.io/badge/c%C3%B3digo-read--only-orange.svg)](#regla-de-oro)
 [![skills.sh](https://img.shields.io/badge/skills.sh-chronicle-black.svg)](https://www.skills.sh/3zequiel3/chronicle)
 
@@ -182,7 +182,7 @@ Según el dominio, chronicle agrega nodos extra con prefijo `1X_` que **compleme
 - **Consistencia** — todo proyecto documentado comparte la misma forma → onboarding más rápido.
 - **Trazabilidad** — el nodo `09` (ADR) obliga a documentar el porqué de cada decisión.
 - **Visibilidad de huecos** — el nodo `10` hace explícitas las preguntas pendientes en vez de enterrarlas.
-- **Lista para spec-driven development** — la KB sirve de input para flujos tipo OpenSpec; los tags `[MVP]`/`[Post-MVP]` permiten derivar un roadmap.
+- **Lista para spec-driven development y orquestadores** — corre headless vía un contrato de parámetros (modo, scope, trust), devuelve un *result contract* estructurado y un manifest `index.json` navegable por máquina; la KB sirve de input para flujos tipo SDD/OpenSpec y los tags `[MVP]`/`[Post-MVP]` permiten derivar un roadmap.
 - **Mantenible en el tiempo** — gobernanza condicional, changelog y auditoría de consistencia.
 
 ---

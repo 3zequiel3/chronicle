@@ -21,6 +21,15 @@ If the update causes a file-collection node to cross its threshold (see `node-te
 ### Golden rule of the merge
 Do not destroy. When in doubt between overwriting and preserving, preserve and flag the divergence as a question in `10_preguntas_abiertas.md`.
 
+### Delta sync (post-apply, orchestrated)
+
+When `scope.change_diff` + `scope.codes` are provided (typically after `sdd-apply`):
+read **only** the nodes those codes map to (via `knowledge-base/index.json`) plus the diff —
+not the whole KB. Apply the standard non-destructive merge to those nodes, refresh their
+fingerprints (ledger-owned) and the manifest, and return the result contract with
+`codes_touched` set to the synced codes. This is the delta-targeted path; it never re-reads
+untouched nodes (token economy).
+
 ### Open question resolution (living backlog)
 `10` is a **living backlog, not a log**. When an Update resolves an open question (or an `SU-NN` assumption from `09`):
 1. The answer **migrates to its own node** (decision → `09`, rule → `05`, entity → `04`, etc.).
