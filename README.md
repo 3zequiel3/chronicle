@@ -1,14 +1,13 @@
 <div align="center">
 
-<!-- Reemplazá banner.png por tu imagen (dejala en la raíz del repo). Hasta entonces este img puede verse roto. -->
-<img src="banner.png" alt="chronicle" width="100%">
+<img src="banner.webp" alt="chronicle" width="100%">
 
 # chronicle
 
 **La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — generándola desde documentos, desde cero, o **documentando código existente sin tocar una sola línea**.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.10-green.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/version-2.11-green.svg)](SKILL.md)
 [![Read-only on code](https://img.shields.io/badge/c%C3%B3digo-read--only-orange.svg)](#regla-de-oro)
 [![skills.sh](https://img.shields.io/badge/skills.sh-chronicle-black.svg)](https://www.skills.sh/3zequiel3/chronicle)
 
@@ -84,6 +83,20 @@ Toda ambigüedad o suposición que no pueda confirmarse va al nodo `09` (decisi�
 ---
 
 ## Más a fondo
+
+<details>
+<summary><b>📥 Fuentes que lee (y sus límites)</b></summary>
+
+chronicle ingiere las siguientes fuentes, citando cada afirmación con su procedencia:
+
+- **Código** — read-only, con cita anclada a símbolo (Mode C).
+- **Documentos** — `.txt`, `.docx`, `.pdf`, `.md` (Mode A).
+- **Manifests** — `package.json`, `go.mod`, `pyproject.toml`… para detectar el stack.
+- **Configuraciones** — config keys, routing por config, `.env` → nodo 08.
+- **Esquemas / DB** — lee **archivos de schema y migraciones** (`prisma/schema.prisma`, `*.sql`, `openapi.*`) como código. **No se conecta a una base de datos en vivo.**
+- **Diagramas** — Mermaid/PlantUML/DOT y **SVG/`.drawio`** (son texto/XML, no imágenes): ERD → nodo 04, secuencia → nodo 07, arquitectura → nodo 08. **Imágenes raster** (`.png`/`.jpg`) solo si el agente tiene visión, como fuente de **baja confianza** (van al nodo 10 a confirmar, nunca como hecho citado).
+
+</details>
 
 <details>
 <summary><b>✨ Características completas</b></summary>
