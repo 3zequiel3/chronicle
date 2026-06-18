@@ -166,13 +166,13 @@ Extra files with prefix `1X_`/`2X_` and kebab-case names complement the canonica
 - **Mode B** (from scratch): **consultant**. Challenges weak decisions, marks assumptions with `**Assumption:**`, proposes alternatives, flags risks.
 
 ### Close gate (mandatory — every generative mode)
-Every run that writes a KB (A/B/C/Update) **ends with the mechanical close gate** before declaring done — **fail-closed**. It checks coverage, cross-references, citation→map resolution, and **citation→source existence** (anti-fabrication: the cited `#symbol` must exist in the real file, not just resolve to the trace map). It is deterministic and ~0 tokens where shell-exec is available (**full coverage**), or a clearly-labeled **degraded** LLM sample where it is not; the close **states which path ran** and reports the result. A fabricated or orphan citation **blocks "done"**. Full contract: `edge-cases.md` §Final self-check + `checker-spec.md` §2.5–2.6, §8.
+Every KB-writing run (A/B/C/Update) **ends with the mechanical close gate** before declaring done — **fail-closed**: coverage, cross-references, citation→map, and **citation→source existence** (the cited `#symbol` must exist in the real file, not just resolve to the trace map). Deterministic and ~0 tokens where shell-exec exists (full coverage), else a labeled **degraded** LLM sample — the close **states which path ran**. A fabricated/orphan citation **blocks "done"**. Contract: `edge-cases.md` §Final self-check + `checker-spec.md` §2.5–2.6, §8.
 
-### Result summary (mandatory — every run, both modes)
-After the close gate passes, **every run ends with a one-line confidence summary** — so the human gets the same trust signal the orchestrator gets as structured output, without re-verifying anything. It is the **prose rendering of the result-contract fields** (`orchestration.md` §Result contract), computed from the actual artifact. Example:
+### Result summary (mandatory — every run)
+After the gate passes, **end with a one-line confidence summary** so the human gets the same signal the orchestrator gets as structured output — the prose rendering of the result-contract fields (`orchestration.md`), e.g.:
 > Documented checkout: 4 nodes (US-014, RN-PAGOS-07) · 2 assumptions → 09 · 1 open question → Q-03 (node 10) · close gate: deterministic ✅ · confidence 8 code-cited / 1 inferred.
 
-**Same fields, one source**: headless emits the YAML contract + manifest, interactive renders this line — both computed from the same run. The numbers MUST match the artifact (nodes/codes written, assumptions in 09, open questions in 10, the close-gate path + verdict from §Close gate, and the provenance-type counts = the `provenance_summary`). **Take the counts from the deterministic close-gate output** (the same citation extraction the gate already ran) — do **not** re-count by hand: a hand-tallied summary can disagree with the gate, which defeats the point. Never report "done" without it.
+Take the counts from the **deterministic close-gate output**, not a hand tally (a hand count can disagree with the gate). Headless emits the YAML contract; interactive renders this line — same source. Never report "done" without it.
 
 ---
 
@@ -195,26 +195,10 @@ After the close gate passes, **every run ends with a one-line confidence summary
 
 `provenance.md` is loaded in **every mode that writes or audits claims** (A, B, C, Update, Audit) — it defines the provenance citation contract, mandatory under the master rule.
 
+`node-templates-profiles.md` (non-web slot variants) is loaded **only** when `system_type` ∈ {`cli`, `library_sdk`, `data_pipeline`}, alongside `node-templates.md`. `web_app`/`api`/`mobile`/`saas_multi_tenant` runs never load it (token economy — saves ~725 tokens on the common path).
+
 The **mandatory close gate** runs at the end of every generative mode using the deterministic recipe in `edge-cases.md` §Final self-check (grep/regex over the KB + source via the agent's own tools — its #4 already covers the §2.6 citation→source existence check) — it does **not** require loading the full `checker-spec.md`. The complete `automation.md` + `checker-spec.md` are loaded together **on-demand** only when the user asks to **generate a persistent CI artifact** ("set up the CI check") or run a standalone mechanical check / staleness pass ("is the doc stale?"). `checker-spec.md` defines the runtime-agnostic contract of the generated checker and references the golden fixture under `assets/conformance/`.
 
 `conventions.md` (Mermaid, tagging, language, compliance) is consulted selectively when relevant, not loaded in full.
 
----
-
-## Resources
-
-- **Detection funnel**: [assets/detection-funnel.md](assets/detection-funnel.md) — 3 layers + manifest→stack table.
-- **Canonical templates**: [assets/node-templates.md](assets/node-templates.md) — core + profiles by `system_type`, templates for all 10 slots (web + non-web variants), file↔folder rule, dynamic promotion.
-- **Strategic questions**: [assets/interview-guide.md](assets/interview-guide.md) — question bank (Mode B) + discovery + question→effect mapping by mode.
-- **Provenance**: [assets/provenance.md](assets/provenance.md) — provenance citation contract (`code`/`doc`/`user`/`inferred`); master rule enforcement and verification backbone.
-- **Reverse documentation**: [assets/reverse-documentation.md](assets/reverse-documentation.md) — Mode C protocol (read-only by functionality).
-- **Lifecycle**: [assets/lifecycle.md](assets/lifecycle.md) — Mode Update (non-destructive merge + promotion), conditional governance, Mode Audit.
-- **Verification**: [assets/verification.md](assets/verification.md) — correctness verification against source (deep on-demand Audit, sub-agent, ledger + fingerprint).
-- **Staleness**: [assets/staleness.md](assets/staleness.md) — stale-doc-vs-code detection (git fast-path, normalized fingerprint); filters what to re-verify.
-- **Automation**: [assets/automation.md](assets/automation.md) — mechanical check without LLM (coverage/consistency/staleness) with JSON report + exit codes; surface-agnostic (PR/pre-commit/manual/agent); generated to fit the project.
-- **Checker spec**: [assets/checker-spec.md](assets/checker-spec.md) — runtime-agnostic contract for the mechanical checker (inputs, checks, fingerprint, exit codes), security rules (argv-arrays, parse-no-exec, confinement), ledger ownership, and conformance protocol against the golden fixture (`assets/conformance/`).
-- **Conventions**: [assets/conventions.md](assets/conventions.md) — Mermaid, MVP/Post-MVP tagging, adaptive canonical set by `system_type`, conditional compliance, glossary, language flag.
-- **Discovery fields**: [assets/discovery-fields.md](assets/discovery-fields.md) — the discovery model (internal state), Mode A inference, low-confidence rule.
-- **Examples**: [assets/examples.md](assets/examples.md) — one end-to-end example per mode (few-shot). Load only the active mode's section.
-- **Quality rubric**: [assets/quality-rubric.md](assets/quality-rubric.md) — completeness score criteria per node (Mode Audit and auto-check).
-- **Edge cases**: [assets/edge-cases.md](assets/edge-cases.md) — detection edge cases, conflicts, and the final auto-check before closing.
+> Every asset and when to load it is in the **Asset loading map** above; each asset is self-describing once loaded. (No duplicate resource index here — it would be paid on every run for a human-only catalog.)

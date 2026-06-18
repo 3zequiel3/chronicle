@@ -72,43 +72,19 @@ Extraction regex: `\[(code|doc|user|inferred) · ([^\]]+)\]`
 
 ## Stable IDs — content-derived, append-only (determinism / P1)
 
-Coded items carry a **stable ID** (`RN-{DOMINIO}-NN`, `US-NNN`, `DD-NN`, `SU-NN`, plus entity/endpoint headings). The **format does not change**; what changes is *how the suffix is assigned*: from the item's **content**, never from generation order. This is what makes a re-run idempotent and two from-scratch runs agree on the same codes.
+Coded items carry a **stable ID** (`RN-{DOMINIO}-NN`, `US-NNN`, `DD-NN`, `SU-NN`, plus entity/endpoint headings). The **format does not change**; what changes is *how the suffix is assigned*: from the item's **content** (its natural key), never from generation order. That is what makes a re-run idempotent and two from-scratch runs agree on the same codes.
 
-### Natural key (the identity of an item)
+| Item kind | Natural key |
+|---|---|
+| `code`-cited (RN / US / entity / endpoint / flow step) | the cited `file#symbol` (the trace-map row) |
+| `user` / `doc`-cited (DD decisions, SU assumptions) | a normalized slug/short-hash of the canonical statement |
+| open questions (`Q-NN`, node 10) | slug/short-hash of the question statement |
 
-| Item kind | Natural key | Source |
-|---|---|---|
-| `code`-cited (RN / US / entity / endpoint / flow step) | the cited `file#symbol` | the trace-map row (`reverse-documentation.md` §3) |
-| `user` / `doc`-cited (DD decisions, SU assumptions) | a normalized **slug/short-hash of the canonical statement** | the decision/assumption title |
-| open questions (`Q-NN`, node 10) | slug/short-hash of the question statement | the question text |
+The key is **stable across refactors** (the symbol survives line moves) and across prose drift (the hash is of the statement, not the paragraph). The `{DOMINIO}` token is content-derived too — the functionality name when given, else the slug of the rules' shared module — never a re-worded paraphrase.
 
-> **`Q-NN` is the exception to "append-only".** Open questions are the **inference layer** and node 10 is a *living backlog that shrinks*: when a question is resolved its answer migrates to its node and the `Q-NN` is **deleted**. So `Q-NN` is content-derived (stable while the question exists, so the result contract / orchestrator can reference it) but is **NOT** registry-tracked — it is ephemeral, never retired-forever like `RN`/`US`/`DD`/`SU`. The append-only registry holds only the durable, citable codes.
+**The assignment is mechanical and tooling-owned**: within a scope, sort natural keys canonically and look them up in the append-only `knowledge-base/.chronicle/registry.json` — reuse the ID for a known key, `max+1` for a new one, **never renumber**. From-scratch (no registry) the canonical sort alone is reproducible; on re-run the registry is the source of truth. **Full mechanics + shape in `checker-spec.md` §6.** The writer **reads** the registry to reuse IDs; it never hand-edits it.
 
-The key is **stable across refactors** for code items (the symbol survives line moves — same rationale as the citation anchor) and **stable across prose drift** for WHY items (the hash is of the canonical statement, not the surrounding paragraph).
-
-### Scope token (the `{DOMINIO}` in `RN-{DOMINIO}-NN`) — also content-derived
-
-The domain token is **not** a free semantic paraphrase (that is where `RN-TODOS` vs `RN-TODO` drift comes from — singular/plural, synonyms). Fix it deterministically:
-
-- **Functionality given** (the normal Mode C / orchestrated case — the user or `scope` names the slice "pagos", "checkout") → the domain **is that name**, normalized (uppercase, ASCII, no pluralization changes). Deterministic by input.
-- **No functionality name** (e.g. a headless whole-repo run) → derive the domain from a **code anchor**: the slug of the rules' shared **module / directory** (the `file` in the trace-map row), uppercased. Symbols in `src/payments/rules.ts` → `RN-PAYMENTS-NN`; symbols in `src/rules.js` → `RN-RULES-NN`. Never singularize/pluralize or re-word.
-
-Same principle as the suffix: the token is a function of a stable anchor (input name or module path), never of how the model phrases the domain this run.
-
-### Suffix assignment (canonical sort + append-only registry)
-
-The numeric suffix is **not** the order the LLM wrote things. It is assigned mechanically:
-
-1. **Canonical sort** — within a scope (a domain for `RN-{DOMINIO}`, the whole collection for `US`/`DD`/`SU`), sort the natural keys deterministically.
-2. **Registry lookup** — `knowledge-base/.chronicle/registry.json` maps `(scope, key) → ID`, **append-only**:
-   - key already in the registry → **reuse** its ID (idempotency);
-   - new key → assign `max(seq in scope) + 1` and **append** (never insert-and-shift);
-   - item deleted → its number is **retired**, never reused.
-3. **No renumbering, ever.** A rule inserted "in the middle" alphabetically still gets the next free number, not a shift of everything below it. The canonical sort decides *order on the page*; the registry decides *the number*.
-
-> **From-scratch vs re-run.** On a first generation there is no registry: the canonical sort alone yields reproducible numbering (same traced symbols → same order → same `NN`), so two independent runs agree. On every later run the registry is the source of truth: reuse + append. Both paths converge on stable IDs.
-
-> **Registry is tooling-owned** — same hard rule as the trace map and `verification.json` (`checker-spec.md` §6). Written by the checker / the deterministic close step, **never** by the LLM from memory. The writer **reads** it to reuse IDs; it does not hand-edit it.
+> **`Q-NN` is the exception**: open questions are inference-layer and node 10 shrinks, so a resolved `Q-NN` is **deleted** (its answer migrates to its node). It is content-derived but **not** registry-tracked — ephemeral, unlike the durable `RN`/`US`/`DD`/`SU`.
 
 ---
 

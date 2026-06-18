@@ -149,6 +149,8 @@ The same rule governs `registry.json` (the append-only stable-ID ledger — `pro
 
 **Append-only**: entries are added, never reordered or renumbered. `seq` per scope is `max + 1` of the entries already in that scope. A deleted item's entry is **kept** (flag `retired: true`) so its number is never reused. Assignment within a scope follows the **canonical sort** of `key`, so a from-scratch run with no registry yet still numbers deterministically.
 
+**The `{DOMINIO}` scope token is content-derived too** (this is what kills `RN-TODOS` vs `RN-TODO` plural/synonym drift): when the user or `scope` names the functionality ("pagos", "checkout") the domain **is that name** (uppercase, ASCII, no pluralization changes); with **no** functionality name (e.g. a headless whole-repo run) derive it from the rules' shared **module/directory** slug (the `file` in the trace-map row), uppercased — `src/payments/rules.ts → RN-PAYMENTS`, `src/rules.js → RN-RULES`. Never re-word or singularize/pluralize. So `scope` = a function of a stable anchor (input name or module path), not of how the model phrases the domain this run.
+
 ---
 
 ## 7. Conformance protocol (self-verify before trusting)
