@@ -14,6 +14,7 @@ Defines **what the mechanical checker for `chronicle` must do**, without tying i
 | Config | `knowledge-base/.chronicle/checks.json` | no (defaults) |
 | Ledger | `knowledge-base/.chronicle/verification.json` | no (staleness needs it) |
 | Trace map | `knowledge-base/.chronicle/trace-map.json` | no (needed for `code` citation resolution) |
+| Registry | `knowledge-base/.chronicle/registry.json` | no (append-only stable-ID ledger — `provenance.md` §Stable IDs) |
 | git `ref` | from ledger or argument | no (without git → full mode) |
 
 ---
@@ -84,7 +85,11 @@ Machine-readable report (same contract as `automation.md`):
 
 The fingerprint is shared by verification (§3) and staleness (§5); it must produce the **same result** after a reformat and a **different result** only on a real logic change.
 
-1. Locate the cited symbol's body (the function/class/region, not the whole file).
+1. **Locate the cited symbol's body — an exact, reproducible span** (the function/class/region, not the whole file). The boundary **must be identical** between the run that *seeds* the fingerprint and any later *staleness re-run*; otherwise an unchanged symbol hashes differently, the node is wrongly flagged stale, and the idempotent re-run churns the KB (it stops being a no-op). Pin the span:
+   - **Start** at the first token of the symbol's *declaration*, including leading keywords/modifiers (`export`, `default`, `async`, `function`, `const`/`let`, `public`/`static`, and decorators on their own lines) — **not** the body after the opening brace.
+   - **End** at the close of the definition: the matching closing `}` for a block body, **or** the end of the statement **including a trailing `;`** for an expression / arrow / object-literal assignment.
+   - For a `path ~Lnn` anchor with **no `#symbol`** (loose config, inline region): the body is exactly that one physical line.
+   The same bytes are selected both times — only then does the normalization below yield a stable digest.
 2. Normalize, in this order:
    - strip comments (line and block, per language),
    - collapse all whitespace runs (spaces, tabs, newlines) to a single space,
@@ -110,6 +115,17 @@ The checker runs on untrusted repos and is generated as code → it is an inject
 ## 6. Ledger ownership (hard rule)
 
 `verification.json` is written **exclusively by the mechanical checker**. The LLM **never edits it manually** — it only **reads** it to decide what to re-verify. This eliminates drift from "model maintaining JSON from memory": tooling state is the responsibility of tooling, not natural language.
+
+The same rule governs `registry.json` (the append-only stable-ID ledger — `provenance.md` §Stable IDs) and `trace-map.json`: tooling writes them, the LLM only reads them to reuse IDs / resolve citations. Registry shape:
+
+```json
+{ "version": 1, "ids": [
+  { "id": "RN-PAGOS-01", "scope": "RN-PAGOS", "key": "src/payments/rules.ts#validateCoupon", "key_type": "symbol" },
+  { "id": "DD-01", "scope": "DD", "key": "h:9f3ab2…", "key_type": "statement", "retired": false }
+] }
+```
+
+**Append-only**: entries are added, never reordered or renumbered. `seq` per scope is `max + 1` of the entries already in that scope. A deleted item's entry is **kept** (flag `retired: true`) so its number is never reused. Assignment within a scope follows the **canonical sort** of `key`, so a from-scratch run with no registry yet still numbers deterministically.
 
 ---
 

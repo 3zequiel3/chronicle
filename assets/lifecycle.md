@@ -8,6 +8,19 @@ Covers maintenance of an existing KB: non-destructive merge (Mode Update), condi
 
 Triggered when `knowledge-base/` already exists and the user requests an update/improvement. **Never regenerates the entire KB.**
 
+### Idempotent re-run (fingerprint-skip — the diff-cleaner)
+
+A re-run over an existing KB with **unchanged source must be a no-op** (empty diff). This is the determinism that matters: chronicle *maintains* a KB, so re-running may not churn prose. A re-run is a **Mode Update**, never a regenerate. Before touching anything:
+
+1. Run **staleness** (`staleness.md`, git fast-path — cheap): compare each cited source's current fingerprint against the ledger.
+2. **Skip the fresh nodes.** A node whose citations are all `equal` is **not read and not rewritten** — its prose is preserved verbatim, so it cannot diff.
+3. **Only drifted nodes** (`different` / `gone` / `moved`) go through the non-destructive merge below, scoped to the changed items.
+4. **Nothing stale → no-op.** Write nothing, report "0 nodes changed"; the KB on disk stays byte-identical to before the run.
+
+New items inside a changed node get IDs from the **append-only registry** (`provenance.md` §Stable IDs): reuse for keys already seen, `max+1` for genuinely new ones — existing IDs never renumber, so even a real update produces a minimal diff.
+
+> **Why this is idempotent, not just incremental.** The skip is keyed on the **mechanical fingerprint**, not on the LLM re-deciding the prose is "the same". Unchanged source → equal fingerprint → the node is never even opened. Determinism comes from *not running the non-deterministic step* — the only reliable way to get it out of an LLM.
+
 ### Algorithm
 1. Read the existing KB (the affected nodes, not everything if scoped to a feature).
 2. **Respect what is correct** — do not rewrite valid content for its own sake.

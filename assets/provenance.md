@@ -70,12 +70,51 @@ Extraction regex: `\[(code|doc|user|inferred) · ([^\]]+)\]`
 
 ---
 
+## Stable IDs — content-derived, append-only (determinism / P1)
+
+Coded items carry a **stable ID** (`RN-{DOMINIO}-NN`, `US-NNN`, `DD-NN`, `SU-NN`, plus entity/endpoint headings). The **format does not change**; what changes is *how the suffix is assigned*: from the item's **content**, never from generation order. This is what makes a re-run idempotent and two from-scratch runs agree on the same codes.
+
+### Natural key (the identity of an item)
+
+| Item kind | Natural key | Source |
+|---|---|---|
+| `code`-cited (RN / US / entity / endpoint / flow step) | the cited `file#symbol` | the trace-map row (`reverse-documentation.md` §3) |
+| `user` / `doc`-cited (DD decisions, SU assumptions) | a normalized **slug/short-hash of the canonical statement** | the decision/assumption title |
+
+The key is **stable across refactors** for code items (the symbol survives line moves — same rationale as the citation anchor) and **stable across prose drift** for WHY items (the hash is of the canonical statement, not the surrounding paragraph).
+
+### Scope token (the `{DOMINIO}` in `RN-{DOMINIO}-NN`) — also content-derived
+
+The domain token is **not** a free semantic paraphrase (that is where `RN-TODOS` vs `RN-TODO` drift comes from — singular/plural, synonyms). Fix it deterministically:
+
+- **Functionality given** (the normal Mode C / orchestrated case — the user or `scope` names the slice "pagos", "checkout") → the domain **is that name**, normalized (uppercase, ASCII, no pluralization changes). Deterministic by input.
+- **No functionality name** (e.g. a headless whole-repo run) → derive the domain from a **code anchor**: the slug of the rules' shared **module / directory** (the `file` in the trace-map row), uppercased. Symbols in `src/payments/rules.ts` → `RN-PAYMENTS-NN`; symbols in `src/rules.js` → `RN-RULES-NN`. Never singularize/pluralize or re-word.
+
+Same principle as the suffix: the token is a function of a stable anchor (input name or module path), never of how the model phrases the domain this run.
+
+### Suffix assignment (canonical sort + append-only registry)
+
+The numeric suffix is **not** the order the LLM wrote things. It is assigned mechanically:
+
+1. **Canonical sort** — within a scope (a domain for `RN-{DOMINIO}`, the whole collection for `US`/`DD`/`SU`), sort the natural keys deterministically.
+2. **Registry lookup** — `knowledge-base/.chronicle/registry.json` maps `(scope, key) → ID`, **append-only**:
+   - key already in the registry → **reuse** its ID (idempotency);
+   - new key → assign `max(seq in scope) + 1` and **append** (never insert-and-shift);
+   - item deleted → its number is **retired**, never reused.
+3. **No renumbering, ever.** A rule inserted "in the middle" alphabetically still gets the next free number, not a shift of everything below it. The canonical sort decides *order on the page*; the registry decides *the number*.
+
+> **From-scratch vs re-run.** On a first generation there is no registry: the canonical sort alone yields reproducible numbering (same traced symbols → same order → same `NN`), so two independent runs agree. On every later run the registry is the source of truth: reuse + append. Both paths converge on stable IDs.
+
+> **Registry is tooling-owned** — same hard rule as the trace map and `verification.json` (`checker-spec.md` §6). Written by the checker / the deterministic close step, **never** by the LLM from memory. The writer **reads** it to reuse IDs; it does not hand-edit it.
+
+---
+
 ## Behavior by mode
 
 - **Mode A (ingest)**: each claim cites `doc` (which source originated it). Anything not traceable to a source → `[inferred · → 10]`.
 - **Mode B (scratch)**: no system is built yet → claims cite `user` (what the user decided) or remain as proposals. No `code` is fabricated.
 - **Mode C (reverse)**: the central case. Each WHAT claim cites `code` with a symbol anchor. WHY answers the user gives (Q-WHY) cite `user`; unanswered WHYs → `[inferred · → 10]`.
-- **Mode Update**: citations are kept and refreshed when re-documenting; a re-derived claim refreshes its anchor.
+- **Mode Update**: citations are kept and refreshed when re-documenting; a re-derived claim refreshes its anchor. **IDs are reused** from the registry (§Stable IDs) — an updated item keeps its code; only genuinely new items append.
 - **Mode Audit**: does not generate, but **measures citation coverage** (see `quality-rubric.md`).
 
 ---

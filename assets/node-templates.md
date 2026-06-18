@@ -37,6 +37,25 @@ Not all systems carry the same nodes. A CLI has no RBAC; a library has no UI flo
 
 > **Separately gated extras** (not by profile): `12_seguridad_compliance.md` is gated by **data type** (PII/payments), `1X_tenancy.md` is added by `saas_multi_tenant`. See `conventions.md` §3-4.
 
+### Canonical filenames are FIXED per slot (determinism — P1)
+
+The profile changes a slot's **content and framing**, **never its filename**. Filenames are pinned by slot number so re-runs and cross-references stay stable. Do **not** invent profile-specific filenames — reframe the **section titles inside** the file instead.
+
+| Slot | File form | Folder form (when promoted) |
+|---|---|---|
+| 01 | `01_vision_y_objetivos.md` | — (map) |
+| 02 | `02_descripcion_general.md` | — (map) |
+| 03 | `03_actores_y_roles.md` | — (map) |
+| 04 | `04_modelo_de_datos.md` | `04_modelos-apis/` |
+| 05 | `05_reglas_de_negocio.md` | `05_reglas-de-negocio/` |
+| 06 | `06_funcionalidades.md` | `06_funcionalidades/` |
+| 07 | `07_flujos_principales.md` | `07_flujos-principales/` |
+| 08 | `08_arquitectura_propuesta.md` | — (map) |
+| 09 | `09_decisiones_y_supuestos.md` | `09_decisiones/` |
+| 10 | `10_preguntas_abiertas.md` | — (map) |
+
+> Example: a CLI's slot 04 is `04_modelo_de_datos.md` **containing** the config/IO schema — not `04_config_io_schema.md`. The CLI framing lives in the section titles, not the filename.
+
 ---
 
 ## Axis 2 — Maps vs collections
@@ -46,7 +65,7 @@ Of the **active** nodes, only collections expand into folders.
 - **Maps (single file)** — read in full to get the complete picture; splitting them fragments the story. These are **01, 02, 03, 08, 10**.
 - **Collections (file or folder)** — lists of discrete units, organized by functionality/domain, that grow and are navigated per unit. These are **04, 05, 06, 07, 09**. These are exactly the nodes that **Mode C writes** when documenting a functionality.
 
-> **Mandatory provenance**: every factual item in collections (04-07) and every decision (09) carries its **origin citation** (`[code · …]` / `[doc · …]` / `[user]`), or is marked `[inferred · → 10]`. See `provenance.md`. The checklists below require it.
+> **Mandatory provenance**: every factual item in collections (04-07) and every decision (09) carries its **origin citation** (`[code · …]` / `[doc · …]` / `[user]`), or is marked `[inferred · → 10]`. See `provenance.md`. The checklists below require it. Their **IDs** (`RN`/`US`/`DD`/`SU`) are **content-derived and append-only**, not generation-order — see `provenance.md` §Stable IDs.
 
 ### File ↔ folder rule (conditional on size)
 
