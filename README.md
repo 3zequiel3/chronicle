@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Reemplazá banner.png por tu imagen (dejala en la raíz del repo). Hasta entonces este img puede verse roto. -->
-<img src="banner.png" alt="chronicle" width="640">
+<img src="banner.png" alt="chronicle" width="100%">
 
 # chronicle
 
