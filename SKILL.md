@@ -6,7 +6,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Ezequiel González
-  version: "2.10"
+  version: "2.11"
 ---
 
 ## Master rule (governs every mode)
@@ -95,7 +95,7 @@ Layer 0 **proposes** the mode; Q-INTENT **confirms** it. If context is already u
 
 **Trigger**: `docs/` exists and contains sources (`.txt`, `.docx`, `.pdf`, or `.md` files other than a README), and the user did not request otherwise.
 
-**Behavior**: read all sources from `docs/`, analyze, and generate the complete canonical KB under `knowledge-base/` with **a single structural confirmation** before writing: the **output language** (Q-language) and the inferred **`system_type`** (which selects the profile → which nodes exist). Both are structural: getting them wrong requires regenerating the entire KB, so they are confirmed even in silent mode. Everything else is fire-and-forget. The remaining discovery fields are **inferred** from the sources; fields that cannot be inferred (`trajectory`, `maintenance_context`) fall back to conservative defaults plus a note in `10_preguntas_abiertas.md`. See `assets/discovery-fields.md`.
+**Behavior**: read all sources from `docs/` (prose **and text diagrams** — Mermaid/PlantUML, see `conventions.md` §1), analyze, and generate the complete canonical KB under `knowledge-base/` with **a single structural confirmation** before writing: the **output language** (Q-language) and the inferred **`system_type`** (which selects the profile → which nodes exist). Both are structural: getting them wrong requires regenerating the entire KB, so they are confirmed even in silent mode. Everything else is fire-and-forget. The remaining discovery fields are **inferred** from the sources; fields that cannot be inferred (`trajectory`, `maintenance_context`) fall back to conservative defaults plus a note in `10_preguntas_abiertas.md`. See `assets/discovery-fields.md`.
 
 ### Mode B — From scratch (interactive)
 

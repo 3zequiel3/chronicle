@@ -39,6 +39,18 @@ flowchart LR
 ```
 ````
 
+### Ingesting diagrams (as a source, not only output)
+
+Text/markup diagrams are a **`doc`-type source**, parsed like prose docs (no OCR):
+- **Mermaid / PlantUML / DOT** — `.mmd`, `.puml`, `.dot`, or fenced `mermaid`/`plantuml` blocks inside `docs/`.
+- **SVG and `.drawio` are XML/text, not images** — parse them too (a `.drawio` may be deflate+base64-encoded inside its `<diagram>` tag; decode, then parse).
+- Map by kind: **ERD → node 04** (entities + relations), **sequence → node 07** (flow steps), **flowchart/architecture → node 08**.
+- Cite extracted claims as `[doc · path/to/diagram.mmd]`; apply the master rule — only what the diagram states, ambiguities → node 10.
+
+**Raster images (`.png`/`.jpg`/screenshots) — capability-gated, low-confidence:**
+- Read them **only if the host model has vision**. If it does not, **skip and note in node 10** — never a hard dependency (portability).
+- Vision reads are **lower confidence** (a misread arrow or label is a wrong fact): send extracted claims to **node 10 for confirmation** or mark `[inferred · → 10]`. **Never cite a raster diagram as a `[doc]` fact.**
+
 ASCII only as a fallback if the target does not render Mermaid.
 
 ---
