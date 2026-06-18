@@ -50,6 +50,20 @@ proyecto/                          chronicle                  knowledge-base/
 
 ---
 
+## Cómo actualizar
+
+La skill es una copia traída de GitHub; **no se auto-actualiza**. Para traer la última versión:
+
+```bash
+npx skills update                    # actualiza todas las skills instaladas
+# o, puntual:
+npx skills add 3zequiel3/chronicle   # re-instala = trae la última de main
+```
+
+> Esto actualiza **la skill**. Para actualizar **la KB** que chronicle mantiene, es otra cosa: pedí *"actualizá la KB"* (interactivo) o, en headless, invocá `chronicle.run: { mode: update }`.
+
+---
+
 ## Los 5 modos
 
 Un **router de intención** elige el modo tras un embudo de detección barato:
