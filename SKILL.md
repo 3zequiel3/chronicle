@@ -165,6 +165,9 @@ Extra files with prefix `1X_`/`2X_` and kebab-case names complement the canonica
 - **Mode A / C / Update / Audit** (documenting what exists): efficient, factual, **notary**. Does not prescribe architecture over what is already built.
 - **Mode B** (from scratch): **consultant**. Challenges weak decisions, marks assumptions with `**Assumption:**`, proposes alternatives, flags risks.
 
+### Close gate (mandatory — every generative mode)
+Every run that writes a KB (A/B/C/Update) **ends with the mechanical close gate** before declaring done — **fail-closed**. It checks coverage, cross-references, citation→map resolution, and **citation→source existence** (anti-fabrication: the cited `#symbol` must exist in the real file, not just resolve to the trace map). It is deterministic and ~0 tokens where shell-exec is available (**full coverage**), or a clearly-labeled **degraded** LLM sample where it is not; the close **states which path ran** and reports the result. A fabricated or orphan citation **blocks "done"**. Full contract: `edge-cases.md` §Final self-check + `checker-spec.md` §2.5–2.6, §8.
+
 ---
 
 ## Asset loading map (token discipline)
@@ -179,13 +182,14 @@ Extra files with prefix `1X_`/`2X_` and kebab-case names complement the canonica
 | Mode C (reverse) | `reverse-documentation.md`, `node-templates.md` | interview-guide (except Q-WHY) |
 | Mode Update | `lifecycle.md`, `node-templates.md` | interview-guide, reverse-documentation |
 | Mode Audit | `lifecycle.md`, `quality-rubric.md` (+ `verification.md` and/or `staleness.md` **only** if deep on-demand Audit) | everything else |
+| **Close of every generative mode** (A/B/C/Update) | `edge-cases.md` §Final self-check (mandatory gate; deterministic checker recipe) | the full `checker-spec.md`/`automation.md` unless generating a CI artifact |
 | Edge cases / doubts | `edge-cases.md` | — |
 | Examples (few-shot) | `examples.md` (active mode section only) | other sections |
 | Headless (param block present) | `orchestration.md` (+ the active mode's assets) | interactive-only prompts |
 
 `provenance.md` is loaded in **every mode that writes or audits claims** (A, B, C, Update, Audit) — it defines the provenance citation contract, mandatory under the master rule.
 
-`automation.md` + `checker-spec.md` are loaded together **on-demand** when the user asks to run the mechanical check or generate a CI artifact ("set up the CI check", "is the doc stale?"). `checker-spec.md` defines the runtime-agnostic contract of the generated checker and references the golden fixture under `assets/conformance/`.
+The **mandatory close gate** runs at the end of every generative mode using the deterministic recipe in `edge-cases.md` §Final self-check (grep/regex over the KB + source via the agent's own tools) — it does **not** require loading the full `checker-spec.md`. The complete `automation.md` + `checker-spec.md` are loaded together **on-demand** only when the user asks to **generate a persistent CI artifact** ("set up the CI check") or run a standalone mechanical check / staleness pass ("is the doc stale?"). `checker-spec.md` defines the runtime-agnostic contract of the generated checker and references the golden fixture under `assets/conformance/`.
 
 `conventions.md` (Mermaid, tagging, language, compliance) is consulted selectively when relevant, not loaded in full.
 

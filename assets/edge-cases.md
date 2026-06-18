@@ -48,12 +48,12 @@ Closing has **two levels** — and the mechanical level takes authority.
 
 ### Mechanical level (AUTHORITY — run by the checker, not the LLM)
 
-These checks are deterministic, so **the model does not "verify" them against itself**: they are run by the **mechanical checker** (`checker-spec.md`), the **same binary as the CI gate**. It is **fail-closed**: do not declare the KB complete if the checker is red.
+These checks are deterministic, so **the model does not "verify" them against itself**: they are run by the **mechanical checker** (`checker-spec.md`), the **same binary as the CI gate**. It is **fail-closed**: do not declare the KB complete if the checker is red. This gate is **mandatory at the close of every generative mode** (A/B/C/Update), not opt-in. Where shell-exec is available it runs **deterministic and full-coverage** (~0 tokens); where it is not, it degrades to the LLM sample below — and the run **states which path ran** (`checker-spec.md` §8).
 
 1. **Cross-consistency** — every referenced `RN`/`US`/`DD` exists and resolves.
 2. **Live links** — paths to entity/domain files resolve.
 3. **Provenance coverage** — every factual claim carries a citation (`[code/doc/user]`) or is marked `[inferred → 10]`. No citation = defect (master rule, see `provenance.md`).
-4. **Existence spot-check (anti-fabricated-citation)** — cited symbols **exist** at the cited path. Scales with size, not a fixed cap: **all** high-risk citations (`RN` + contracts/entities from `04`) always, + a proportional sample (~20%, minimum 10) of the rest, bounded by budget. Report actual coverage (`checked/total`); broken anchor → mark it and add to `10`.
+4. **Existence check (anti-fabricated-citation)** — every cited `#symbol` **exists in the file** at the cited path (not merely resolves to the trace map). **Deterministic path**: the full-coverage check `checker-spec.md` §2.6 (every citation **and** every map row) — it catches a *poisoned* trace map (a row for a symbol that was never in the code; P1 finding F1), which citation→map resolution alone misses. **Degraded path** (no shell): sample — all high-risk citations (`RN` + contracts/entities from `04`) + a proportional ~20% (min 10) of the rest, bounded by budget, and **report it as sampled**. A `#symbol` absent from its file → defect: fix the anchor, switch it to `path ~Lnn` (no symbol) if the region is genuinely nameless, or mark it and add to `10`.
 
 **Persistence + enforcement.** The result is saved to `knowledge-base/.chronicle/last-check.json` with the git ref. If the project **does not yet have a generated checker**, run these four using your deterministic tools (grep/regex over the KB) as an equivalent, and **offer to generate the persistent checker** so CI/pre-commit can re-run them without you. The **real** catch is CI; the run close is the early catch. If anything is red: **fix it or mark it `inferred`/`→10`** and re-run — never close declaring "complete" over red.
 
