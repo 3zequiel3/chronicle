@@ -194,6 +194,42 @@ La KB sirve de input para flujos tipo SDD/OpenSpec, y los tags `[MVP]`/`[Post-MV
 </details>
 
 <details>
+<summary><b>🗄️ <code>.ledger/</code> — estado de tooling y contrato público</b></summary>
+
+`.ledger/` vive en la **raíz del proyecto**, al lado de `knowledge-base/` (no adentro) y **gitignored**: es estado local de herramienta, no se versiona — un clon fresco lo re-siembra en la primera corrida. Lo escribe **solo el checker mecánico**, nunca el LLM a mano. Así no hay drift de "modelo manteniendo JSON de memoria": el estado de tooling es responsabilidad del tooling.
+
+**Cuándo se genera:** se siembra en la primera corrida generativa (Mode B/C) y se refresca tras cada *verify* o *staleness*. No hace falta pedirlo: es un subproducto de documentar.
+
+| Archivo | Qué guarda | Público |
+|---------|-----------|---------|
+| `verification.json` | estado por-claim de la verificación de correctitud | privado |
+| `trace-map.json` | filas `file#symbol` para resolver las citas `code` | privado |
+| `registry.json` | ledger append-only de IDs estables (RN-XX, DD-NN…) | privado |
+| `checks.json` | config del checker (con defaults) | privado |
+| **`fingerprints.json`** | **mapa de frescura `path#symbol → { fingerprint, ref }`** | **público** |
+
+**El único archivo público es `fingerprints.json`** — la proyección que una skill hermana (p. ej. **herald**) lee para saber si el código cambió, **sin conocer las tripas de chronicle**. Esta es su forma exacta (`version` la versiona — un lector que no reconoce la versión NO la interpreta, se re-funda):
+
+```json
+{
+  "version": 1,
+  "ref": "<commit git del último write, o null>",
+  "fingerprints": {
+    "src/payments/rules.ts#validateCoupon": {
+      "fingerprint": "<sha256 del cuerpo NORMALIZADO del símbolo>",
+      "ref": "<commit git cuando se computó, o null>"
+    }
+  }
+}
+```
+
+> **Es un contrato cross-skill, no un volcado interno.** La key es el *anchor* `path#symbol` (se le saca el prefijo `type · ` y el hint ` ~Lnn`). Lo escriben **dos** productores —el checker de chronicle y el consumidor externo— con **union-merge atómico**: cada uno toca solo sus entradas, nunca pisa el mapa entero. Es seguro porque el `fingerprint` es función pura del código: mismo símbolo → mismo hash, lo compute quien lo compute. El algoritmo byte-exacto y su fixture canónico viven en `assets/checker-spec.md` §4/§6.
+
+**Migración (una vez, segura):** si existe el legacy `knowledge-base/.chronicle/`, la primera corrida **copia → verifica → limpia** (nunca `mv` a ciegas). Si fallara la migración, sigue leyendo el legacy (backward-compat) y nunca rompe la corrida.
+
+</details>
+
+<details>
 <summary><b>➕ Extras opcionales</b></summary>
 
 Según el dominio, chronicle agrega nodos extra con prefijo `1X_` que **complementan** los 10 canónicos, nunca los reemplazan:
@@ -219,7 +255,7 @@ npx skills add 3zequiel3/chronicle   # re-instala = trae la última de main
 
 > Eso actualiza **la skill**. Actualizar **la KB** que mantiene es otra cosa: como humano, pedí *"actualizá la KB"* en lenguaje natural. (Una automatización/CI lo dispara sola con un bloque `chronicle.run:` — ver el colapsable **🤖 Headless**.)
 
-> **Cambio en 2.12:** el estado de tooling (ledger, trace map, registry) se movió de `knowledge-base/.chronicle/` a **`.ledger/`** en la raíz del proyecto (gitignored). La migración es **automática y segura** en la primera corrida (copia → verifica → limpia el legacy). El único archivo público, `.ledger/fingerprints.json`, expone el mapa de frescura del código para que skills hermanas (p. ej. **herald**) lo lean sin conocer las tripas de chronicle.
+> **Cambio en 2.12:** el estado de tooling se movió de `knowledge-base/.chronicle/` a **`.ledger/`** en la raíz (gitignored), con migración automática y segura. Qué guarda, cuándo se genera y la forma del contrato público `fingerprints.json` están en el colapsable **🗄️ `.ledger/`** de arriba.
 
 </details>
 
