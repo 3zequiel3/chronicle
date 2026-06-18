@@ -72,7 +72,7 @@ End-of-run, single snapshot. `knowledge-base/index.json`:
               "fingerprint": "sha…" }],
   "codes": { "US-014": "06_funcionalidades/checkout.md" } }
 ```
-`fingerprint` is **projected from the ledger** (`.ledger/verification.json`, mirrored to the shared `.ledger/fingerprints.json` — `checker-spec.md` §6) — never re-computed or duplicated.
+`fingerprint` is **projected from the checker's fingerprint map** in `.ledger/` (seeded from the trace-map at close, refreshed in the ledger; mirrored to the shared `.ledger/fingerprints.json` — `checker-spec.md` §6) — never re-computed or duplicated here.
 `provenance_summary` is a per-node trust signal (citation-type counts) **recomputed from the node's
 citations on every end-of-run emission** — never patched incrementally, so it cannot desync.
 Humans navigate via `knowledge-base/README`; the manifest is for machines.

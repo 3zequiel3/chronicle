@@ -158,7 +158,7 @@ The same rule governs `registry.json` (the append-only stable-ID ledger — `pro
 
 ### `fingerprints.json` — the public projection (shared with external consumers)
 
-`.ledger/fingerprints.json` is the **one public file** in `.ledger/`: a flat, versioned map of `path#symbol → { fingerprint, ref }` that a sibling skill (e.g. `herald`) reads for code freshness **without knowing chronicle's internals**. Written **only by the mechanical checker** (same ownership rule), as a **projection of the fingerprint values** held in `verification.json`.
+`.ledger/fingerprints.json` is the **one public file** in `.ledger/`: a flat, versioned map of `path#symbol → { fingerprint, ref }` that a sibling skill (e.g. `herald`) reads for code freshness **without knowing chronicle's internals**. On chronicle's side it is written **only by the mechanical checker** — never chronicle's LLM by hand (same ownership rule) — as a **projection of the checker's current fingerprint map**: seeded from the **trace-map rows** at generation close (each row already carries its `fingerprint`), then **refreshed from the verification ledger** as staleness/verify passes recompute. So it is populated **right after a generation run** — it does **not** wait for a staleness pass. The file is **also written by external consumers** (e.g. `herald` seeding it standalone), which is exactly why the union-merge + atomic write rules below exist.
 
 ```json
 {
@@ -173,11 +173,13 @@ The same rule governs `registry.json` (the append-only stable-ID ledger — `pro
 }
 ```
 
+The **key** is the citation's *anchor* `path#symbol` — strip the `type · ` prefix and the ` ~Lnn` line hint from the stored citation (e.g. `code · src/payments/rules.ts#validateCoupon ~L42` → `src/payments/rules.ts#validateCoupon`). Only `code` citations contribute (only they carry a fingerprint); `doc`/`user`/`inferred` are skipped.
+
 **Write semantics (two writers share this file — chronicle's checker and the external consumer):**
 - **Union-merge, never overwrite.** read-merge-write: each writer adds/updates **only its own `path#symbol` entries**, never replacing the whole map. chronicle "projects" by **merging** its symbols in — it does **not** clobber entries written by another skill. Last-write-wins **per key** is safe because the fingerprint is a **pure function of the code** (§4): same symbol → same hash, whoever computed it.
 - **Atomic.** Write to a temp file and `rename` into place, so a concurrent reader never sees a half-written file.
 - **Version-first.** `version: 1` == the §4 algorithm. Bump it on any algorithm/span change — never silently. A reader that does not recognize the version MUST NOT interpret the fingerprints (degrade to re-grounding).
-- **No desync.** `verification.json` keeps the rich per-claim state; `fingerprints.json` mirrors only its fingerprint values, re-projected (merged) on every checker write. Both derive from the same code via the same algorithm, so they cannot drift.
+- **No desync.** Every fingerprint source (trace-map rows, verification ledger) and `fingerprints.json` derive from the **same code via the same algorithm** (§4), so they cannot disagree on a value. On conflict for a key, the **most recently computed** wins (latest checker write — a staleness recomputation supersedes the seed). `verification.json` keeps the rich per-claim state; `fingerprints.json` carries only `{ fingerprint, ref }` per symbol.
 
 ### Migration from the legacy path (once, safe)
 
@@ -185,7 +187,7 @@ On checker init, if storage still lives at the legacy `knowledge-base/.chronicle
 
 | State | Action |
 |---|---|
-| legacy exists, `.ledger/` does not | **copy** files to `.ledger/`, derive `fingerprints.json` from `verification.json`, **verify** (entry counts + a sample of hashes match), **then** remove the legacy dir. Never blind-`mv`. |
+| legacy exists, `.ledger/` does not | **copy** files to `.ledger/`, derive `fingerprints.json` from the trace-map rows (and the verification ledger if populated), **verify** (entry counts + a sample of hashes match), **then** remove the legacy dir. Never blind-`mv`. |
 | both exist | prefer `.ledger/`; leave legacy untouched (do not delete — flag for manual cleanup). |
 | migration cannot run (no write access, etc.) | keep reading the legacy path (**backward-compat**); recommend migrating. Never fail the run over migration. |
 | neither exists | first generative run **seeds** `.ledger/` (standalone behavior unchanged). |
