@@ -60,6 +60,8 @@ next_recommended: "answer Q-3, Q-7 → update --codes Q-3,Q-7"
 risks: []
 ```
 
+> **Interactive parity (P3).** These same fields render as a one-line **prose confidence summary** at the end of *every* interactive run (`SKILL.md` §Result summary) — headless gets the YAML above, the human gets the prose line, both computed from the same artifact. The "confidence N code-cited / M inferred" part is exactly the `provenance_summary` citation-type counts (§Manifest); the "close gate: <path> ✅/❌" part is the P2 gate result (`checker-spec.md` §8). One source, two renderings — they can never disagree.
+
 ## Manifest (machine-only; emit when headless/`emit.manifest`)
 End-of-run, single snapshot. `knowledge-base/index.json`:
 ```json

@@ -168,6 +168,12 @@ Extra files with prefix `1X_`/`2X_` and kebab-case names complement the canonica
 ### Close gate (mandatory — every generative mode)
 Every run that writes a KB (A/B/C/Update) **ends with the mechanical close gate** before declaring done — **fail-closed**. It checks coverage, cross-references, citation→map resolution, and **citation→source existence** (anti-fabrication: the cited `#symbol` must exist in the real file, not just resolve to the trace map). It is deterministic and ~0 tokens where shell-exec is available (**full coverage**), or a clearly-labeled **degraded** LLM sample where it is not; the close **states which path ran** and reports the result. A fabricated or orphan citation **blocks "done"**. Full contract: `edge-cases.md` §Final self-check + `checker-spec.md` §2.5–2.6, §8.
 
+### Result summary (mandatory — every run, both modes)
+After the close gate passes, **every run ends with a one-line confidence summary** — so the human gets the same trust signal the orchestrator gets as structured output, without re-verifying anything. It is the **prose rendering of the result-contract fields** (`orchestration.md` §Result contract), computed from the actual artifact. Example:
+> Documented checkout: 4 nodes (US-014, RN-07) · 2 assumptions → 09 · 1 open question → Q-3 (node 10) · close gate: deterministic ✅ · confidence 8 code-cited / 1 inferred.
+
+**Same fields, one source**: headless emits the YAML contract + manifest, interactive renders this line — both computed from the same run. The numbers MUST match the artifact (nodes/codes written, assumptions in 09, open questions in 10, the close-gate path + verdict from §Close gate, and the provenance-type counts = the `provenance_summary`). **Take the counts from the deterministic close-gate output** (the same citation extraction the gate already ran) — do **not** re-count by hand: a hand-tallied summary can disagree with the gate, which defeats the point. Never report "done" without it.
+
 ---
 
 ## Asset loading map (token discipline)
