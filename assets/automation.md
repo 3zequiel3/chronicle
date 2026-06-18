@@ -87,6 +87,31 @@ The check is thus turnkey **without** a script that chronicle has to maintain, a
 
 ---
 
+## Freshness watch (one-command hook)
+
+The mechanical staleness check (git fast-path, `staleness.md`) is cheap enough to run **on every commit**. The **watch** packages it as a one-command-install hook so "you touched documented code and didn't update the doc" is caught automatically, without anyone remembering to ask.
+
+**Setup** — the user says *"set up the freshness watch"* (or *"watch the docs"*). chronicle, reusing **Generated to spec** above:
+
+- detects the runtime + CI from Layer 0,
+- generates the staleness checker (runtime-native, `checker-spec.md`) **and** a `pre-commit` (or `pre-push` / CI) hook that invokes it,
+- self-verifies the checker against the conformance fixture before trusting it (`checker-spec.md` §7),
+- installs the hook (or prints the one install command), applying the security rules (`checker-spec.md` §5).
+
+**On each commit** the hook runs the git fast-path — `git diff <ref> --name-only` → changed files → cited symbols on them → normalized fingerprint vs ledger — touching only what changed (near-free). Then, per config:
+
+| `on_stale` | Behavior |
+|---|---|
+| `nudge` (default) | **non-blocking**: prints `N nodes stale (RN-…, US-…) → chronicle update --codes …` and lets the commit through. The doc-fix is the human's call. |
+| `block` | **fail-closed**: stops the commit until the stale nodes are updated (or explicitly waived). |
+| `sync` | triggers a **headless delta sync** — builds `chronicle.run: { mode: update, scope: { change_diff, codes } }` from the staleness output and invokes chronicle (the post-apply adapter path). Auto-keeps the KB fresh. |
+
+```json
+{ "on_stale": "nudge", "block_on_broken_ref": true, "watch_paths": ["src/"] }
+```
+
+Defaults: `nudge` (visible but never in your way). Nobody is forced onto PRs or blocking gates — the watch is a capability; the surface (pre-commit / pre-push / CI / none) and the strictness are the user's choice. The hook burns **zero tokens** (mechanical); only `on_stale: sync` spends the LLM, and only on the nodes that actually drifted.
+
 ## The LLM level (separate, never a gate)
 
 Correctness verification (`verification.md`) and auto-update run **on-demand or on a schedule** — for example, a nightly headless agent that audits in depth and opens an issue/PR with findings. Never as a synchronous blocking check, because it costs tokens and is non-deterministic.
