@@ -171,7 +171,18 @@ erDiagram
 <details>
 <summary><b>🤖 Headless — para orquestadores (SDD / CI)</b></summary>
 
-Corre **sin humano** vía un contrato de parámetros (`chronicle.run: { mode, scope, trust }`), sin preguntas bloqueantes. Devuelve un **result contract** estructurado + un manifest `index.json` navegable por máquina, y se **re-sincroniza por delta** tras cada cambio (lee solo los nodos que el diff toca).
+> **Esto no es un comando de terminal ni algo que un humano escriba.** Es un bloque de parámetros que **otra automatización** (un orquestador, CI, un flujo SDD) **incluye en el mensaje** que le manda al agente. La skill lo detecta por su forma y corre **sin preguntar**. Si sos una persona, no lo uses: decí *"actualizá la KB"* en lenguaje natural y listo.
+
+El bloque que arma el orquestador se ve así:
+
+```yaml
+chronicle.run:
+  mode: update
+  scope: { change_diff: ruta/al.patch, codes: [RN-RULES-02] }
+  emit: { result: true }
+```
+
+Corre **sin humano** (sin preguntas bloqueantes), devuelve un **result contract** estructurado + un manifest `index.json` navegable por máquina, y se **re-sincroniza por delta** tras cada cambio (lee solo los nodos que el diff toca).
 
 - **Idempotente** — re-correr sobre código sin cambios es un no-op (diff vacío).
 - **Fail-closed** — una cita fabricada bloquea el `ok`, nunca pasa como verde falso.
@@ -206,7 +217,7 @@ npx skills update                    # actualiza todas las skills instaladas
 npx skills add 3zequiel3/chronicle   # re-instala = trae la última de main
 ```
 
-> Eso actualiza **la skill**. Para actualizar **la KB** que mantiene es otra cosa: pedí *"actualizá la KB"* (interactivo) o, en headless, invocá `chronicle.run: { mode: update }`.
+> Eso actualiza **la skill**. Actualizar **la KB** que mantiene es otra cosa: como humano, pedí *"actualizá la KB"* en lenguaje natural. (Una automatización/CI lo dispara sola con un bloque `chronicle.run:` — ver el colapsable **🤖 Headless**.)
 
 </details>
 
