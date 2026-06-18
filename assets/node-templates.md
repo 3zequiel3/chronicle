@@ -41,6 +41,8 @@ Not all systems carry the same nodes. A CLI has no RBAC; a library has no UI flo
 
 The profile changes a slot's **content and framing**, **never its filename**. Filenames are pinned by slot number so re-runs and cross-references stay stable. Do **not** invent profile-specific filenames — reframe the **section titles inside** the file instead.
 
+> **Pinned per slot *within the chosen `kb_language`*.** The names in the table below are the Spanish (`es`) form; an `en` KB uses the translated set (`04_models-apis/`, `05_business-rules/`, …) per `conventions.md` §6. The language is chosen **once** (Q-language) and cached for the whole KB, so the filenames are still fixed for every re-run — they just live in the language the KB was created in. Changing `kb_language` after the fact is a full regeneration, not a rename.
+
 | Slot | File form | Folder form (when promoted) |
 |---|---|---|
 | 01 | `01_vision_y_objetivos.md` | — (map) |
@@ -307,9 +309,12 @@ sequenceDiagram
 **A says**: [...] · **B says**: [...] · **Impact**: [...] · **Proposed resolution**: [...]
 
 ## Preguntas priorizadas
-| Priority | Question | Blocks | Decision-maker |
+| ID | Priority | Question | Blocks | Decision-maker |
+| `Q-01` | Alta | ... | US-014 | @owner |
 ```
-**Checklist**: inconsistencies with impact · questions with priority and decision-maker.
+Each open question carries a stable `Q-NN` id (see `provenance.md` §Stable IDs) so the headless result contract and orchestrator can reference it (`open_questions: [Q-01]`). `Q-NN` is **inference-layer**: ephemeral (deleted when the question is resolved and its answer migrates to its node), content-derived, **not** in the append-only registry.
+
+**Checklist**: inconsistencies with impact · questions with `Q-NN` id, priority and decision-maker.
 
 > **LIVE backlog, not a log.** When a question is resolved, its answer **migrates** to its own node (decision → `09`, rule → `05`, etc.) and the question **is deleted from `10`**. The resolution history goes to `CHANGELOG.md`, not here. This way `10` shrinks as things are resolved and never becomes a graveyard of thousands of lines. Same rule for `SU-NN` assumptions in `09`.
 

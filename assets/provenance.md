@@ -25,7 +25,7 @@ Rendered as **inline code** (visually distinct and greppable):
 
 **`code` anchor** (design decision): the **symbol** (function/class/method) is the source of truth — it survives refactors and line moves. The line number (`~Lnn`) is only a **navigation hint**, never the canonical reference.
 
-### Grammar (for tooling — §3, §5, §6)
+### Grammar (for tooling — consumed by verification, staleness & the checker)
 
 ```
 citation = "[" type " · " anchor "]"
@@ -80,6 +80,9 @@ Coded items carry a **stable ID** (`RN-{DOMINIO}-NN`, `US-NNN`, `DD-NN`, `SU-NN`
 |---|---|---|
 | `code`-cited (RN / US / entity / endpoint / flow step) | the cited `file#symbol` | the trace-map row (`reverse-documentation.md` §3) |
 | `user` / `doc`-cited (DD decisions, SU assumptions) | a normalized **slug/short-hash of the canonical statement** | the decision/assumption title |
+| open questions (`Q-NN`, node 10) | slug/short-hash of the question statement | the question text |
+
+> **`Q-NN` is the exception to "append-only".** Open questions are the **inference layer** and node 10 is a *living backlog that shrinks*: when a question is resolved its answer migrates to its node and the `Q-NN` is **deleted**. So `Q-NN` is content-derived (stable while the question exists, so the result contract / orchestrator can reference it) but is **NOT** registry-tracked — it is ephemeral, never retired-forever like `RN`/`US`/`DD`/`SU`. The append-only registry holds only the durable, citable codes.
 
 The key is **stable across refactors** for code items (the symbol survives line moves — same rationale as the citation anchor) and **stable across prose drift** for WHY items (the hash is of the canonical statement, not the surrounding paragraph).
 
@@ -138,8 +141,8 @@ The numeric suffix is **not** the order the LLM wrote things. It is assigned mec
 
 The format is deliberately **parseable** because three features consume it:
 
-- **§3 Correctness** — takes each `code`/`doc` citation and verifies the claim against its anchor.
-- **§5 Staleness** — re-resolves the `#symbol`; if it changed or disappeared, marks the section as suspect.
-- **§6 CI** — parses citations and reports coverage (% of cited claims) as a quality metric with exit code.
+- **Correctness** (`verification.md`) — takes each `code`/`doc` citation and verifies the claim against its anchor.
+- **Staleness** (`staleness.md`) — re-resolves the `#symbol`; if it changed or disappeared, marks the section as suspect.
+- **CI / checker** (`checker-spec.md`, `automation.md`) — parses citations and reports coverage (% of cited claims) as a quality metric with exit code.
 
 Designing the citation format once, correctly, is what lets those three features plug in without redesign.

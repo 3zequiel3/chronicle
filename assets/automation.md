@@ -21,7 +21,7 @@ The gate on each commit/PR burns **zero tokens** because only the mechanical lev
 
 | Check | How (mechanical) | Fails if… |
 |---|---|---|
-| **Citation coverage** | extracts citations with `\[(code\|doc\|user\|inferred) · [^]]+\]`; counts factual claims without a citation | coverage < threshold |
+| **Citation coverage** | extracts citations with `\[(code\|doc\|user\|inferred) · ([^\]]+)\]` (the `\|` are markdown table-escapes; the canonical regex is `\[(code\|doc\|user\|inferred) · ([^\]]+)\]` — same as `provenance.md` / `checker-spec.md`); counts factual claims without a citation | coverage < threshold |
 | **Cross-reference consistency** | resolves each referenced `RN`/`US`/`DD` | there is a broken reference |
 | **Staleness** | `git diff <ref> --name-only` → changed files → affected citations → normalized fingerprint vs ledger | there are `stale`/orphaned claims on touched code |
 | **Test coverage** | counts rules with a test citation vs rules with `⚠ no test` | (risk metric; blocks only if a minimum is configured) |
@@ -45,7 +45,7 @@ Report (consumable by any surface):
 }
 ```
 
-**Exit codes**: `0` = all pass · `1` = staleness · `2` = coverage · `3` = consistency · (combinable by bitmask if needed). Detail always goes in the report.
+**Exit codes** (combinable by bitwise OR — powers of two): `0` = all pass · `1` = staleness · `2` = coverage · `4` = consistency · `8` = orphan/fabricated citation (§2.5/§2.6). Same scheme as `checker-spec.md` §3. Detail always goes in the report.
 
 **Optional config** (`knowledge-base/.chronicle/checks.json`) — thresholds and what blocks:
 

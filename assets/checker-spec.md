@@ -28,7 +28,11 @@ Extracts citations using the grammar from `provenance.md`:
 \[(code|doc|user|inferred) · ([^\]]+)\]
 ```
 
-**Claim unit** (deterministic definition for counting): in nodes 04-09, each **coded item** counts as one factual claim. Operationally, a line starting with `- **<CODE>**` (e.g. `- **RN-PAGOS-01**`, `- **DD-02**`) or an entity/endpoint heading. Each claim **must** have a citation in its block or be marked `[inferred · …]`.
+**Claim unit** (deterministic definition for counting): in nodes 04-09, each **coded item** counts as one factual claim. A coded item appears in one of **two** template forms (`node-templates.md`) and the counter must match **both**:
+- a **list line** `- **<CODE>**` (e.g. `- **RN-PAGOS-01**`), as 05/06 use; **and**
+- a **heading** form `#`/`##` `<CODE>` or an entity/endpoint heading (e.g. `# DD-01 — …`, `# SU-01 — …`, `## Entidad: Pago`), as node 09 (ADR) and node 04 use.
+
+Matching only `- **` silently **exempts node 09** (DD/SU render as headings) — undercounting claims. Each claim **must** carry a citation in its block or be marked `[inferred · …]`.
 
 - `claims` = total claim units.
 - `cited` = those with a citation (any type) in their block.
@@ -151,12 +155,12 @@ The same rule governs `registry.json` (the append-only stable-ID ledger — `pro
 
 When the agent **generates** the checker for a project, before using it:
 
-1. Run the generated checker against `assets/conformance/sample-kb/` and compare its output with `assets/conformance/expected.json` (fields `claims`, `cited`, `uncited`, `broken`, `items`).
+1. Run the generated checker against `assets/conformance/sample-kb/` and compare its output with `assets/conformance/expected.json` — exactly the fields the fixture carries: coverage `claims`, `cited`, `uncited`, `value`, `uncited_items`; cross_ref `broken`, `items`. (`threshold`/`pass` are runtime-config-dependent, so they are **not** fixture-compared.)
 2. Run normalization + hash on `assets/conformance/fingerprint/sample.js` and compare with `assets/conformance/fingerprint/expected.json` (both the `normalized` string **and** the SHA-256 `fingerprint`).
 3. Run citation→map resolution on `assets/conformance/trace-map/` (using its `trace-map.json`) and compare with `assets/conformance/trace-map/expected.json` (`code_citations`, `resolved`, `orphans`, `orphan_items`).
 4. **If everything matches exactly → conformant**, use it. **If not → regenerate** the checker and repeat. Never use a checker that did not pass the fixture.
 
-The fixture is **data, not code** (markdown + JSON + one snippet), runtime-agnostic. It validates all four deterministic pieces: citation extraction, cross-reference consistency, fingerprint normalization **and citation→map resolution** (the anti-fabrication foreign key). The only piece not fixturized is the `git diff` staleness path, which requires a real git repo and is validated in the target repo.
+The fixture is **data, not code** (markdown + JSON + one snippet), runtime-agnostic. It validates four deterministic pieces: citation extraction, cross-reference consistency, fingerprint normalization **and citation→map resolution** (the anti-fabrication foreign key). Two pieces are **not** fixturized because they need real source files in a real repo, and are validated **in the target repo** instead: the `git diff` staleness path, and **§2.6 citation→source existence** (it greps the actual code, which the markdown fixture has none of).
 
 > This makes the check turnkey **without** chronicle maintaining a per-platform script, and its correctness is **verified by generation** rather than assumed.
 

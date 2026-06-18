@@ -82,7 +82,7 @@ You don't re-verify what hasn't changed. The two make each other cheaper.
 ## Feeding the trust gate (beyond audit reporting)
 
 When invoked from the orchestration trust gate, staleness does more than report: it
-**classifies drift by node kind** (spec §10) and emits a trust decision.
+**classifies drift by node kind** (per the trust gate, `orchestration.md` §Trust gate) and emits a trust decision.
 - Drift in rules/flows/models (04–07) → recommend/auto-flip `code_authoritative` for those nodes.
 - Drift touching `system_type`/`kb_language` signals or identity nodes (01/02) → `partial` + risk;
   do not auto-proceed.

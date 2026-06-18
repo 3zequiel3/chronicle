@@ -49,14 +49,14 @@ status: ok | partial | needs_input | error
 mode: C
 executive_summary: "…"
 artifacts: [{ path, action: created|updated, codes: [US-014] }]
-codes_touched: [US-014, RN-07, DD-03]
+codes_touched: [US-014, RN-PAGOS-07, DD-03]
 assumptions: [{ id: DD-03, confidence: low, node: "09" }]
 questions:
-  - { id: Q-1, scope: resolvable_by_orchestrator, blocking: true,  field: kb_language, text: "…" }
-  - { id: Q-3, scope: human_only,                  blocking: false, node: "10",         text: "…" }
-open_questions: [Q-3, Q-7]
+  - { id: Q-01, scope: resolvable_by_orchestrator, blocking: true,  field: kb_language, text: "…" }
+  - { id: Q-03, scope: human_only,                  blocking: false, node: "10",         text: "…" }
+open_questions: [Q-03, Q-07]
 coverage: { requested: checkout, documented: true, skipped: [] }
-next_recommended: "answer Q-3, Q-7 → update --codes Q-3,Q-7"
+next_recommended: "answer Q-03, Q-07 → their answers migrate to 09/05; then re-run update on the affected codes"
 risks: []
 ```
 

@@ -170,7 +170,7 @@ Every run that writes a KB (A/B/C/Update) **ends with the mechanical close gate*
 
 ### Result summary (mandatory — every run, both modes)
 After the close gate passes, **every run ends with a one-line confidence summary** — so the human gets the same trust signal the orchestrator gets as structured output, without re-verifying anything. It is the **prose rendering of the result-contract fields** (`orchestration.md` §Result contract), computed from the actual artifact. Example:
-> Documented checkout: 4 nodes (US-014, RN-07) · 2 assumptions → 09 · 1 open question → Q-3 (node 10) · close gate: deterministic ✅ · confidence 8 code-cited / 1 inferred.
+> Documented checkout: 4 nodes (US-014, RN-PAGOS-07) · 2 assumptions → 09 · 1 open question → Q-03 (node 10) · close gate: deterministic ✅ · confidence 8 code-cited / 1 inferred.
 
 **Same fields, one source**: headless emits the YAML contract + manifest, interactive renders this line — both computed from the same run. The numbers MUST match the artifact (nodes/codes written, assumptions in 09, open questions in 10, the close-gate path + verdict from §Close gate, and the provenance-type counts = the `provenance_summary`). **Take the counts from the deterministic close-gate output** (the same citation extraction the gate already ran) — do **not** re-count by hand: a hand-tallied summary can disagree with the gate, which defeats the point. Never report "done" without it.
 
@@ -195,7 +195,7 @@ After the close gate passes, **every run ends with a one-line confidence summary
 
 `provenance.md` is loaded in **every mode that writes or audits claims** (A, B, C, Update, Audit) — it defines the provenance citation contract, mandatory under the master rule.
 
-The **mandatory close gate** runs at the end of every generative mode using the deterministic recipe in `edge-cases.md` §Final self-check (grep/regex over the KB + source via the agent's own tools) — it does **not** require loading the full `checker-spec.md`. The complete `automation.md` + `checker-spec.md` are loaded together **on-demand** only when the user asks to **generate a persistent CI artifact** ("set up the CI check") or run a standalone mechanical check / staleness pass ("is the doc stale?"). `checker-spec.md` defines the runtime-agnostic contract of the generated checker and references the golden fixture under `assets/conformance/`.
+The **mandatory close gate** runs at the end of every generative mode using the deterministic recipe in `edge-cases.md` §Final self-check (grep/regex over the KB + source via the agent's own tools — its #4 already covers the §2.6 citation→source existence check) — it does **not** require loading the full `checker-spec.md`. The complete `automation.md` + `checker-spec.md` are loaded together **on-demand** only when the user asks to **generate a persistent CI artifact** ("set up the CI check") or run a standalone mechanical check / staleness pass ("is the doc stale?"). `checker-spec.md` defines the runtime-agnostic contract of the generated checker and references the golden fixture under `assets/conformance/`.
 
 `conventions.md` (Mermaid, tagging, language, compliance) is consulted selectively when relevant, not loaded in full.
 
