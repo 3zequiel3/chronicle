@@ -4,24 +4,20 @@
 
 # chronicle
 
-**La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — generándola desde documentos, desde cero, o **documentando código existente sin tocar una sola línea**.
+**La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — desde documentos, desde cero, o **documentando código existente sin tocar una línea**.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.11-green.svg)](SKILL.md)
 [![Read-only on code](https://img.shields.io/badge/c%C3%B3digo-read--only-orange.svg)](#regla-de-oro)
 [![skills.sh](https://img.shields.io/badge/skills.sh-chronicle-black.svg)](https://www.skills.sh/3zequiel3/chronicle)
 
-*Un cronista registra la realidad tal cual es, sin alterarla. Eso es chronicle: documenta el sistema, no lo modifica.*
-
 </div>
 
 ---
 
-## ¿Qué es?
+## Qué es
 
-`chronicle` toma cualquier proyecto y produce una **base de conocimiento navegable y consistente** en `knowledge-base/`, organizada en **10 slots canónicos** —un núcleo de 4 siempre presente + variables que se activan según el tipo de sistema— que cubren todo lo crítico: visión, datos, reglas, flujos, arquitectura y decisiones.
-
-A diferencia de un generador de documentación de un solo uso, chronicle cubre el **ciclo de vida completo**: crea, documenta código que ya existe, actualiza sin destruir, y audita lo que se escribió antes.
+Toma cualquier proyecto y produce una **base de conocimiento navegable y consistente** en `knowledge-base/`, en **10 slots canónicos** (un núcleo de 4 siempre presente + variables según el tipo de sistema): visión, datos, reglas, flujos, arquitectura y decisiones. A diferencia de un generador de un solo uso, cubre el **ciclo de vida completo**: genera, documenta código existente, actualiza sin destruir y audita.
 
 ```
 proyecto/                          chronicle                  knowledge-base/
@@ -35,32 +31,18 @@ proyecto/                          chronicle                  knowledge-base/
 
 ## Empezá acá
 
-1. **Instalá la skill** en tu agente — ya publicada en **[skills.sh](https://www.skills.sh/3zequiel3/chronicle)**:
+1. **Instalá la skill** — publicada en **[skills.sh](https://www.skills.sh/3zequiel3/chronicle)**:
    ```bash
    npx skills add 3zequiel3/chronicle
    ```
-   > Funciona en Claude Code, Cursor, Codex, Gemini y demás agentes compatibles. También aceptá la URL completa (`https://github.com/3zequiel3/chronicle`) si preferís.
-2. **Pedísela en lenguaje natural** — se activa sola al detectar la intención (crear, documentar, actualizar o auditar):
+   > Funciona en Claude Code, Cursor, Codex, Gemini y demás agentes compatibles.
+2. **Pedísela en lenguaje natural** — se activa sola al detectar la intención:
    ```text
    "documentá la funcionalidad de checkout"
    ```
-3. **Obtenés** los nodos afectados en `knowledge-base/`, cada afirmación con su **cita de procedencia** (`[code · …]`) y sin haber tocado una línea de código.
+3. **Obtenés** los nodos afectados en `knowledge-base/`, cada afirmación con su **cita de procedencia** (`[code · …]`), sin una línea de código tocada.
 
 ¿No sabés qué modo necesitás? No importa: chronicle lo detecta solo.
-
----
-
-## Cómo actualizar
-
-La skill es una copia traída de GitHub; **no se auto-actualiza**. Para traer la última versión:
-
-```bash
-npx skills update                    # actualiza todas las skills instaladas
-# o, puntual:
-npx skills add 3zequiel3/chronicle   # re-instala = trae la última de main
-```
-
-> Esto actualiza **la skill**. Para actualizar **la KB** que chronicle mantiene, es otra cosa: pedí *"actualizá la KB"* (interactivo) o, en headless, invocá `chronicle.run: { mode: update }`.
 
 ---
 
@@ -73,7 +55,7 @@ Un **router de intención** elige el modo tras un embudo de detección barato:
 | **A · Ingest** | Hay `docs/` con fuentes | Genera la KB completa con **una sola pregunta** (el idioma); por lo demás fire-and-forget. |
 | **B · Scratch** | No hay docs ni código | Actúa como **arquitecto + product manager**: pregunta, propone, itera. |
 | **C · Reverse** | Hay código sin documentar | Documenta **una funcionalidad** leyendo el código (read-only). |
-| **Update** | Ya existe `knowledge-base/` | **Merge no destructivo**; promueve nodos archivo→carpeta al crecer. |
+| **Update** | Ya existe `knowledge-base/` | **Merge no destructivo**; re-correr sobre código sin cambios no reescribe nada. |
 | **Audit** | Querés validar la KB | Reporta completitud, consistencia y drift. **No genera, audita.** |
 
 ```text
@@ -90,9 +72,11 @@ Un **router de intención** elige el modo tras un embudo de detección barato:
 ## Regla de oro
 
 > **El código se LEE pero NUNCA se modifica.**
-> El **código dice el QUÉ**, el **usuario dice el PORQUÉ**, y **nada se inventa**.
+> El **código dice el QUÉ**, el **usuario dice el PORQUÉ**, y **nada se inventa.**
 
-Toda ambigüedad o suposición que no pueda confirmarse va al nodo `09` (decisión inferida) o `10` (pregunta abierta), nunca documentada como un hecho. chronicle actúa como **notario** cuando documenta lo que existe, y solo como **consultor** cuando todavía no hay nada construido. Por eso la documentación es **confiable**: no mezcla lo que el sistema hace con lo que alguien supone que hace.
+Toda suposición que no pueda confirmarse va al nodo `09` (decisión inferida) o `10` (pregunta abierta), nunca documentada como un hecho. chronicle es **notario** cuando documenta lo que existe, y solo **consultor** cuando todavía no hay nada construido.
+
+Y la confianza no depende de disciplina: cada cita se ancla a un **símbolo real**, y un **chequeo mecánico** (git + regex + hash, sin LLM) marca como defecto cualquier cita que no resuelva al código — bloquea el cierre antes de declarar "listo". Por eso la documentación no mezcla lo que el sistema hace con lo que alguien supone que hace.
 
 ---
 
@@ -101,31 +85,14 @@ Toda ambigüedad o suposición que no pueda confirmarse va al nodo `09` (decisi�
 <details>
 <summary><b>📥 Fuentes que lee (y sus límites)</b></summary>
 
-chronicle ingiere las siguientes fuentes, citando cada afirmación con su procedencia:
+Cada afirmación se cita con su procedencia. Las fuentes:
 
 - **Código** — read-only, con cita anclada a símbolo (Mode C).
 - **Documentos** — `.txt`, `.docx`, `.pdf`, `.md` (Mode A).
 - **Manifests** — `package.json`, `go.mod`, `pyproject.toml`… para detectar el stack.
 - **Configuraciones** — config keys, routing por config, `.env` → nodo 08.
 - **Esquemas / DB** — lee **archivos de schema y migraciones** (`prisma/schema.prisma`, `*.sql`, `openapi.*`) como código. **No se conecta a una base de datos en vivo.**
-- **Diagramas** — Mermaid/PlantUML/DOT y **SVG/`.drawio`** (son texto/XML, no imágenes): ERD → nodo 04, secuencia → nodo 07, arquitectura → nodo 08. **Imágenes raster** (`.png`/`.jpg`) solo si el agente tiene visión, como fuente de **baja confianza** (van al nodo 10 a confirmar, nunca como hecho citado).
-
-</details>
-
-<details>
-<summary><b>✨ Características completas</b></summary>
-
-- 🧭 **5 modos** que cubren todo el ciclo de vida de la documentación.
-- 🔍 **Documentación inversa por funcionalidad** — documenta un corte vertical (checkout, pagos…) que cruza carpetas y lenguajes, leyendo el código en modo read-only.
-- 🪶 **Eficiente en tokens** — detecta el stack desde los *manifests*, no leyendo el código; y carga solo los recursos que el modo activo necesita.
-- 🤖 **Lista para orquestadores (headless)** — corre sin humano vía un contrato de parámetros (sin preguntas bloqueantes), devuelve un *result contract* estructurado + un manifest `index.json` navegable por máquina, y se re-sincroniza por delta tras cada cambio. **Sin costo en el uso interactivo: pagás por orquestación solo si orquestás.**
-- 🧩 **Estructura adaptativa** — núcleo de 4 nodos + *profile* por tipo de sistema (web, API, CLI, móvil, SaaS, **librería/SDK**, **pipeline de datos**): un CLI no lleva RBAC, una librería documenta su API pública, un pipeline su DAG. Y los nodos crecen de archivo a carpeta según el tamaño.
-- 🔀 **Merge no destructivo** — actualizar nunca pisa el trabajo previo válido.
-- ✅ **Auditable** — score de completitud por nodo, consistencia cruzada y detección de contradicciones internas.
-- 🛡️ **El código manda sobre el doc viejo** — ante conflicto entre código y documentación, gana el código; el doc desactualizado nunca se documenta como hecho, queda registrado en `09`/`10`.
-- 📊 **Diagramas Mermaid** nativos (ERD, secuencia, arquitectura).
-- 🌐 **Multi-idioma (es/en)** — responde en el idioma en que le hablás; el idioma de la **KB generada** se pregunta una vez al inicio (no se adivina del repo).
-- 🤝 **Gobernanza condicional** — metadata de ownership y cadencia de revisión que se activa solo cuando hay un equipo o un handoff de por medio, no en proyectos solo.
+- **Diagramas** — Mermaid/PlantUML/DOT y **SVG/`.drawio`** (son texto/XML): ERD → nodo 04, secuencia → nodo 07, arquitectura → nodo 08. **Imágenes raster** (`.png`/`.jpg`) solo si el agente tiene visión, como fuente de **baja confianza** (van al nodo 10 a confirmar, nunca como hecho citado).
 
 </details>
 
@@ -151,6 +118,8 @@ Por eso documentar un proyecto gigante cuesta casi lo mismo que uno chico: nunca
 
 <details>
 <summary><b>🗂️ Estructura de la base de conocimiento</b></summary>
+
+Misma forma en todo proyecto → onboarding rápido. El nodo `09` (ADR) obliga a registrar el **porqué** de cada decisión; el `10` hace **explícitos los huecos** en vez de enterrarlos.
 
 Los **10 slots canónicos** se clasifican en dos ejes ortogonales:
 
@@ -179,18 +148,16 @@ knowledge-base/
 </details>
 
 <details>
-<summary><b>🎯 Diseño destacado</b></summary>
+<summary><b>🎯 Diseño destacado — corte vertical por funcionalidad</b></summary>
 
-**Corte vertical por funcionalidad.** En Mode C, documentar "pagos" escribe en paralelo cuatro archivos — uno en cada colección — siguiendo el flujo real en vez de la estructura de carpetas del código:
+En Mode C, documentar "pagos" escribe en paralelo cuatro archivos —uno en cada colección— siguiendo el flujo real en vez de la estructura de carpetas del código:
 
 ```
 04_modelos-apis/modelos/pago.md   ·   05_reglas-de-negocio/pagos.md
 06_funcionalidades/pagos.md        ·   07_flujos-principales/pagos-checkout.md
 ```
 
-Cuatro diffs quirúrgicos en lugar de cuatro monolitos editados. La estructura de carpetas es el reflejo físico del enfoque por funcionalidad.
-
-**Diagramas que se mantienen.** Donde corresponde, los nodos usan Mermaid:
+Cuatro diffs quirúrgicos en lugar de cuatro monolitos editados. Donde corresponde, los nodos usan Mermaid nativo:
 
 ```mermaid
 erDiagram
@@ -198,6 +165,20 @@ erDiagram
     PEDIDO  ||--|{ ITEM   : contiene
     PEDIDO  }o--|| PAGO   : tiene
 ```
+
+</details>
+
+<details>
+<summary><b>🤖 Headless — para orquestadores (SDD / CI)</b></summary>
+
+Corre **sin humano** vía un contrato de parámetros (`chronicle.run: { mode, scope, trust }`), sin preguntas bloqueantes. Devuelve un **result contract** estructurado + un manifest `index.json` navegable por máquina, y se **re-sincroniza por delta** tras cada cambio (lee solo los nodos que el diff toca).
+
+- **Idempotente** — re-correr sobre código sin cambios es un no-op (diff vacío).
+- **Fail-closed** — una cita fabricada bloquea el `ok`, nunca pasa como verde falso.
+- **Watch de frescura** — un hook opcional avisa en cada commit qué nodos quedaron viejos (o dispara la sync solo).
+- **Sin costo en uso interactivo** — pagás por orquestación solo si orquestás.
+
+La KB sirve de input para flujos tipo SDD/OpenSpec, y los tags `[MVP]`/`[Post-MVP]` permiten derivar un roadmap.
 
 </details>
 
@@ -215,13 +196,17 @@ Según el dominio, chronicle agrega nodos extra con prefijo `1X_` que **compleme
 </details>
 
 <details>
-<summary><b>🤔 Por qué esta estructura</b></summary>
+<summary><b>🔄 Actualizar la skill (vs. actualizar la KB)</b></summary>
 
-- **Consistencia** — todo proyecto documentado comparte la misma forma → onboarding más rápido.
-- **Trazabilidad** — el nodo `09` (ADR) obliga a documentar el porqué de cada decisión.
-- **Visibilidad de huecos** — el nodo `10` hace explícitas las preguntas pendientes en vez de enterrarlas.
-- **Lista para spec-driven development y orquestadores** — corre headless vía un contrato de parámetros (modo, scope, trust), devuelve un *result contract* estructurado y un manifest `index.json` navegable por máquina; la KB sirve de input para flujos tipo SDD/OpenSpec y los tags `[MVP]`/`[Post-MVP]` permiten derivar un roadmap.
-- **Mantenible en el tiempo** — gobernanza condicional, changelog y auditoría de consistencia.
+La skill es una copia traída de GitHub; **no se auto-actualiza**:
+
+```bash
+npx skills update                    # actualiza todas las skills instaladas
+# o, puntual:
+npx skills add 3zequiel3/chronicle   # re-instala = trae la última de main
+```
+
+> Eso actualiza **la skill**. Para actualizar **la KB** que mantiene es otra cosa: pedí *"actualizá la KB"* (interactivo) o, en headless, invocá `chronicle.run: { mode: update }`.
 
 </details>
 
@@ -234,3 +219,5 @@ Las contribuciones son bienvenidas. Abrí un issue para discutir cambios grandes
 ## Licencia
 
 [Apache-2.0](LICENSE) — proyecto original de Ezequiel González.
+</content>
+</invoke>
