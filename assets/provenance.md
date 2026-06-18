@@ -82,7 +82,7 @@ Coded items carry a **stable ID** (`RN-{DOMINIO}-NN`, `US-NNN`, `DD-NN`, `SU-NN`
 
 The key is **stable across refactors** (the symbol survives line moves) and across prose drift (the hash is of the statement, not the paragraph). The `{DOMINIO}` token is content-derived too — the functionality name when given, else the slug of the rules' shared module — never a re-worded paraphrase.
 
-**The assignment is mechanical and tooling-owned**: within a scope, sort natural keys canonically and look them up in the append-only `knowledge-base/.chronicle/registry.json` — reuse the ID for a known key, `max+1` for a new one, **never renumber**. From-scratch (no registry) the canonical sort alone is reproducible; on re-run the registry is the source of truth. **Full mechanics + shape in `checker-spec.md` §6.** The writer **reads** the registry to reuse IDs; it never hand-edits it.
+**The assignment is mechanical and tooling-owned**: within a scope, sort natural keys canonically and look them up in the append-only `.ledger/registry.json` — reuse the ID for a known key, `max+1` for a new one, **never renumber**. From-scratch (no registry) the canonical sort alone is reproducible; on re-run the registry is the source of truth. **Full mechanics + shape in `checker-spec.md` §6.** The writer **reads** the registry to reuse IDs; it never hand-edits it.
 
 > **`Q-NN` is the exception**: open questions are inference-layer and node 10 shrinks, so a resolved `Q-NN` is **deleted** (its answer migrates to its node). It is content-derived but **not** registry-tracked — ephemeral, unlike the durable `RN`/`US`/`DD`/`SU`.
 

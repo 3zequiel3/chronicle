@@ -89,7 +89,7 @@ This avoids documenting the wrong thing — a real risk when the target is given
 
 **Frontier rule**: when a found symbol clearly belongs to **another functionality**, don't expand it — cross-reference and continue. The frontier is decided by **domain**, not call distance.
 
-**Output — the trace map (persisted)**: the sub-agent returns and **persists** the map in `knowledge-base/.chronicle/trace-map.json`. Each row is a citable unit:
+**Output — the trace map (persisted)**: the sub-agent returns and **persists** the map in `.ledger/trace-map.json`. Each row is a citable unit:
 
 ```json
 { "version": 1, "rows": [
@@ -121,7 +121,7 @@ If the node is a file (small system) it gets merged into the file; if it's a fol
 
 > **Mandatory citation when writing (Mode C is the central provenance case).** Every statement you write carries its citation `[code · path#symbol ~Lnn]` pointing to the exact place it was derived from — the **symbol** you are reading at that moment is the anchor, and **it must be in the trace map** (see §3 — the allowlist). For flows (07), one citation per step. What you cannot anchor to a symbol in the map **is not written as fact**: `[inferred · → 10]`. The `~Lnn` comes from the search, not from memory. See `provenance.md`.
 
-> **Stable IDs are assigned from the map, not from writing order.** Each coded item's ID suffix comes from its **natural key** — the map row's `file#symbol` (or a statement slug for WHY items) — via the append-only registry (`provenance.md` §Stable IDs). The writer **reads** `knowledge-base/.chronicle/registry.json` to reuse existing IDs, orders items by **canonical sort** of their keys, and appends new ones at `max+1`; it never renumbers existing codes. The registry write is a deterministic close step (tooling-owned), exactly like the trace map. Two from-scratch runs that trace the same symbols therefore emit the **same codes** even though the prose differs.
+> **Stable IDs are assigned from the map, not from writing order.** Each coded item's ID suffix comes from its **natural key** — the map row's `file#symbol` (or a statement slug for WHY items) — via the append-only registry (`provenance.md` §Stable IDs). The writer **reads** `.ledger/registry.json` to reuse existing IDs, orders items by **canonical sort** of their keys, and appends new ones at `max+1`; it never renumbers existing codes. The registry write is a deterministic close step (tooling-owned), exactly like the trace map. Two from-scratch runs that trace the same symbols therefore emit the **same codes** even though the prose differs.
 
 ---
 

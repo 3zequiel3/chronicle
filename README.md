@@ -7,7 +7,7 @@
 **La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — desde documentos, desde cero, o **documentando código existente sin tocar una línea**.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.11-green.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/version-2.12-green.svg)](SKILL.md)
 [![Read-only on code](https://img.shields.io/badge/c%C3%B3digo-read--only-orange.svg)](#regla-de-oro)
 [![skills.sh](https://img.shields.io/badge/skills.sh-chronicle-black.svg)](https://www.skills.sh/3zequiel3/chronicle)
 
@@ -218,6 +218,8 @@ npx skills add 3zequiel3/chronicle   # re-instala = trae la última de main
 ```
 
 > Eso actualiza **la skill**. Actualizar **la KB** que mantiene es otra cosa: como humano, pedí *"actualizá la KB"* en lenguaje natural. (Una automatización/CI lo dispara sola con un bloque `chronicle.run:` — ver el colapsable **🤖 Headless**.)
+
+> **Cambio en 2.12:** el estado de tooling (ledger, trace map, registry) se movió de `knowledge-base/.chronicle/` a **`.ledger/`** en la raíz del proyecto (gitignored). La migración es **automática y segura** en la primera corrida (copia → verifica → limpia el legacy). El único archivo público, `.ledger/fingerprints.json`, expone el mapa de frescura del código para que skills hermanas (p. ej. **herald**) lo lean sin conocer las tripas de chronicle.
 
 </details>
 

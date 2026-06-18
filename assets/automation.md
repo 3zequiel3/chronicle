@@ -47,7 +47,7 @@ Report (consumable by any surface):
 
 **Exit codes** (combinable by bitwise OR — powers of two): `0` = all pass · `1` = staleness · `2` = coverage · `4` = consistency · `8` = orphan/fabricated citation (§2.5/§2.6). Same scheme as `checker-spec.md` §3. Detail always goes in the report.
 
-**Optional config** (`knowledge-base/.chronicle/checks.json`) — thresholds and what blocks:
+**Optional config** (`.ledger/checks.json`) — thresholds and what blocks:
 
 ```json
 { "coverage_threshold": 0.80, "block_on_stale": true, "block_on_broken_ref": true }

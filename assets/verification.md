@@ -73,9 +73,11 @@ This is the cheap **semantic complement** to the close-gate mechanical check (`e
 
 ## The ledger (shared mechanism with #5)
 
-Persisted at `knowledge-base/.chronicle/verification.json`. Clean Markdown; tooling state kept separate.
+Persisted at `.ledger/verification.json` (project-root tooling storage — `.ledger/`, a sibling of `knowledge-base/`, since a consumer without a KB may still need the ledger). The KB nodes stay clean Markdown; tooling state lives separately as JSON under `.ledger/`.
 
 > **Ledger ownership (hard rule).** `verification.json` is written **only by the mechanical checker** (`checker-spec.md` §6). The LLM **never edits it by hand** — it only reads it to decide what to re-verify. Tooling state is the tooling's responsibility; keeping it in natural language drifts.
+
+> **Shared fingerprint projection.** The fingerprint values in this rich ledger are also **mirror-projected** (merge, never overwrite) into `.ledger/fingerprints.json` — a flat, versioned map that an external consumer (e.g. the `herald` skill) reads without knowing chronicle's internals. Same algorithm, same ownership. Full contract + schema in `checker-spec.md` §6.
 
 ```json
 {

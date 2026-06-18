@@ -1,6 +1,6 @@
 # Staleness — did the doc go stale? (cheap check, on-demand)
 
-Detects when documentation has gone stale relative to the code, by comparing the **current** fingerprint of each cited source against the one stored in the ledger (`verification.json`). Without this, the doc silently lies when code changes.
+Detects when documentation has gone stale relative to the code, by comparing the **current** fingerprint of each cited source against the one stored in the ledger (`.ledger/verification.json`, whose fingerprint values are also projected to the shared `.ledger/fingerprints.json` — `checker-spec.md` §6). Without this, the doc silently lies when code changes.
 
 > **Staleness ≠ verification.** Staleness asks *"did the source change?"* — a **mechanical** fingerprint comparison, cheap. Verification (#3) asks *"does the claim still match?"* — judgment, expensive. **Staleness is the cheap filter that tells #3 what to re-verify.**
 
@@ -21,7 +21,7 @@ Read-only, on-demand, in an **isolated sub-agent** (token-economy principle). Re
 | gone | symbol deleted/renamed | **orphan** → flag |
 | moved | symbol exists elsewhere | refresh the anchor (`~Lnn`/file) + review |
 
-4. **Update the ledger** (status + new fingerprint/`ref`) and **report**. Writing to `verification.json` is done by the **mechanical checker**, never by the LLM directly (ledger ownership rule — see `checker-spec.md` §6 and `verification.md`).
+4. **Update the ledger** (status + new fingerprint/`ref`) and **report**. Writing to `.ledger/verification.json` (and the projected `.ledger/fingerprints.json`) is done by the **mechanical checker**, never by the LLM directly (ledger ownership rule — see `checker-spec.md` §6 and `verification.md`).
 
 ---
 

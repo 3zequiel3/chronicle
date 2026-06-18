@@ -11,11 +11,14 @@ Defines **what the mechanical checker for `chronicle` must do**, without tying i
 | Input | Source | Required |
 |---|---|---|
 | KB directory | `knowledge-base/` | yes |
-| Config | `knowledge-base/.chronicle/checks.json` | no (defaults) |
-| Ledger | `knowledge-base/.chronicle/verification.json` | no (staleness needs it) |
-| Trace map | `knowledge-base/.chronicle/trace-map.json` | no (needed for `code` citation resolution) |
-| Registry | `knowledge-base/.chronicle/registry.json` | no (append-only stable-ID ledger — `provenance.md` §Stable IDs) |
+| Config | `.ledger/checks.json` | no (defaults) |
+| Ledger | `.ledger/verification.json` | no (staleness needs it) |
+| Trace map | `.ledger/trace-map.json` | no (needed for `code` citation resolution) |
+| Registry | `.ledger/registry.json` | no (append-only stable-ID ledger — `provenance.md` §Stable IDs) |
+| Fingerprints | `.ledger/fingerprints.json` | no (flat, versioned **public projection** of the fingerprint map — read by external consumers, e.g. `herald`) |
 | git `ref` | from ledger or argument | no (without git → full mode) |
+
+> **`.ledger/` is project-root tooling storage** (a sibling of `knowledge-base/`, not inside it): a consumer without a KB still needs the ledger. It holds chronicle's **private** state (`verification.json`, `trace-map.json`, `checks.json`, `last-check.json`, `registry.json`) plus the **one public file** `fingerprints.json` (§6). Migration from the legacy `knowledge-base/.chronicle/` is in §6.
 
 ---
 
@@ -120,6 +123,8 @@ The fingerprint is shared by verification (§3) and staleness (§5); it must pro
 
 The digest is the `fingerprint`. The `ref` (git commit of the run) is stored alongside it as the baseline for the git fast-path.
 
+> **This algorithm is a shared cross-skill contract.** `.ledger/fingerprints.json` (§6) is read by external consumers (e.g. `herald`) that **re-implement this exact computation** to seed the ledger standalone. The span boundary + normalization + SHA-256 above are **byte-exact**: a one-byte difference makes the same symbol hash differently and the shared map lies. `assets/conformance/fingerprint/` is the **canonical fixture both producer and consumer must pass** (§7). The `version` field in `fingerprints.json` gates it: `version: 1` == this algorithm; any change **bumps the version**, and a reader that does not recognize the version MUST NOT interpret the fingerprints (it re-grounds — recomputes itself).
+
 ---
 
 ## 5. Security rules (mandatory in the generated checker)
@@ -130,7 +135,7 @@ The checker runs on untrusted repos and is generated as code → it is an inject
 2. **Parse citations, do not execute them.** A citation is text to match with the regex, never something to evaluate.
 3. **Confinement to the repo root.** A citation like `[code · ../../etc/passwd#x]` is **rejected**: resolve and operate only within the project root. Any path that escapes is reported as an invalid citation, not opened.
 4. **Hash via library**, not by shelling out to `sha256sum`/`shasum` with interpolated input.
-5. **No network, no writes outside `.chronicle/`.** The checker only reads the KB + code and writes the ledger.
+5. **No network, no writes outside `.ledger/`.** The checker only reads the KB + code and writes the ledger (project-root `.ledger/`).
 
 ---
 
@@ -151,6 +156,42 @@ The same rule governs `registry.json` (the append-only stable-ID ledger — `pro
 
 **The `{DOMINIO}` scope token is content-derived too** (this is what kills `RN-TODOS` vs `RN-TODO` plural/synonym drift): when the user or `scope` names the functionality ("pagos", "checkout") the domain **is that name** (uppercase, ASCII, no pluralization changes); with **no** functionality name (e.g. a headless whole-repo run) derive it from the rules' shared **module/directory** slug (the `file` in the trace-map row), uppercased — `src/payments/rules.ts → RN-PAYMENTS`, `src/rules.js → RN-RULES`. Never re-word or singularize/pluralize. So `scope` = a function of a stable anchor (input name or module path), not of how the model phrases the domain this run.
 
+### `fingerprints.json` — the public projection (shared with external consumers)
+
+`.ledger/fingerprints.json` is the **one public file** in `.ledger/`: a flat, versioned map of `path#symbol → { fingerprint, ref }` that a sibling skill (e.g. `herald`) reads for code freshness **without knowing chronicle's internals**. Written **only by the mechanical checker** (same ownership rule), as a **projection of the fingerprint values** held in `verification.json`.
+
+```json
+{
+  "version": 1,
+  "ref": "<git commit of the last write, or null>",
+  "fingerprints": {
+    "path/to/file.ext#symbol": {
+      "fingerprint": "<sha256 of the NORMALIZED symbol body (§4)>",
+      "ref": "<git commit when computed, or null>"
+    }
+  }
+}
+```
+
+**Write semantics (two writers share this file — chronicle's checker and the external consumer):**
+- **Union-merge, never overwrite.** read-merge-write: each writer adds/updates **only its own `path#symbol` entries**, never replacing the whole map. chronicle "projects" by **merging** its symbols in — it does **not** clobber entries written by another skill. Last-write-wins **per key** is safe because the fingerprint is a **pure function of the code** (§4): same symbol → same hash, whoever computed it.
+- **Atomic.** Write to a temp file and `rename` into place, so a concurrent reader never sees a half-written file.
+- **Version-first.** `version: 1` == the §4 algorithm. Bump it on any algorithm/span change — never silently. A reader that does not recognize the version MUST NOT interpret the fingerprints (degrade to re-grounding).
+- **No desync.** `verification.json` keeps the rich per-claim state; `fingerprints.json` mirrors only its fingerprint values, re-projected (merged) on every checker write. Both derive from the same code via the same algorithm, so they cannot drift.
+
+### Migration from the legacy path (once, safe)
+
+On checker init, if storage still lives at the legacy `knowledge-base/.chronicle/`:
+
+| State | Action |
+|---|---|
+| legacy exists, `.ledger/` does not | **copy** files to `.ledger/`, derive `fingerprints.json` from `verification.json`, **verify** (entry counts + a sample of hashes match), **then** remove the legacy dir. Never blind-`mv`. |
+| both exist | prefer `.ledger/`; leave legacy untouched (do not delete — flag for manual cleanup). |
+| migration cannot run (no write access, etc.) | keep reading the legacy path (**backward-compat**); recommend migrating. Never fail the run over migration. |
+| neither exists | first generative run **seeds** `.ledger/` (standalone behavior unchanged). |
+
+On init/seed (and after migration), ensure `.ledger/` is in the **consuming project's** `.gitignore` — it is local tooling state, not versioned, so a fresh clone re-seeds on the first run (the `ref` fields still carry the git baseline when git is present). Standalone: no git → no fast-path; nothing present → the first run seeds.
+
 ---
 
 ## 7. Conformance protocol (self-verify before trusting)
@@ -165,6 +206,8 @@ When the agent **generates** the checker for a project, before using it:
 The fixture is **data, not code** (markdown + JSON + one snippet), runtime-agnostic. It validates four deterministic pieces: citation extraction, cross-reference consistency, fingerprint normalization **and citation→map resolution** (the anti-fabrication foreign key). Two pieces are **not** fixturized because they need real source files in a real repo, and are validated **in the target repo** instead: the `git diff` staleness path, and **§2.6 citation→source existence** (it greps the actual code, which the markdown fixture has none of).
 
 > This makes the check turnkey **without** chronicle maintaining a per-platform script, and its correctness is **verified by generation** rather than assumed.
+
+> **The fingerprint fixture is the cross-skill contract.** Because `.ledger/fingerprints.json` (§6) is consumed by other skills that re-implement §4, `assets/conformance/fingerprint/` is the shared golden that **any** producer/consumer must pass — it is what guarantees two independent implementations agree on the hash. Keep it byte-stable; changing the algorithm it pins is a `version` bump.
 
 ---
 
@@ -190,7 +233,7 @@ The deterministic path costs ~0 tokens and is the default; the degraded path is 
 
 ### Result persistence
 
-The checker writes its last run to `knowledge-base/.chronicle/last-check.json` (distinct from `verification.json`, which is the verification/staleness ledger). Written **only by the checker**, never by the LLM (same rule as §6):
+The checker writes its last run to `.ledger/last-check.json` (distinct from `verification.json`, which is the verification/staleness ledger). Written **only by the checker**, never by the LLM (same rule as §6):
 
 ```json
 { "ran_at": "<timestamp>", "ref": "<git commit>", "status": "pass|fail",
