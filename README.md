@@ -7,7 +7,7 @@
 **La crónica viva de tu proyecto.** Una skill que construye y mantiene una base de conocimiento estructurada — desde documentos, desde cero, o **documentando código existente sin tocar una línea**.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.12-green.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/version-2.13-green.svg)](SKILL.md)
 [![Read-only on code](https://img.shields.io/badge/c%C3%B3digo-read--only-orange.svg)](#regla-de-oro)
 [![skills.sh](https://img.shields.io/badge/skills.sh-chronicle-black.svg)](https://www.skills.sh/3zequiel3/chronicle)
 
