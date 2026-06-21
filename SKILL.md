@@ -126,7 +126,7 @@ Layer 0 **proposes** the mode; Q-INTENT **confirms** it. If context is already u
 ## Critical Patterns
 
 ### Output location (all modes)
-All KB files go to `knowledge-base/` at the **project root**. **NEVER** mix with `docs/` (which holds Mode A source documents). Tooling state (the ledger, trace map, registry, checker results) lives **separately** in `.ledger/` at the project root — a sibling of `knowledge-base/`, gitignored, written by the mechanical checker (never the LLM by hand). Its one public file, `.ledger/fingerprints.json`, is the freshness map external skills read — and may co-write (`checker-spec.md` §6). Migration from the legacy `knowledge-base/.chronicle/` is automatic and safe (§6).
+All KB files go to `knowledge-base/` at the **project root**; **NEVER** mix with `docs/` (Mode A sources). Tooling state (ledger, trace map, registry, checker results) lives in a sibling `.ledger/` (gitignored, checker-owned — never the LLM by hand); its one public file `.ledger/fingerprints.json` is the freshness map external skills read and may co-write. Full `.ledger/` contract, co-write, and legacy `knowledge-base/.chronicle/` migration: `checker-spec.md` §6.
 
 ### Canonical nodes (core 4 + variables by profile)
 

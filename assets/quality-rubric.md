@@ -49,7 +49,7 @@ These are not about completeness but about **integrity**, and they apply to Mode
 2. **Internal drift** — no contradictions between nodes (e.g. entity count in 04 vs 02).
 3. **Live links** — references to entity/domain files point to real paths.
 4. **MVP tags** — items in 05/06/07 have a scope tag (or a note explaining why not).
-5. **Citation coverage** (see `provenance.md`) — every factual claim carries a source citation. Metric: `cited_claims / factual_claims`. A claim without a citation or `inferred` mark is a **defect**. Extraction regex: `\[(code|doc|user|inferred) · ([^\]]+)\]`.
+5. **Citation coverage** (see `provenance.md`) — every factual claim carries a source citation. Metric: `cited_claims / factual_claims`. A claim without a citation or `inferred` mark is a **defect**. Extraction grammar: `provenance.md`.
 6. **Test coverage** (see `reverse-documentation.md` §Tests as source) — what percentage of rules (`05`) are backed by a test vs. implementation only. Mechanical metric: count rules with a test citation vs. rules with `⚠ no test`. Not a defect — it is **visible risk**: it shows which rules have no safety net.
 
 ---

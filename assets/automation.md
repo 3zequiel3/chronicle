@@ -21,7 +21,7 @@ The gate on each commit/PR burns **zero tokens** because only the mechanical lev
 
 | Check | How (mechanical) | Fails if… |
 |---|---|---|
-| **Citation coverage** | extracts citations with `\[(code\|doc\|user\|inferred) · ([^\]]+)\]` (the `\|` are markdown table-escapes; the canonical regex is `\[(code\|doc\|user\|inferred) · ([^\]]+)\]` — same as `provenance.md` / `checker-spec.md`); counts factual claims without a citation | coverage < threshold |
+| **Citation coverage** | extracts citations with the canonical grammar (`provenance.md` / `checker-spec.md` §2.1); counts factual claims without a citation | coverage < threshold |
 | **Cross-reference consistency** | resolves each referenced `RN`/`US`/`DD` | there is a broken reference |
 | **Staleness** | `git diff <ref> --name-only` → changed files → affected citations → normalized fingerprint vs ledger | there are `stale`/orphaned claims on touched code |
 | **Test coverage** | counts rules with a test citation vs rules with `⚠ no test` | (risk metric; blocks only if a minimum is configured) |
