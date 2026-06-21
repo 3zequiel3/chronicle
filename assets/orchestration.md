@@ -60,6 +60,14 @@ next_recommended: "answer Q-03, Q-07 → their answers migrate to 09/05; then re
 risks: []
 ```
 
+## Status — consumer actions (what the caller does with each)
+| `status` | Meaning | Caller action |
+|---|---|---|
+| `ok` | completed, gate green, no flagged content | consume `artifacts`; no further action |
+| `partial` | usable but incomplete — coverage gaps and/or audit-flagged items parked in node 10 | **not a failure, do not discard**: read `next_recommended` + `open_questions`, then re-run scoped to the gaps (`scope.codes`/`paths`). Set by the gate-vs-audit rule in `verification.md` §Post-generation audit. |
+| `needs_input` | blocking fields missing (`mode`/`kb_language`/`system_type`) | supply the fields named in `questions[].field` and re-invoke |
+| `error` | nothing usable produced | inspect `risks`; do **not** consume `artifacts` |
+
 > **Interactive parity (P3).** These same fields render as a one-line **prose confidence summary** at the end of *every* interactive run (`SKILL.md` §Result summary) — headless gets the YAML above, the human gets the prose line, both computed from the same artifact. The "confidence N code-cited / M inferred" part is exactly the `provenance_summary` citation-type counts (§Manifest); the "close gate: <path> ✅/❌" part is the P2 gate result (`checker-spec.md` §8). One source, two renderings — they can never disagree.
 
 ## Manifest (machine-only; emit when headless/`emit.manifest`)

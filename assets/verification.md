@@ -68,6 +68,7 @@ This is the cheap **semantic complement** to the close-gate mechanical check (`e
 - **Sample, not exhaustive**: N high-risk claims (`RN` first), bounded by budget. Not the full pass — a cheap, early **spot-audit**.
 - **Adversarial**: same refutation framing ("find evidence it is WRONG").
 - **Reports, does NOT block**: this is LLM-level (costs tokens, non-deterministic) → **never** a blocking gate (rule from `automation.md`). The blocking gate is the mechanical one; this logs findings in `10`. If contradictions are found, the user decides whether to run the full pass or move to Mode Update.
+- **Status mapping (gate green, audit dirty)** — resolves the gate-vs-audit ambiguity deterministically. The mechanical close gate is authoritative for *blocking*; this audit never blocks. But when it logs `contradicted`/`unsupported` items to `10`, the run's reported status downgrades from `ok` to **`partial`** — done and structurally sound, but with flagged content parked in `10` for review (same semantics as `partial` elsewhere: complete *plus* a gap to node 10). A green gate with **no audit, or a clean audit**, reports `ok`. A **red gate is never "done"** regardless of the audit. Consumer actions per status: `orchestration.md` §Status.
 
 ---
 
