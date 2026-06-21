@@ -76,7 +76,7 @@ Requires `trace-map.json`. For each `code` citation in the KB, extract its `file
 - `missing_symbol` = those whose `#symbol` is **absent** from the file's text.
 - `fabricated` = `missing_file ∪ missing_symbol` → **defect** (blocks "done"). `fabricated_items` = list of `file#symbol`.
 
-This is the check that catches a **poisoned trace map**: a row naming a symbol that was never in the code (P1 finding F1 — `index.js#dispatch` invented for an *anonymous* region). §2.5 alone misses it, because the fabricated citation resolves to its own fabricated row. §2.6 closes the loop against the real source. The correct citation for a nameless region is `path ~Lnn` with **no `#symbol`** (`provenance.md` edge case) — this check accepts it (no `#symbol` → only the file must exist).
+This is the check that catches a **poisoned trace map**: a row naming a symbol that was never in the code (e.g. `index.js#dispatch` invented for an *anonymous* region). §2.5 alone misses it, because the fabricated citation resolves to its own fabricated row. §2.6 closes the loop against the real source. The correct citation for a nameless region is `path ~Lnn` with **no `#symbol`** (`provenance.md` edge case) — this check accepts it (no `#symbol` → only the file must exist).
 
 > **Authority.** §2.6 is the mechanical form of the existence spot-check in `edge-cases.md` §Final self-check #4. Where shell-exec/grep is available it runs at **full coverage** (every citation + row); where it is not, it degrades to the proportional sample (~20%, min 10) run by the LLM, which **must be labeled** as the degraded path (see §8). Path normalization and root-confinement from §5 apply (a `#symbol` lookup never opens a file outside the root).
 

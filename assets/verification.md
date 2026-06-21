@@ -71,7 +71,7 @@ This is the cheap **semantic complement** to the close-gate mechanical check (`e
 
 ---
 
-## The ledger (shared mechanism with #5)
+## The ledger (shared mechanism with staleness)
 
 Persisted at `.ledger/verification.json` (project-root tooling storage — `.ledger/`, a sibling of `knowledge-base/`, since a consumer without a KB may still need the ledger). The KB nodes stay clean Markdown; tooling state lives separately as JSON under `.ledger/`.
 
@@ -98,12 +98,12 @@ Persisted at `.ledger/verification.json` (project-root tooling storage — `.led
 }
 ```
 
-**The `fingerprint`** is a hash of the cited symbol's body, **normalized** — spaces, formatting, and comments collapsed — so a reformat or a new comment does **not** count as a change (only real logic changes do). Calculated with the available hashing tool (`sha256sum`/`shasum` or equivalent); without hashing, a normalized structural signature as fallback. The `ref` field stores the git commit of the run (if git is available), used by #5 as baseline. This is the backbone shared by two features:
+**The `fingerprint`** is a hash of the cited symbol's body, **normalized** — spaces, formatting, and comments collapsed — so a reformat or a new comment does **not** count as a change (only real logic changes do). Calculated with the available hashing tool (`sha256sum`/`shasum` or equivalent); without hashing, a normalized structural signature as fallback. The `ref` field stores the git commit of the run (if git is available), used by staleness as baseline. This is the backbone shared by two features:
 
-- **#3 (this pass)** uses it to **skip** claims whose source has not changed.
-- **#5 (staleness)** compares it against the current fingerprint: if it differs, the source changed and the claim becomes **suspect**.
+- **This pass (verification)** uses it to **skip** claims whose source has not changed.
+- **Staleness** (`staleness.md`) compares it against the current fingerprint: if it differs, the source changed and the claim becomes **suspect**.
 
-Designing the fingerprint once is what lets #5 plug in without redesign.
+Designing the fingerprint once is what lets staleness plug in without redesign.
 
 ---
 
@@ -111,7 +111,7 @@ Designing the fingerprint once is what lets #5 plug in without redesign.
 
 | Case | What to do |
 |---|---|
-| The cited source no longer exists (symbol deleted) | `contradicted`/`unsupported` + note; #5 will treat it as stale. |
+| The cited source no longer exists (symbol deleted) | `contradicted`/`unsupported` + note; staleness will treat it as stale. |
 | Claim with multiple citations | holds only if **all** its sources confirm it; if one contradicts, `contradicted`. |
 | `doc` citation (Mode A) | verified against the source document, just as `code` against code. |
 | No budget for everything | prioritize by risk and honestly report `unverified`; never mark green what was not verified. |

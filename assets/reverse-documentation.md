@@ -148,7 +148,7 @@ The **`⚠ no test`** marker lives next to the rule and **self-clears**: when th
 
 ## Extract, don't narrate (where there's a structured source)
 
-Where a **structured and deterministic** source exists, don't narrate it from memory: **extract it**. The LLM narrating entities from scratch can drift; a mechanical extraction from the source cannot. This shrinks the fabrication surface (it's the "shrink the surface" angle of gap #5) and saves tokens. LLM narration is reserved for the **WHY**, which the structured source doesn't have.
+Where a **structured and deterministic** source exists, don't narrate it from memory: **extract it**. The LLM narrating entities from scratch can drift; a mechanical extraction from the source cannot. This shrinks the fabrication surface and saves tokens. LLM narration is reserved for the **WHY**, which the structured source doesn't have.
 
 | Structured source | Extract (mechanical) → node | LLM adds (the WHY) |
 |---|---|---|

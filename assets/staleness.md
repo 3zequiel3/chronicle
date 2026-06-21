@@ -2,7 +2,7 @@
 
 Detects when documentation has gone stale relative to the code, by comparing the **current** fingerprint of each cited source against the one stored in the ledger (`.ledger/verification.json`, whose fingerprint values are also projected to the shared `.ledger/fingerprints.json` — `checker-spec.md` §6). Without this, the doc silently lies when code changes.
 
-> **Staleness ≠ verification.** Staleness asks *"did the source change?"* — a **mechanical** fingerprint comparison, cheap. Verification (#3) asks *"does the claim still match?"* — judgment, expensive. **Staleness is the cheap filter that tells #3 what to re-verify.**
+> **Staleness ≠ verification.** Staleness asks *"did the source change?"* — a **mechanical** fingerprint comparison, cheap. Verification (`verification.md`) asks *"does the claim still match?"* — judgment, expensive. **Staleness is the cheap filter that tells verification what to re-verify.**
 
 Read-only, on-demand, in an **isolated sub-agent** (token-economy principle). Reuses the already-built ledger, **normalized** fingerprint, and search-first approach — no redesign needed.
 
@@ -33,7 +33,7 @@ The ledger stores the `ref` (commit) of the last run. With git:
 git diff <ref> --name-only        # files changed since the baseline, includes uncommitted changes
 ```
 
-Only citations pointing to **those files** are candidates; the rest are presumed fresh. Instead of re-fingerprinting 200 symbols you process ~5 touched files. **That is why it is cheap enough to run per-commit in CI** (#6).
+Only citations pointing to **those files** are candidates; the rest are presumed fresh. Instead of re-fingerprinting 200 symbols you process ~5 touched files. **That is why it is cheap enough to run per-commit in CI** (see `automation.md`).
 
 > `git diff <ref>` (without `..HEAD`) compares the baseline against the **working tree**, so it **also catches uncommitted changes**. This closes the gap that a purely git-based fingerprint would have.
 
@@ -53,16 +53,16 @@ Read-only + non-destructive: **flags, does not rewrite.**
 → Suggestion: Mode Update scoped ONLY to these 9 claims.
 ```
 
-The user decides: trigger a **Mode Update** scoped to the stale items (not the whole KB). Optionally, the stale items are passed to **#3** to re-verify whether, beyond changing, they now **contradict** the doc.
+The user decides: trigger a **Mode Update** scoped to the stale items (not the whole KB). Optionally, the stale items are passed to **verification** (`verification.md`) to re-verify whether, beyond changing, they now **contradict** the doc.
 
 ---
 
-## Composition with #3 (cheap filters the expensive)
+## Composition with verification (cheap filters the expensive)
 
 ```
 staleness (cheap)  →  flags the 9 claims whose source changed
                           ↓
-verification #3 (expensive)  →  runs ONLY on those 9, not on all 120
+verification (expensive)  →  runs ONLY on those 9, not on all 120
 ```
 
 You don't re-verify what hasn't changed. The two make each other cheaper.
@@ -74,7 +74,7 @@ You don't re-verify what hasn't changed. The two make each other cheaper.
 | Case | What to do |
 |---|---|
 | `inferred` / `user` citation | Has no code source → staleness **does not apply**. |
-| No prior ledger (never fingerprinted) | Nothing to compare against → first run a verification/fingerprint pass (#3) that **seeds** the ledger. |
+| No prior ledger (never fingerprinted) | Nothing to compare against → first run a verification/fingerprint pass (`verification.md`) that **seeds** the ledger. |
 | Huge repo | The git fast-path keeps it cheap; without git, budget-bounded + coverage report. |
 | File changed but cited symbol did not | The fast-path marks it as a candidate, but the normalized fingerprint is **equal** → fresh. No false positive. |
 | Symbol moved to another file | `moved` → update the citation anchor and flag for review, do not discard it. |
@@ -82,7 +82,7 @@ You don't re-verify what hasn't changed. The two make each other cheaper.
 ## Feeding the trust gate (beyond audit reporting)
 
 When invoked from the orchestration trust gate, staleness does more than report: it
-**classifies drift by node kind** (per the trust gate, `orchestration.md` §Trust gate) and emits a trust decision.
+**classifies drift by node kind** (per the Trust gate section in `orchestration.md`) and emits a trust decision.
 - Drift in rules/flows/models (04–07) → recommend/auto-flip `code_authoritative` for those nodes.
 - Drift touching `system_type`/`kb_language` signals or identity nodes (01/02) → `partial` + risk;
   do not auto-proceed.
