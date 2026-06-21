@@ -31,7 +31,7 @@ A single read of a small, dense file resolves the full stack. Reading source fil
 | `openapi.*` / `swagger.*` | API contracts (input for node 04 — **extract, don't narrate**) |
 | `*.mmd` / `*.puml` / `*.dot` / `*.svg` / `*.drawio` / fenced `mermaid`/`plantuml` in `docs/` | **text/markup diagrams** (incl. SVG/drawio = XML) — input for nodes 04 (ERD), 07 (sequence), 08 (architecture); see `conventions.md` §1. Raster images (`.png`/`.jpg`) only if the host has vision, as low-confidence → node 10. |
 
-> Read **only the dependencies section** of the manifest when that suffices. The full file is not needed.
+> **Read only the dependencies section** of the manifest — not the whole file. A manifest is a signal to scan, not a document to ingest; pulling the full file into context is a token leak (`SKILL.md` §Token economy).
 
 ### Other structural signals (free)
 

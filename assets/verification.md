@@ -57,7 +57,7 @@ A single sub-agent judging "does it match?" is the same model family with the sa
 - A claim **holds only if the majority confirms it**. A single `contradicted` downgrades it to **suspect** (→ `10`), it does not confirm it.
 - To diversify (not redundate), give them **different lenses** when applicable: one checks against the **test**, another against the **implementation**, another against the **contract/usage**. Different lenses catch failures that three identical judges miss.
 
-It is **opt-in and budget-bounded** (token economy): reserved for high risk, not the whole KB. The default is single judge; multi-judge is requested ("verify reinforced") or triggered automatically on `RN` items when budget allows. Report how many judges voted per claim.
+It is **opt-in and budget-bounded** (token economy): reserved for high risk, not the whole KB. The default is single judge; multi-judge is requested ("verify reinforced") or triggered automatically on `RN` items **when `budget.max_tokens` leaves headroom** (no token budget set → stay single judge; never block on it). Report how many judges voted per claim.
 
 ### Post-generation audit (adversarial sample, fresh-context)
 

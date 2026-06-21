@@ -16,6 +16,7 @@ What to do when the situation is not clean, and the verification the agent runs 
 | Code with no docs and no concrete feature request | Mode C needs a target → ask which functionality to document first. |
 | Ambiguous user intent | Resolve with an explicit Q-INTENT before acting. |
 | No search tool available (Mode C, neither native nor `rg`/`git grep`/`grep`) | **Do not trace blindly.** Ask the user to install ripgrep with the OS-specific command and explain why (see `reverse-documentation.md` §0 Preflight). |
+| Cannot read source files at all (read tool sandboxed / access denied — not just search) | **Do not fabricate.** Report `status: partial`, park the gap in `10`, and explain the access blocker. Interactive mirror of the headless anti-fabrication ladder (`orchestration.md` §Anti-fabrication invariant). |
 | Windows (path separator `\`) | Normalize citation paths to `/` for cross-OS stability. |
 
 ---

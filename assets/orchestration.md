@@ -24,7 +24,7 @@ chronicle.run:
     codes: [US-014]                   # target codes (delta sync)
   why: { source: user | doc | none, text: "…" }
   trust: default | code_authoritative
-  budget: { max_files: N }
+  budget: { max_files: N, max_tokens: N }   # max_files caps files read; max_tokens (optional) caps spend and gates opt-in depth (e.g. multi-judge verification)
   emit: { manifest: true, result: true }
 ```
 
